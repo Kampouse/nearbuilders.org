@@ -11,18 +11,13 @@
   "repository": "https://github.com/nearbuilders/everything-dev",
   "app": {
     "ui": {
-      "development": "local:ui",
-      "production": "https://elliot-braem-4000-ui-monorepo-elliot-braem-9536dc1b9-ze.zephyrcloud.app",
-      "integrity": "sha384-wAOHyqAYG7/HIyDuYvqX6qkouA1bEuseIkUSbjwNTUXgQLWdj3g+0ved8Axjz99j",
-      "ssr": "https://elliot-braem-4001-ui-monorepo-elliot-braem-f3f7d54c6-ze.zephyrcloud.app"
+      "development": "local:ui"
     },
     "api": {
       "development": "local:api",
       "secrets": [
         "API_DATABASE_URL"
-      ],
-      "production": "https://elliot-braem-4002-api-monorepo-elliot-braem-95a0fd655-ze.zephyrcloud.app",
-      "integrity": "sha384-b/yKcaQ3SK3uqaae1mdjXqutKCd3OlZRdrTrLNqej/IRe1nSQisO2/TP3MhHjQVk"
+      ]
     }
   },
   "plugins": {
@@ -40,9 +35,7 @@
           "label": "apps",
           "roleRequired": "anon"
         }
-      ],
-      "production": "https://elliot-braem-4003-everything-dev-apps-plugin-ever-0aee196ce-ze.zephyrcloud.app",
-      "integrity": "sha384-y3sci4dkrrwpJFklofUct9UQlLKJeSJpiKjLwXsiIF4xH+QBRXOUYodpNOJsdrqK"
+      ]
     },
     "projects": {
       "development": "local:plugins/projects",
@@ -57,9 +50,7 @@
           "icon": "FolderKanban",
           "label": "projects"
         }
-      ],
-      "production": "https://elliot-braem-4004-everything-dev-projects-plugin--eb4242c83-ze.zephyrcloud.app",
-      "integrity": "sha384-Ebw6xOrPBFCd78H0ZuGt85tniTj3J+jKmSts9ULm+tQTy2yco6E5jWfflXwVUON6"
+      ]
     }
   },
   "shared": {
