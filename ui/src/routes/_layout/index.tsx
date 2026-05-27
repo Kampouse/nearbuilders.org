@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ExternalLink } from "lucide-react";
+import multiagencyLogo from "@/assets/multiagency-logo.svg";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_layout/")({
@@ -117,7 +118,7 @@ const ecosystemLinks: EcosystemLink[] = [
     label: "MultiAgency",
     tagline: "Hire Near Builders",
     domain: "multiagency.ai",
-    logoSrc: "https://multiagency.ai/icon.svg",
+    logoSrc: multiagencyLogo,
     multiagency: true,
   },
   {

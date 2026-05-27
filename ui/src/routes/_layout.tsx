@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { sessionQueryOptions } from "@/app";
+import multiagencyLogo from "@/assets/multiagency-logo.svg";
 import builtOn from "@/assets/built_on.png";
 import builtOnRev from "@/assets/built_on_rev.png";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -130,8 +131,9 @@ function Layout() {
                     href="https://ironclaw.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
                   >
+                    <img src={multiagencyLogo} alt="" className="h-4 w-4" />
                     Ironclaw
                   </a>
                   <a

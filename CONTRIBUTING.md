@@ -1,40 +1,42 @@
 # Contributing Guide
 
-Thank you for contributing to everything-dev! 🎉
+Thank you for contributing to NEAR Builders!
 
 ## Quick Setup
 
 ```bash
-bun install              # Install dependencies
-bun db:migrate           # Run database migrations
-bos dev --host remote    # Start development (typical workflow)
+bun install                # Install dependencies
+docker compose up -d --wait # Start PostgreSQL (4 databases)
+bun run db:push            # Run database migrations
+bos dev --host remote      # Start development (typical workflow for tenant)
 ```
 
 Visit http://localhost:3003 (UI), http://localhost:3001 (API), and http://localhost:3002 (Auth).
 
 **Need more details?** See [README.md](./README.md) for architecture overview and [LLM.txt](./LLM.txt) for technical deep-dive.
 
+**Tenant note:** The host and auth plugin run remotely. You only need to run UI and API locally. Host changes should be submitted to the [everything.dev](https://github.com/nearbuilders/everything-dev) parent repository.
+
 ## Development Workflow
 
 ### Making Changes
 
-- **UI Changes**: Edit `ui/src/` → hot reload automatically → deploy with `bun run build:ui`
-- **API Changes**: Edit `api/src/` → hot reload automatically → deploy with `bun run build:api`
+- **UI Changes**: Edit `ui/src/` → hot reload automatically → deploy with `bos publish --deploy`
 - **Plugin Changes**: Edit `plugins/*/src/` → hot reload automatically → deploy per plugin
-- **Host Changes**: Edit `host/src/` or `bos.config.json` → deploy with `bun run build:host`
+- **Config Changes**: Edit `bos.config.json` → publish with `bos publish --deploy`
+- **Host/Auth Changes**: Submit PRs to the parent [everything.dev](https://github.com/nearbuilders/everything-dev) repository
 
 ### Plugin Architecture
 
 Business logic lives in independent plugins under `plugins/`:
 
-- **`plugins/registry/`** — FastKV app discovery, metadata publish/relay (no database)
-- **`plugins/auth/`** — Authentication and authorization (Better-Auth, NEAR SIWN, organizations, API keys)
-- **`plugins/projects/`** — Projects CRUD, KV store, org management, API keys (SQLite via libsql)
- - **`plugins/_template/`** — Scaffold for new plugins
+- **`plugins/apps/`** — FastKV app discovery, metadata publish/relay, on-chain runtime browsing (no database)
+- **`plugins/projects/`** — Projects & ideas with upvote ranking, markdown editing, GitHub integration, visibility controls (PostgreSQL)
+- **`plugins/builders/`** — Builder profiles with admin moderation, skills, NEAR Social cross-referencing (PostgreSQL)
 
-Each plugin has its own `contract.ts`, `index.ts`, `rspack.config.js`, and `package.json`. Routes are namespaced in the UI: `apiClient.registry.*()` and `apiClient.projects.*()`.
+Each plugin has its own `contract.ts` (oRPC routes + Zod schemas), `index.ts` (plugin factory), `rspack.config.js`, and `package.json`. Routes are namespaced in the UI: `apiClient.apps.*()`, `apiClient.projects.*()`, `apiClient.builders.*()`.
 
-The `api/` package is a thin structural shell with only health/ping routes and shared auth middleware. It can compose across plugins in-process via `createPlugin.withPlugins<PluginsClient>()` — the API receives typed client factories for all other plugins and calls their routers directly without HTTP roundtrips.
+The `api/` package is a thin structural shell with only health/ping routes, upvote endpoints, and shared auth middleware. It composes across all three plugins in-process via `createPlugin.withPlugins<PluginsClient>()` — the API receives typed client factories for each plugin and calls their routers directly without HTTP roundtrips.
 
 Plugin and API variables are configured in `bos.config.json`:
 - API variables: `app.api.variables` → `config.variables` in `initialize`
@@ -44,24 +46,40 @@ Plugins are accessible both directly via HTTP (`/api/{key}/*`) and in-process vi
 
 ### Environment Configuration
 
-All runtime URLs are configured in `bos.config.json` - no rebuild needed! Switch environments:
+All runtime URLs are configured in `bos.config.json` — no rebuild needed. Switch environments:
 
 ```bash
-NODE_ENV=development bun dev:host  # Use local services (default)
-NODE_ENV=production bun dev:host   # Use production CDN URLs
+NODE_ENV=development bun dev   # Use local services (default)
+NODE_ENV=production bun dev    # Use production CDN URLs
 ```
 
-Secrets go in `.env` (see [.env.example](./.env.example) for required variables).
+Secrets go in `.env` (see [.env.example](./.env.example) for required variables). Key variables for this tenant:
+
+```bash
+# plugins.projects (PostgreSQL)
+PROJECTS_DATABASE_URL=postgres://everythingdev:everythingdev@localhost:5435/projects_db
+
+# plugins.builders (PostgreSQL)
+BUILDERS_DATABASE_URL=postgres://everythingdev:everythingdev@localhost:5434/builders_db
+
+# API (also PostgreSQL)
+API_DATABASE_URL=postgres://everythingdev:everythingdev@localhost:5432/api_db
+
+# Auth (inherited from everything.dev)
+AUTH_DATABASE_URL=postgres://everythingdev:everythingdev@localhost:5433/auth_db
+BETTER_AUTH_SECRET=
+```
 
 ### Project Documentation
 
-- **[AGENTS.md](./AGENTS.md)** - Operational guide for AI agents
-- **[README.md](./README.md)** - Architecture, tech stack, and quick start
-- **[LLM.txt](./LLM.txt)** - Technical guide for LLMs and developers
-- **[api/README.md](./api/README.md)** - API plugin documentation
-- **[ui/README.md](./ui/README.md)** - Frontend documentation
-- **[host/README.md](./host/README.md)** - Server host documentation
-- **[plugins/auth/README.md](./plugins/auth/README.md)** - Auth plugin documentation
+- **[AGENTS.md](./AGENTS.md)** — Operational guide for AI agents
+- **[README.md](./README.md)** — Architecture, tenant model, and quick start
+- **[LLM.txt](./LLM.txt)** — Technical guide for LLMs and developers
+- **[api/README.md](./api/README.md)** — API plugin documentation
+- **[ui/README.md](./ui/README.md)** — Frontend documentation
+- **[plugins/apps/README.md](./plugins/apps/README.md)** — Apps plugin documentation
+- **[plugins/projects/README.md](./plugins/projects/README.md)** — Projects plugin documentation
+- **[plugins/builders/README.md](./plugins/builders/README.md)** — Builders plugin documentation
 
 ## Git Workflow
 
@@ -76,11 +94,11 @@ git checkout -b feature/amazing-feature
 ```
 
 **Branch naming conventions:**
-- `feature/description` - New features
-- `fix/description` - Bug fixes
-- `docs/description` - Documentation changes
-- `refactor/description` - Code refactoring
-- `test/description` - Test additions/changes
+- `feature/description` — New features
+- `fix/description` — Bug fixes
+- `docs/description` — Documentation changes
+- `refactor/description` — Code refactoring
+- `test/description` — Test additions/changes
 
 ### Semantic Commits
 
@@ -88,22 +106,22 @@ Use [Semantic Commits](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f
 
 ```bash
 # Format: <type>(<scope>): <subject>
-git commit -m "feat(api): add user profile endpoint"
-git commit -m "fix(ui): resolve routing issue on mobile"
-git commit -m "docs(readme): update setup instructions"
-git commit -m "refactor(api): simplify auth middleware"
-git commit -m "test(ui): add coverage for login flow"
+git commit -m "feat(builders): add admin moderation workflow"
+git commit -m "fix(projects): resolve upvote count race condition"
+git commit -m "docs(readme): update tenant architecture section"
+git commit -m "refactor(apps): simplify FastKV metadata resolution"
+git commit -m "test(projects): add coverage for idea creation"
 ```
 
 **Types:**
-- `feat:` - New feature
-- `fix:` - Bug fix
-- `docs:` - Documentation only
-- `style:` - Code style (formatting, no logic change)
-- `refactor:` - Code refactoring
-- `perf:` - Performance improvements
-- `test:` - Tests
-- `chore:` - Build/config/tooling changes
+- `feat:` — New feature
+- `fix:` — Bug fix
+- `docs:` — Documentation only
+- `style:` — Code style (formatting, no logic change)
+- `refactor:` — Code refactoring
+- `perf:` — Performance improvements
+- `test:` — Tests
+- `chore:` — Build/config/tooling changes
 
 ### Changesets
 
@@ -127,12 +145,12 @@ bun run changeset
 "ui": patch
 ---
 
-Added new endpoint for user profiles
+Added builder admin moderation workflow
 ```
 
 **The release workflow:**
 1. Changesets action creates a "Version Packages" PR on merge to main
-2. On merge of that PR, GitHub releases are created for api/ui
+2. On merge of that PR, GitHub releases are created for changed packages
 3. Deployments happen automatically via CI
 
 ### Pull Request Process
@@ -178,8 +196,10 @@ Added new endpoint for user profiles
 - Ensure type safety (no `any` types unless absolutely necessary)
 - Write descriptive commit messages
 - Add tests for new features
-- Use semantic Tailwind classes (see LLM.txt for style guide)
+- Use semantic Tailwind classes (`bg-background`, `text-foreground`, `text-muted-foreground`)
+- No hardcoded colors like `bg-blue-600`
 - No code comments in implementation (code should be self-documenting)
+- Brand colors: `--brand-green` (`#00D9A3`), `--brand-cobalt` (`#0072CE`), `--brand-chartreuse` (`#F0EC74`)
 
 ### Linting
 
@@ -203,11 +223,11 @@ Use [GitHub Issues](https://github.com/NEARBuilders/everything-dev/issues) with:
 ## Getting Help
 
 - Check [AGENTS.md](./AGENTS.md) for agent operational guidance
-- Check the [README](./README.md) for architecture and setup
+- Check the [README](./README.md) for architecture and tenant model
 - Read the [LLM.txt](./LLM.txt) for technical details
 - Review workspace READMEs for specific documentation
 - Ask questions in GitHub Issues or Discussions
 
 ---
 
-Thank you for your contributions! 💚
+Thank you for your contributions!
