@@ -45,7 +45,7 @@ function Layout() {
           <div className="flex h-16 items-center justify-between">
             <Link
               to="/"
-              className="flex items-center gap-2 font-black text-lg tracking-tight text-foreground no-underline hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 font-black text-lg tracking-tight text-foreground hover:opacity-80 transition-opacity"
             >
               <span className="text-brand-green">●</span>
               {appName}
@@ -56,7 +56,7 @@ function Layout() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="text-sm font-medium text-muted-foreground no-underline hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-semibold"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors [&.active]:text-foreground [&.active]:font-semibold"
                 >
                   {link.label}
                 </Link>
@@ -87,7 +87,7 @@ function Layout() {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileOpen(false)}
-                  className="px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground no-underline hover:text-foreground hover:bg-accent transition-colors [&.active]:text-foreground [&.active]:bg-accent"
+                  className="px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors [&.active]:text-foreground [&.active]:bg-accent"
                 >
                   {link.label}
                 </Link>
@@ -119,7 +119,7 @@ function Layout() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="text-xs text-muted-foreground no-underline hover:text-foreground transition-colors"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>

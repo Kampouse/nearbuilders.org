@@ -21,7 +21,7 @@ function ProfileSettings() {
     <div className="space-y-4">
       <IdentityCard user={user} />
       {user.isAnonymous && (
-        <div className="rounded-[12px] border border-border bg-card p-4 text-sm text-muted-foreground leading-relaxed">
+        <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground leading-relaxed">
           This session is temporary. Link an email or NEAR wallet before signing out if you want the
           account to remain recoverable.
         </div>
@@ -48,7 +48,7 @@ function IdentityCard({
   });
 
   return (
-    <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         Identity
       </div>
@@ -85,7 +85,7 @@ function IdentityCard({
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-4 rounded-[8px] border border-border bg-muted px-3.5 py-2.5 items-center">
+    <div className="grid grid-cols-[120px_1fr] gap-4 rounded-md border border-border bg-muted px-3.5 py-2.5 items-center">
       <span className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
         {label}
       </span>

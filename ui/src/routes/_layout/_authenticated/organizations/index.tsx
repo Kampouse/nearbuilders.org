@@ -135,7 +135,7 @@ function OrganizationsList() {
         <h1 className="text-xl font-semibold text-foreground">Organizations</h1>
         <Link
           to="/organizations/new"
-          className="h-9 rounded-[12px] bg-primary px-4 text-sm font-bold text-primary-foreground inline-flex items-center gap-1.5 no-underline transition-colors duration-150 hover:opacity-90"
+          className="h-9 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground inline-flex items-center gap-1.5 transition-colors duration-150 hover:opacity-90"
         >
           <Plus size={14} />
           New
@@ -153,10 +153,10 @@ function OrganizationsList() {
                 {pendingInvitations.map((invitation) => (
                   <div
                     key={invitation.id}
-                    className="rounded-[12px] border border-border bg-card p-6 space-y-4"
+                    className="rounded-xl border border-border bg-card p-6 space-y-4"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-[10px] border border-border bg-muted flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
                         <Mail className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="space-y-1 min-w-0 flex-1">
@@ -207,29 +207,29 @@ function OrganizationsList() {
           {isLoading ? (
             <div className="grid gap-6 md:grid-cols-2">
               {[1, 2].map((n) => (
-                <div key={n} className="rounded-[12px] border border-border bg-card p-6 space-y-5">
+                <div key={n} className="rounded-xl border border-border bg-card p-6 space-y-5">
                   <div className="flex items-start gap-4">
-                    <div className="h-14 w-14 rounded-[10px] animate-pulse bg-muted shrink-0" />
+                    <div className="h-14 w-14 rounded-lg animate-pulse bg-muted shrink-0" />
                     <div className="space-y-2 flex-1 pt-1">
                       <div className="h-5 w-3/4 rounded-[4px] animate-pulse bg-muted" />
                       <div className="h-4 w-1/2 rounded-[4px] animate-pulse bg-muted" />
                     </div>
                   </div>
-                  <div className="h-10 w-full rounded-[8px] animate-pulse bg-muted" />
+                  <div className="h-10 w-full rounded-md animate-pulse bg-muted" />
                   <div className="flex gap-2">
-                    <div className="h-10 w-24 rounded-[12px] animate-pulse bg-muted" />
-                    <div className="h-10 w-24 rounded-[12px] animate-pulse bg-muted" />
+                    <div className="h-10 w-24 rounded-xl animate-pulse bg-muted" />
+                    <div className="h-10 w-24 rounded-xl animate-pulse bg-muted" />
                   </div>
                 </div>
               ))}
             </div>
           ) : orgs.length === 0 ? (
-            <div className="rounded-[12px] border border-border bg-card p-10 text-center space-y-4">
+            <div className="rounded-xl border border-border bg-card p-10 text-center space-y-4">
               <Building2 className="h-10 w-10 mx-auto text-muted-foreground" />
               <p className="text-base font-semibold text-foreground">No organizations yet.</p>
               <Link
                 to="/organizations/new"
-                className="h-9 rounded-[12px] bg-primary px-4 text-sm font-bold text-primary-foreground inline-flex items-center no-underline transition-colors duration-150 hover:opacity-90"
+                className="h-9 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground inline-flex items-center transition-colors duration-150 hover:opacity-90"
               >
                 create your first org
               </Link>
@@ -245,17 +245,17 @@ function OrganizationsList() {
                 return (
                   <div
                     key={org.id}
-                    className="rounded-[12px] border border-border bg-card p-6 space-y-5"
+                    className="rounded-xl border border-border bg-card p-6 space-y-5"
                   >
                     <div className="flex items-start gap-4">
                       {org.logo ? (
                         <img
                           src={org.logo}
                           alt=""
-                          className="w-14 h-14 rounded-[10px] border border-border object-cover shrink-0"
+                          className="w-14 h-14 rounded-lg border border-border object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-[10px] border border-border bg-muted flex items-center justify-center text-xl font-bold text-foreground shrink-0">
+                        <div className="w-14 h-14 rounded-lg border border-border bg-muted flex items-center justify-center text-xl font-bold text-foreground shrink-0">
                           {org.name.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -271,7 +271,7 @@ function OrganizationsList() {
                       </div>
                     </div>
 
-                    <div className="rounded-[8px] border border-border bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
+                    <div className="rounded-md border border-border bg-muted px-3.5 py-2.5 text-sm text-muted-foreground">
                       {org.createdAt
                         ? `created ${new Date(org.createdAt).toLocaleDateString()}`
                         : "organization record"}
@@ -300,7 +300,7 @@ function OrganizationsList() {
             </div>
           )}
 
-          <div className="rounded-[12px] border border-border bg-card p-5 text-sm text-muted-foreground leading-relaxed">
+          <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground leading-relaxed">
             Each user gets a personal organization automatically. Additional organizations give
             teams their own members, invitations, and API key scope.
           </div>
@@ -312,7 +312,7 @@ function OrganizationsList() {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-[6px] px-2 py-0.5 text-[10px] font-semibold border bg-secondary border-border text-foreground">
+    <span className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-semibold border bg-secondary border-border text-foreground">
       {children}
     </span>
   );

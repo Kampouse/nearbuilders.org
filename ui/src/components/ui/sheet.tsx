@@ -57,7 +57,7 @@ function SheetContent({
         className={cn(
           "fixed z-50 flex flex-col",
           "bg-card text-foreground",
-          "border-2 border-outset border-border-strong",
+          "border border-border",
           "shadow-[0_-8px_40px_rgba(0,0,0,0.18)]",
           "transition ease-in-out",
           "data-[state=closed]:duration-250 data-[state=open]:duration-350",
@@ -97,7 +97,7 @@ function SheetContent({
       >
         {side === "bottom" && (
           <div className="flex shrink-0 justify-center pt-3 pb-1">
-            <div className="h-1 w-10 rounded-full bg-border-strong opacity-60" />
+            <div className="h-1 w-10 rounded-full bg-border opacity-60" />
           </div>
         )}
         {children}
@@ -105,7 +105,7 @@ function SheetContent({
           <SheetPrimitive.Close
             className={cn(
               "absolute flex h-9 w-9 items-center justify-center rounded-xl",
-              "border-2 border-outset border-border-strong bg-card",
+              "border border-border bg-card",
               "text-muted-foreground transition-colors hover:text-foreground",
               side === "bottom" ? "right-4 top-3" : "right-4 top-4",
             )}

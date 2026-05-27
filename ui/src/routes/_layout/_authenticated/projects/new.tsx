@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { ProjectFormLayout, type ProjectFormValues } from "@/components/project-form";
+import { Button } from "@/components/ui/button";
 import { parseProjectListSearch } from "./-search";
 
 const STORAGE_KEY_PROJECT = "projects:new:project";
@@ -177,59 +178,49 @@ function NewProjectPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            to="/projects"
-            search={{
-              preview: undefined,
-              kind: search.kind,
-              personal: search.personal,
-              private: search.private,
-            }}
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon-sm"
             aria-label="Back to projects"
-            className="flex items-center justify-center w-8 h-8 border-2 border-outset border-border-strong bg-card shadow-sm transition-all duration-200 ease-out hover:shadow-md hover:bg-muted rounded-[10px]"
           >
-            <ArrowLeft size={13} className="text-foreground" />
-          </Link>
-          <span className="text-border">/</span>
-          <span className="text-foreground" style={{ fontSize: 13, fontWeight: 600 }}>
-            New
-          </span>
+            <Link
+              to="/projects"
+              search={{
+                preview: undefined,
+                kind: search.kind,
+                personal: search.personal,
+                private: search.private,
+              }}
+            >
+              <ArrowLeft size={15} />
+            </Link>
+          </Button>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-sm font-semibold text-foreground">New</span>
         </div>
 
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-end">
           {!canCreate && (
-            <span className="text-muted-foreground" style={{ fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               Link an identity in settings to publish
             </span>
           )}
           <form.Subscribe selector={(s) => ({ isSubmitting: s.isSubmitting, kind: s.values.kind })}>
             {({ isSubmitting, kind }) => (
-              <button
+              <Button
                 type="button"
                 onClick={submitForm}
                 disabled={!canCreate || isSubmitting || createMutation.isPending}
-                className={`${canCreate && !isSubmitting && !createMutation.isPending ? "bg-primary text-primary-foreground hover:bg-foreground" : "bg-disabled text-primary-foreground"}`}
-                style={{
-                  height: 36,
-                  padding: "0 20px",
-                  borderRadius: 10,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  border: "none",
-                  cursor:
-                    !canCreate || isSubmitting || createMutation.isPending
-                      ? "not-allowed"
-                      : "pointer",
-                  transition: "background 0.12s",
-                }}
+                size="sm"
               >
                 {createMutation.isPending
                   ? "Creating…"
                   : kind === "idea"
                     ? "Create Idea"
                     : "Create Project"}
-              </button>
+              </Button>
             )}
           </form.Subscribe>
         </div>

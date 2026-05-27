@@ -5,7 +5,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium cursor-pointer transition-all duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 border-2 border-outset border-border-strong shadow-sm hover:shadow-md active:border-inset active:shadow-none rounded-[12px]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium cursor-pointer transition-all duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-border rounded-xl",
   {
     variants: {
       variant: {
@@ -16,7 +16,7 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:opacity-90",
         ghost:
           "border-transparent shadow-none hover:bg-muted hover:shadow-sm active:shadow-none active:border-transparent",
-        link: "border-transparent shadow-none text-link underline-offset-4 hover:underline hover:shadow-none active:shadow-none active:border-transparent",
+        link: "border-transparent shadow-none text-brand-cyan underline-offset-4 hover:underline hover:shadow-none active:shadow-none active:border-transparent",
       },
       size: {
         default: "h-10 px-4 py-2 has-[>svg]:px-3",

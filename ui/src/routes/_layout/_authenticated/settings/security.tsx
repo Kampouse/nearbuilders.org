@@ -73,7 +73,7 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
   return (
     <div className="space-y-4">
       {user.email ? (
-        <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+        <div className="rounded-xl border border-border bg-card p-6 space-y-4">
           <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             Change password
           </div>
@@ -118,7 +118,7 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
           </Button>
         </div>
       ) : (
-        <div className="rounded-[12px] border border-border bg-card p-6 text-sm text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
           Password management appears once an email-based login is attached to this account.
         </div>
       )}
@@ -168,7 +168,7 @@ function ActionCard({
   disabled: boolean;
 }) {
   return (
-    <div className="rounded-[12px] border border-border bg-card p-5 space-y-3">
+    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
       <div className="space-y-1">
         <div className="font-medium text-foreground">{title}</div>
         <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>

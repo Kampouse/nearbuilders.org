@@ -60,7 +60,7 @@ function ClassicTooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         className={cn(
-          "z-50 w-fit rounded-none border-2 border-inset border-border bg-tooltip-classic px-2 py-1 text-xs text-foreground shadow-none",
+          "z-50 w-fit rounded border border-border bg-popover px-2 py-1 text-xs text-foreground shadow-sm",
           className,
         )}
         {...props}

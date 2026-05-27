@@ -17,6 +17,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient, useOrpc } from "@/app";
+import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
 import { type ProjectKindFilter, parseProjectListSearch } from "./-search";
@@ -400,7 +401,7 @@ function ProjectsList() {
           key={opt.value}
           type="button"
           onClick={() => handleKindChange(opt.value)}
-          className={`h-8 px-2.5 rounded-[12px] text-sm font-semibold cursor-pointer transition-all duration-150 border ${activeKind === opt.value ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border ${activeKind === opt.value ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
         >
           {opt.label}
         </button>
@@ -409,7 +410,7 @@ function ProjectsList() {
       <button
         type="button"
         onClick={handlePersonalToggle}
-        className={`h-8 px-2.5 rounded-[12px] text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPersonalOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+        className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPersonalOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
       >
         <User size={13} />
         Personal
@@ -419,7 +420,7 @@ function ProjectsList() {
         <button
           type="button"
           onClick={handlePrivateToggle}
-          className={`h-8 px-2.5 rounded-[12px] text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPrivateOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPrivateOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
         >
           <Lock size={13} />
           Private
@@ -429,24 +430,25 @@ function ProjectsList() {
   );
 
   const newButton = canParticipate ? (
-    <Link
-      to="/projects/new"
-      search={{
-        tab: "write",
-        kind: search.kind,
-        personal: search.personal,
-        private: search.private,
-      }}
-      className="h-9 px-3.5 rounded-[12px] text-sm font-bold inline-flex items-center gap-1.5 no-underline transition-colors duration-150 shrink-0 bg-primary text-primary-foreground hover:opacity-90"
-    >
-      <Plus size={14} />
-      New
-    </Link>
+    <Button asChild size="sm">
+      <Link
+        to="/projects/new"
+        search={{
+          tab: "write",
+          kind: search.kind,
+          personal: search.personal,
+          private: search.private,
+        }}
+      >
+        <Plus size={14} />
+        New
+      </Link>
+    </Button>
   ) : (
-    <span className="h-9 px-3.5 rounded-[12px] text-sm font-bold inline-flex items-center gap-1.5 cursor-not-allowed shrink-0 bg-disabled text-primary-foreground">
+    <Button size="sm" disabled>
       <Plus size={14} />
       New
-    </span>
+    </Button>
   );
 
   const projectList = (
@@ -454,7 +456,7 @@ function ProjectsList() {
       {isLoading ? (
         <div className="flex flex-col gap-2 p-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-secondary h-[72px] rounded-[12px]" />
+            <div key={i} className="animate-pulse bg-secondary h-[72px] rounded-xl" />
           ))}
         </div>
       ) : rankedProjects.length === 0 ? (
@@ -469,7 +471,7 @@ function ProjectsList() {
                 personal: search.personal,
                 private: search.private,
               }}
-              className="text-sm font-bold no-underline text-brand-accent"
+              className="text-sm font-bold text-brand-accent hover:underline"
             >
               Create the first one
             </Link>
@@ -550,7 +552,7 @@ function ProjectsList() {
         {!canParticipate && (
           <div className="shrink-0 border-t border-border bg-card px-4 py-2 text-sm text-center text-muted-foreground pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
             Anonymous sessions can browse.{" "}
-            <Link to="/settings" className="font-semibold no-underline text-brand-accent">
+            <Link to="/settings" className="font-semibold text-brand-accent hover:underline">
               Link an identity
             </Link>{" "}
             to publish and vote.
@@ -592,7 +594,7 @@ function ProjectsList() {
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <div className="flex items-center gap-1 rounded-[12px] px-2.5 py-1 bg-secondary">
+                  <div className="flex items-center gap-1 rounded-xl px-2.5 py-1 bg-secondary">
                     <VoteButton
                       icon={<ChevronUp size={18} strokeWidth={2.25} />}
                       onClick={() => runVote("up", selectedProject.id)}
@@ -618,64 +620,69 @@ function ProjectsList() {
                           downvoteMutation.variables === selectedProject.id)
                       }
                       active={userVoteMap[selectedProject.id] === "down"}
-                      activeColor="text-status-danger-fg"
+                      activeColor="text-destructive"
                     />
                   </div>
 
                   {selectedProject.repository && (
-                    <a
-                      href={selectedProject.repository}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={selectedProject.repository}
-                      className="size-[34px] rounded-[12px] inline-flex items-center justify-center no-underline transition-colors duration-[120ms] shrink-0 bg-secondary text-foreground hover:bg-border"
-                    >
-                      {isGithubUrl(selectedProject.repository) ? (
-                        <GithubIcon size={14} />
-                      ) : (
-                        <Globe size={14} />
-                      )}
-                    </a>
+                    <Button asChild size="icon-sm" variant="outline">
+                      <a
+                        href={selectedProject.repository}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={selectedProject.repository}
+                      >
+                        {isGithubUrl(selectedProject.repository) ? (
+                          <GithubIcon size={14} />
+                        ) : (
+                          <Globe size={14} />
+                        )}
+                      </a>
+                    </Button>
                   )}
 
-                  <button
+                  <Button
                     type="button"
+                    size="icon-sm"
+                    variant="outline"
                     onClick={() => handleShare(selectedProject.id)}
                     title="Copy link"
-                    className={`size-[34px] rounded-[12px] inline-flex items-center justify-center cursor-pointer transition-all duration-[120ms] shrink-0 border-none bg-secondary hover:bg-border ${copied ? "text-brand-accent" : "text-muted-foreground"}`}
+                    className={copied ? "text-brand-accent" : ""}
                   >
                     {copied ? <Check size={14} /> : <Share2 size={14} />}
-                  </button>
+                  </Button>
 
-                  <Link
-                    to="/projects/$id"
-                    params={{ id: selectedProject.id }}
-                    search={{
-                      kind: search.kind,
-                      personal: search.personal,
-                      private: search.private,
-                    }}
-                    className="h-9 px-3.5 rounded-[12px] text-sm font-bold inline-flex items-center gap-1.5 no-underline transition-colors duration-150 bg-primary text-primary-foreground hover:opacity-90"
-                  >
-                    Open
-                    <ArrowUpRight size={13} />
-                  </Link>
-
-                  {canManageSelected && (
+                  <Button asChild size="sm">
                     <Link
-                      to="/projects/$id/edit"
+                      to="/projects/$id"
                       params={{ id: selectedProject.id }}
                       search={{
-                        tab: "write",
                         kind: search.kind,
                         personal: search.personal,
                         private: search.private,
                       }}
-                      className="h-9 px-3.5 rounded-[12px] text-sm font-bold inline-flex items-center gap-1.5 no-underline transition-colors duration-150 bg-secondary text-foreground hover:bg-border"
                     >
-                      <Pencil size={13} />
-                      Edit
+                      Open
+                      <ArrowUpRight size={13} />
                     </Link>
+                  </Button>
+
+                  {canManageSelected && (
+                    <Button asChild size="sm" variant="outline">
+                      <Link
+                        to="/projects/$id/edit"
+                        params={{ id: selectedProject.id }}
+                        search={{
+                          tab: "write",
+                          kind: search.kind,
+                          personal: search.personal,
+                          private: search.private,
+                        }}
+                      >
+                        <Pencil size={13} />
+                        Edit
+                      </Link>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -700,7 +707,7 @@ function ProjectsList() {
         {!canParticipate && (
           <div className="absolute bottom-0 left-0 right-0 shrink-0 border-t border-border bg-card px-6 py-2 text-sm text-center text-muted-foreground">
             Anonymous sessions can browse.{" "}
-            <Link to="/settings" className="font-semibold no-underline text-brand-accent">
+            <Link to="/settings" className="font-semibold text-brand-accent hover:underline">
               Link an identity
             </Link>{" "}
             to publish and vote.
@@ -739,7 +746,7 @@ function ListRow({
       className={`border-b border-border flex items-center gap-2.5 px-3.5 py-3 transition-all duration-[120ms] ${isSelected ? "lg:bg-brand-accent-light lg:border-l-[3px] lg:border-l-brand-accent" : "border-l-[3px] border-l-transparent"}`}
     >
       <span
-        className={`hidden lg:block w-6 text-xs font-bold text-center shrink-0 ${isSelected ? "text-brand-accent" : "text-disabled"}`}
+        className={`hidden lg:block w-6 text-xs font-bold text-center shrink-0 ${isSelected ? "text-brand-accent" : "text-muted-foreground/40"}`}
       >
         {rank}
       </span>
@@ -749,7 +756,7 @@ function ListRow({
         onClick={onMobileTap}
         className="flex flex-1 min-w-0 items-center gap-3 text-left bg-transparent border-none p-0 cursor-pointer lg:hidden"
       >
-        <span className="w-5 text-[11px] font-bold text-center text-disabled shrink-0">{rank}</span>
+        <span className="w-5 text-[11px] font-bold text-center text-muted-foreground/40 shrink-0">{rank}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 mb-0.5">
             <KindBadge kind={project.kind} compact />
@@ -781,7 +788,7 @@ function ListRow({
                 rel="noopener noreferrer"
                 title={project.repository}
                 onClick={(e) => e.stopPropagation()}
-                className="text-disabled hover:text-foreground inline-flex items-center shrink-0 transition-colors duration-[120ms]"
+                className="text-muted-foreground/40 hover:text-foreground inline-flex items-center shrink-0 transition-colors duration-[120ms]"
               >
                 {isGithubUrl(project.repository) ? <GithubIcon size={12} /> : <Globe size={12} />}
               </a>
@@ -824,7 +831,7 @@ function ListRow({
           label="Downvote"
           disabled={isDownvoting}
           active={voteDirection === "down"}
-          activeColor="text-status-danger-fg"
+          activeColor="text-destructive"
           size="compact"
         />
       </div>
@@ -855,7 +862,7 @@ function VoteButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`${size === "compact" ? "size-7 rounded-[8px]" : "size-10 rounded-[10px]"} flex items-center justify-center transition-all duration-[120ms] border border-transparent [WebkitTapHighlightColor:transparent] ${disabled ? "text-disabled cursor-not-allowed bg-transparent" : active ? `${activeColor ?? "text-brand-accent"} bg-card shadow-sm` : "text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground cursor-pointer"}`}
+      className={`${size === "compact" ? "size-7 rounded-md" : "size-10 rounded-lg"} flex items-center justify-center transition-all duration-[120ms] border border-transparent [webkit-tap-highlight-color:transparent] ${disabled ? "text-muted-foreground/40 cursor-not-allowed bg-transparent" : active ? `${activeColor ?? "text-brand-accent"} bg-card shadow-sm` : "text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground cursor-pointer"}`}
     >
       {icon}
     </button>
@@ -897,7 +904,7 @@ function StatusBadge({ status }: { status: "active" | "paused" | "archived" }) {
   const classes = {
     active: "bg-brand-accent-light border-brand-accent text-foreground",
     paused: "bg-secondary border-border text-foreground",
-    archived: "bg-status-danger-bg border-destructive text-status-danger-fg",
+    archived: "bg-destructive/10 border-destructive/40 text-destructive",
   };
   return (
     <span

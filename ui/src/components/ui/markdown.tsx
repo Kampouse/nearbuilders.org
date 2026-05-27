@@ -124,8 +124,7 @@ const markdownComponents: Components = {
 
     return (
       <code
-        className={cn(className, "block min-w-full")}
-        style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13 }}
+        className={cn(className, "block min-w-full font-mono text-[13px]")}
         {...props}
       >
         {children}
@@ -134,13 +133,18 @@ const markdownComponents: Components = {
   },
 
   pre: ({ children }) => (
-    <pre className="bg-muted border border-border rounded-[10px] p-5 overflow-x-auto mb-5 leading-relaxed">
+    <pre className="bg-muted border border-border rounded-lg p-5 overflow-x-auto mb-5 leading-relaxed">
       {children}
     </pre>
   ),
 
   a: ({ href, children }) => (
-    <a href={href ?? "#"} target="_blank" rel="noopener noreferrer">
+    <a
+      href={href ?? "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-brand-cyan font-medium underline-offset-4 hover:underline"
+    >
       {children}
     </a>
   ),
@@ -149,12 +153,12 @@ const markdownComponents: Components = {
     <img
       src={src}
       alt={alt ?? ""}
-      style={{ maxWidth: "100%", borderRadius: 10, margin: "16px 0", display: "block" }}
+      className="max-w-full rounded-lg my-4 block"
     />
   ),
 
   table: ({ children }) => (
-    <div style={{ overflowX: "auto", marginBottom: 20 }}>
+    <div className="overflow-x-auto mb-5">
       <table className="min-w-full border-collapse text-sm text-left">{children}</table>
     </div>
   ),

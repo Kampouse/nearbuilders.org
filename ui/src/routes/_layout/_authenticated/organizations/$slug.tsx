@@ -338,7 +338,7 @@ function OrganizationDetail() {
     return (
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
-          <div className="h-6 w-32 animate-pulse rounded-[6px] bg-muted" />
+          <div className="h-6 w-32 animate-pulse rounded bg-muted" />
         </div>
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground">Loading organization...</p>
@@ -357,7 +357,7 @@ function OrganizationDetail() {
           </Button>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
-          <div className="rounded-[12px] border border-border bg-card p-8 text-center space-y-3 max-w-sm w-full">
+          <div className="rounded-xl border border-border bg-card p-8 text-center space-y-3 max-w-sm w-full">
             <p className="text-sm text-foreground">
               This organization does not exist or you do not have access.
             </p>
@@ -387,7 +387,7 @@ function OrganizationDetail() {
 
       <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          <div className="rounded-[12px] border border-border bg-card p-6">
+          <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <Chip>organization</Chip>
               {isActive && <Chip accent>active</Chip>}
@@ -464,7 +464,7 @@ function OrganizationDetail() {
           </div>
 
           {isEditing && isOwner && (
-            <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+            <div className="rounded-xl border border-border bg-card p-6 space-y-4">
               <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Edit Organization
               </div>
@@ -537,7 +537,7 @@ function OrganizationDetail() {
 
             <TabsContent value="invitations" className="space-y-6 pt-4">
               {canManageMembers && !isPersonal && (
-                <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+                <div className="rounded-xl border border-border bg-card p-6 space-y-4">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                     Invite member
                   </div>
@@ -551,7 +551,7 @@ function OrganizationDetail() {
                     <select
                       value={inviteRole}
                       onChange={(e) => setInviteRole(e.target.value as "admin" | "member")}
-                      className="w-full px-3 py-2 text-sm bg-card text-foreground border-2 border-inset border-border-strong rounded-[8px] outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full px-3 py-2 text-sm bg-card text-foreground border border-border rounded-md outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="member">Member</option>
                       <option value="admin">Admin</option>
@@ -599,7 +599,7 @@ function OrganizationDetail() {
 
             <TabsContent value="apikeys" className="space-y-6 pt-4">
               {canManageMembers && (
-                <div className="rounded-[12px] border border-border bg-card p-6">
+                <div className="rounded-xl border border-border bg-card p-6">
                   <ApiKeyForm
                     onCreate={(values: ApiKeyFormValues) => createApiKeyMutation.mutate(values)}
                     isPending={createApiKeyMutation.isPending}
@@ -616,7 +616,7 @@ function OrganizationDetail() {
                   {apiKeys.map((key) => (
                     <div
                       key={key.id}
-                      className="rounded-[12px] border border-border bg-card p-5 space-y-3"
+                      className="rounded-xl border border-border bg-card p-5 space-y-3"
                     >
                       <div className="space-y-1 min-w-0">
                         <div className="font-medium text-foreground break-all">
@@ -668,7 +668,7 @@ function OrganizationDetail() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[100px_1fr] gap-4 rounded-[8px] border border-border bg-muted px-3.5 py-2.5 items-center">
+    <div className="grid grid-cols-[100px_1fr] gap-4 rounded-md border border-border bg-muted px-3.5 py-2.5 items-center">
       <span className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
         {label}
       </span>
@@ -680,7 +680,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function Chip({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center rounded-[6px] px-2.5 py-0.5 text-[11px] font-semibold border ${accent ? "bg-brand-accent-light border-brand-accent-border" : "bg-secondary border-border"} text-foreground`}
+      className={`inline-flex items-center rounded px-2.5 py-0.5 text-[11px] font-semibold border ${accent ? "bg-brand-accent-light border-brand-accent-border" : "bg-secondary border-border"} text-foreground`}
     >
       {children}
     </span>
@@ -689,7 +689,7 @@ function Chip({ children, accent }: { children: React.ReactNode; accent?: boolea
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="rounded-[12px] border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+    <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
       {label}
     </div>
   );

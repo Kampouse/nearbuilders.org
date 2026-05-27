@@ -171,7 +171,7 @@ export function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-4 bg-card">
+    <div className="border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-4 bg-card">
       <div className="flex items-center gap-2 text-muted-foreground mb-2">
         {icon}
         <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
@@ -434,11 +434,11 @@ export function RelayerCard() {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-3">
+          <div className="border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-3">
             <div className="text-xs text-muted-foreground">Total</div>
             <div className="text-sm font-medium">{formatNear(data.balance ?? "0")} NEAR</div>
           </div>
-          <div className="border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-3">
+          <div className="border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] p-3">
             <div className="text-xs text-muted-foreground">Available</div>
             <div className="text-sm font-medium">{formatNear(data.available ?? "0")} NEAR</div>
           </div>
@@ -614,7 +614,7 @@ export function AccountLinkingCard({ linkedAccounts, user }: { linkedAccounts: a
           )}
 
           {recentlyLinked && (
-            <div className="border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-green-50 dark:bg-green-900/20 p-3 text-sm">
+            <div className="border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-green-50 dark:bg-green-900/20 p-3 text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-green-600 dark:text-green-400 font-medium">
                   ✓ Linked successfully:
@@ -635,7 +635,7 @@ export function AccountLinkingCard({ linkedAccounts, user }: { linkedAccounts: a
                   Can&apos;t be unlinked
                 </Badge>
               </h4>
-              <div className="flex flex-col gap-3 p-3 border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-muted/30 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 p-3 border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-muted/30 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3 sm:items-center">
                   <span className="text-lg">
                     {getProviderConfig(getAccountProviderId(primaryAccount)).icon}
@@ -660,7 +660,7 @@ export function AccountLinkingCard({ linkedAccounts, user }: { linkedAccounts: a
               {secondaryAccounts.map((account) => (
                 <div
                   key={accountKey(account)}
-                  className="flex flex-col gap-3 p-3 border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 p-3 border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-start gap-3 sm:items-center">
                     <span className="text-lg">
@@ -949,7 +949,7 @@ export function GuestbookCard({ initialGreeting }: { initialGreeting?: string })
         </form>
 
         {sendMode === "relay" && relayStatus !== "idle" && (
-          <div className="flex items-center gap-2 p-3 border-2 border-outset border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-muted/50">
+          <div className="flex items-center gap-2 p-3 border border-[rgb(51,51,51)] dark:border-[rgb(100,100,100)] bg-muted/50">
             {relayStatus === "pending" && (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-amber-600" />

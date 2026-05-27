@@ -5,6 +5,7 @@ import { ArrowLeft, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { ProjectFormLayout, type ProjectFormValues } from "@/components/project-form";
+import { Button } from "@/components/ui/button";
 import { parseProjectListSearch } from "./-search";
 
 function isCurrentUserOwner(
@@ -134,16 +135,10 @@ function EditProjectPage() {
     return (
       <div className="flex h-full flex-col">
         <div className="flex shrink-0 items-center gap-3 border-b border-border bg-card px-6 py-3">
-          <div
-            style={{ height: 20, width: 120, borderRadius: 6 }}
-            className="animate-pulse bg-secondary"
-          />
+          <div className="h-5 w-30 rounded animate-pulse bg-secondary" />
         </div>
         <div className="flex flex-1 flex-col gap-4 p-8">
-          <div
-            style={{ height: 32, width: 300, borderRadius: 8 }}
-            className="animate-pulse bg-secondary"
-          />
+          <div className="h-8 w-[300px] rounded-md animate-pulse bg-secondary" />
         </div>
       </div>
     );
@@ -152,9 +147,7 @@ function EditProjectPage() {
   if (projectQuery.isError || !project) {
     return (
       <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center gap-4">
-        <p style={{ fontSize: 16, fontWeight: 600 }} className="text-foreground">
-          Project not found.
-        </p>
+        <p className="text-base font-semibold text-foreground">Project not found.</p>
         <Link
           to="/projects"
           search={{
@@ -163,8 +156,7 @@ function EditProjectPage() {
             personal: search.personal,
             private: search.private,
           }}
-          className="text-brand-accent"
-          style={{ fontWeight: 700, fontSize: 14, textDecoration: "none" }}
+          className="text-sm font-bold text-brand-accent hover:underline"
         >
           ← Back to projects
         </Link>
@@ -175,7 +167,7 @@ function EditProjectPage() {
   if (!canManage) {
     return (
       <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center gap-4">
-        <p style={{ fontSize: 16, fontWeight: 600 }} className="text-foreground">
+        <p className="text-base font-semibold text-foreground">
           You don't have permission to edit this project.
         </p>
         <Link
@@ -186,8 +178,7 @@ function EditProjectPage() {
             personal: search.personal,
             private: search.private,
           }}
-          className="text-brand-accent"
-          style={{ fontWeight: 700, fontSize: 14, textDecoration: "none" }}
+          className="text-sm font-bold text-brand-accent hover:underline"
         >
           ← Back to project
         </Link>
@@ -255,75 +246,65 @@ function EditFormInner({
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/projects/$id"
-            params={{ id: projectId }}
-            search={{
-              kind: search.kind,
-              personal: search.personal,
-              private: search.private,
-            }}
-            aria-label="Back to project"
-            className="flex items-center justify-center w-8 h-8 border-2 border-outset border-border-strong bg-card shadow-sm transition-all duration-200 ease-out hover:shadow-md hover:bg-muted rounded-[10px]"
-          >
-            <ArrowLeft size={13} className="text-foreground" />
-          </Link>
-          <span className="text-border">/</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }} className="text-foreground">
-            Edit
-          </span>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon-sm" aria-label="Back to project">
+            <Link
+              to="/projects/$id"
+              params={{ id: projectId }}
+              search={{
+                kind: search.kind,
+                personal: search.personal,
+                private: search.private,
+              }}
+            >
+              <ArrowLeft size={15} />
+            </Link>
+          </Button>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-sm font-semibold text-foreground">Edit</span>
         </div>
 
         <div className="flex items-center gap-2">
           <form.Subscribe selector={(s) => ({ isSubmitting: s.isSubmitting })}>
             {({ isSubmitting }) => (
-              <PillButton
+              <Button
+                type="button"
+                size="sm"
                 onClick={() => form.handleSubmit()}
                 disabled={isSubmitting || updateMutation.isPending}
-                primary
               >
                 {updateMutation.isPending ? "Saving…" : "Save"}
-              </PillButton>
+              </Button>
             )}
           </form.Subscribe>
 
-          <PillButton
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
             onClick={() => {
               if (confirm("Delete this project permanently?")) deleteMutation.mutate();
             }}
             disabled={deleteMutation.isPending}
-            danger
           >
             <Trash2 size={13} />
             Delete
-          </PillButton>
+          </Button>
 
-          <Link
-            to="/projects/$id"
-            params={{ id: projectId }}
-            search={{
-              kind: search.kind,
-              personal: search.personal,
-              private: search.private,
-            }}
-            className="bg-secondary text-foreground hover:bg-border"
-            style={{
-              height: 34,
-              padding: "0 14px",
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 700,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              textDecoration: "none",
-              transition: "background 0.12s",
-            }}
-          >
-            <X size={13} />
-            Cancel
-          </Link>
+          <Button asChild size="sm" variant="outline">
+            <Link
+              to="/projects/$id"
+              params={{ id: projectId }}
+              search={{
+                kind: search.kind,
+                personal: search.personal,
+                private: search.private,
+              }}
+            >
+              <X size={13} />
+              Cancel
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -348,47 +329,4 @@ function EditFormInner({
   );
 }
 
-function PillButton({
-  onClick,
-  disabled,
-  children,
-  primary,
-  danger,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-  primary?: boolean;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`${
-        disabled
-          ? "bg-disabled text-primary-foreground"
-          : primary
-            ? "bg-primary text-primary-foreground hover:bg-foreground"
-            : danger
-              ? "bg-status-danger-bg text-status-danger-fg hover:bg-status-danger-border"
-              : "bg-secondary text-foreground hover:bg-border"
-      }`}
-      style={{
-        height: 34,
-        padding: "0 14px",
-        borderRadius: 10,
-        fontSize: 13,
-        fontWeight: 700,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background 0.12s",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
+

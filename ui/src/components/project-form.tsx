@@ -15,8 +15,18 @@ import {
 } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { Input } from "@/components";
+import { Label } from "@/components/ui/label";
 import { Markdown } from "@/components/ui/markdown";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
 
 export type ProjectFormValues = {
@@ -121,23 +131,17 @@ export function ProjectFormLayout({
 
   return (
     <div className="flex flex-1 flex-col overflow-visible lg:min-h-0 lg:overflow-hidden lg:flex-row">
-      <div
-        style={{ width: mode === "edit" ? undefined : undefined, flexShrink: 0 }}
-        className="overflow-visible border-b border-border bg-card px-4 py-5 sm:px-6 sm:py-6 lg:overflow-y-auto lg:w-[340px] lg:border-b-0 lg:border-r xl:w-[360px]"
-      >
-        <div className="space-y-6 pb-[env(safe-area-inset-bottom,0px)] lg:pb-0">
+      <div className="overflow-visible border-b border-border bg-card px-4 py-5 sm:px-6 sm:py-6 lg:overflow-y-auto lg:w-[340px] lg:border-b-0 lg:border-r lg:shrink-0 xl:w-[360px]">
+        <div className="space-y-5 pb-[env(safe-area-inset-bottom,0px)] lg:pb-0">
+
           <form.Field name="kind">
             {(field: any) => (
               <div className="space-y-2">
-                <FormLabel>Type</FormLabel>
+                <Label>Type</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {(
                     [
-                      {
-                        value: "project" as const,
-                        label: "Project",
-                        icon: <FileCode2 size={15} />,
-                      },
+                      { value: "project" as const, label: "Project", icon: <FileCode2 size={15} /> },
                       { value: "idea" as const, label: "Idea", icon: <FileText size={15} /> },
                     ] as const
                   ).map((opt) => {
@@ -150,28 +154,17 @@ export function ProjectFormLayout({
                           field.handleChange(opt.value);
                           if (mode === "create" && tab === "preview") setTab("write");
                         }}
-                        className={`${active ? "border-2 border-brand-accent bg-brand-accent-light" : "border border-border bg-card"}`}
-                        style={{
-                          padding: mode === "edit" ? "10px 12px" : 12,
-                          borderRadius: 10,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          textAlign: "left",
-                          cursor: "pointer",
-                          transition: "all 0.12s",
-                        }}
+                        className={cn(
+                          "flex items-center gap-2 rounded-lg border-2 px-3 py-3 text-sm font-bold transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          active
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : "border-border bg-card text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground",
+                        )}
                       >
-                        {opt.icon}
-                        <span
-                          className="text-foreground"
-                          style={{
-                            fontWeight: 700,
-                            fontSize: mode === "edit" ? 13 : 14,
-                          }}
-                        >
-                          {opt.label}
+                        <span className={cn(active ? "text-primary" : "text-muted-foreground")}>
+                          {opt.icon}
                         </span>
+                        {opt.label}
                       </button>
                     );
                   })}
@@ -191,7 +184,7 @@ export function ProjectFormLayout({
               const err = fieldError(field.state.meta.errors[0]);
               return (
                 <div className="space-y-1.5">
-                  <FormLabel htmlFor="title">Title</FormLabel>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
                     value={field.state.value}
@@ -201,7 +194,7 @@ export function ProjectFormLayout({
                   />
                   {err && <ErrorText>{err}</ErrorText>}
                   {slugPreview !== undefined && (
-                    <p className="text-muted-foreground" style={{ fontSize: 12, marginTop: 2 }}>
+                    <p className="text-xs text-muted-foreground mt-1">
                       /{slugPreview || "my-entry"}
                     </p>
                   )}
@@ -221,14 +214,17 @@ export function ProjectFormLayout({
               const err = fieldError(field.state.meta.errors[0]);
               return (
                 <div className="space-y-1.5">
-                  <FormLabel htmlFor="description">Description</FormLabel>
-                  <NearTextarea
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
                     id="description"
                     value={field.state.value ?? ""}
-                    onChange={(v) => field.handleChange(v)}
+                    onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="A short summary shown in the list"
                     rows={3}
-                    error={!!err}
+                    className={cn(
+                      "resize-none",
+                      err ? "border-destructive focus-visible:border-destructive" : "",
+                    )}
                   />
                   {err && <ErrorText>{err}</ErrorText>}
                 </div>
@@ -251,14 +247,14 @@ export function ProjectFormLayout({
                 const err = fieldError(field.state.meta.errors[0]);
                 return (
                   <div className="space-y-1.5">
-                    <FormLabel htmlFor="repository">Repository URL</FormLabel>
+                    <Label htmlFor="repository">Repository URL</Label>
                     <Input
                       id="repository"
                       type="url"
                       value={field.state.value ?? ""}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="https://github.com/user/repo"
-                      className={`font-mono text-sm ${err ? "!border-destructive" : ""}`}
+                      className={cn("font-mono text-sm", err ? "!border-destructive" : "")}
                     />
                     {err && <ErrorText>{err}</ErrorText>}
                     <HelperText>README fetched from the default branch.</HelperText>
@@ -272,16 +268,20 @@ export function ProjectFormLayout({
             <form.Field name="status">
               {(field: any) => (
                 <div className="space-y-2">
-                  <FormLabel>Status</FormLabel>
-                  <NearSelect
+                  <Label>Status</Label>
+                  <Select
                     value={field.state.value ?? "active"}
-                    options={[
-                      { value: "active", label: "Active" },
-                      { value: "paused", label: "Paused" },
-                      { value: "archived", label: "Archived" },
-                    ]}
-                    onChange={(v) => field.handleChange(v)}
-                  />
+                    onValueChange={(v) => field.handleChange(v)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="paused">Paused</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </form.Field>
@@ -290,16 +290,12 @@ export function ProjectFormLayout({
           <form.Field name="visibility">
             {(field: any) => (
               <div className="space-y-2">
-                <FormLabel>Visibility</FormLabel>
+                <Label>Visibility</Label>
                 <div className="flex flex-col gap-2">
                   {(
                     [
                       { value: "public" as const, label: "Public", desc: "Visible in the feed" },
-                      {
-                        value: "unlisted" as const,
-                        label: "Unlisted",
-                        desc: "Only via direct link",
-                      },
+                      { value: "unlisted" as const, label: "Unlisted", desc: "Only via direct link" },
                       { value: "private" as const, label: "Private", desc: "Only you" },
                     ] as const
                   ).map((opt) => {
@@ -309,23 +305,15 @@ export function ProjectFormLayout({
                         key={opt.value}
                         type="button"
                         onClick={() => field.handleChange(opt.value)}
-                        className={`${active ? "border-2 border-brand-accent bg-brand-accent-light" : "border border-border bg-card"}`}
-                        style={{
-                          padding: "10px 14px",
-                          borderRadius: 10,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          cursor: "pointer",
-                          transition: "all 0.12s",
-                        }}
+                        className={cn(
+                          "flex items-center justify-between rounded-lg border-2 px-3 py-2.5 text-sm transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          active
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-card hover:bg-muted hover:border-border",
+                        )}
                       >
-                        <span className="text-foreground" style={{ fontSize: 14, fontWeight: 700 }}>
-                          {opt.label}
-                        </span>
-                        <span className="text-muted-foreground" style={{ fontSize: 12 }}>
-                          {opt.desc}
-                        </span>
+                        <span className="font-bold text-foreground">{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">{opt.desc}</span>
                       </button>
                     );
                   })}
@@ -348,13 +336,13 @@ export function ProjectFormLayout({
                 const err = fieldError(field.state.meta.errors[0]);
                 return (
                   <div className="space-y-1.5">
-                    <FormLabel htmlFor="domain">Domain</FormLabel>
+                    <Label htmlFor="domain">Domain</Label>
                     <Input
                       id="domain"
                       value={field.state.value ?? ""}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="example.com"
-                      className={`font-mono text-sm ${err ? "!border-destructive" : ""}`}
+                      className={cn("font-mono text-sm", err ? "!border-destructive" : "")}
                     />
                     {err && <ErrorText>{err}</ErrorText>}
                     <HelperText>Already have a domain to use?</HelperText>
@@ -378,13 +366,13 @@ export function ProjectFormLayout({
                 const err = fieldError(field.state.meta.errors[0]);
                 return (
                   <div className="space-y-1.5">
-                    <FormLabel htmlFor="ownerId">Owner</FormLabel>
+                    <Label htmlFor="ownerId">Owner</Label>
                     <Input
                       id="ownerId"
                       value={field.state.value ?? ""}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder={defaultOwnerId}
-                      className={`font-mono text-sm ${err ? "!border-destructive" : ""}`}
+                      className={cn("font-mono text-sm", err ? "!border-destructive" : "")}
                     />
                     {err && <ErrorText>{err}</ErrorText>}
                     <HelperText>NEAR account that owns this entry. Defaults to you.</HelperText>
@@ -429,33 +417,12 @@ export function ProjectFormLayout({
                     className="flex flex-col overflow-visible gap-0 lg:hidden"
                   >
                     <div className="shrink-0 border-b border-border bg-card">
-                      <TabsList
-                        style={{
-                          border: "none",
-                          height: "auto",
-                          padding: "0 12px",
-                          display: "flex",
-                          justifyContent: "flex-start",
-                          gap: 0,
-                          width: "auto",
-                        }}
-                        className="bg-transparent border-b-0"
-                      >
+                      <TabsList className="h-auto px-3 flex justify-start gap-0 w-full bg-transparent border-none rounded-none">
                         {(["write", "preview"] as const).map((t) => (
                           <TabsTrigger
                             key={t}
                             value={t}
-                            className={`${tab === t ? "border-b-2 border-brand-accent text-foreground" : "border-b-2 border-transparent text-muted-foreground"}`}
-                            style={{
-                              padding: "14px 20px",
-                              fontSize: 13,
-                              fontWeight: 600,
-                              borderRadius: 0,
-                              marginBottom: -1,
-                              transition: "all 0.12s",
-                              minHeight: 44,
-                              WebkitTapHighlightColor: "transparent",
-                            }}
+                            className="px-5 py-3.5 text-[13px] font-semibold rounded-none border-b-2 border-t-0 border-l-0 border-r-0 data-[state=active]:border-primary data-[state=inactive]:border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none -mb-px"
                           >
                             {t === "write" ? "Write" : "Preview"}
                           </TabsTrigger>
@@ -485,32 +452,18 @@ export function ProjectFormLayout({
               <>
                 <div className="flex shrink-0 items-center gap-2 border-b border-border bg-card px-4 py-3 sm:px-6">
                   <FileCode2 size={14} className="text-muted-foreground" />
-                  <span className="text-foreground" style={{ fontSize: 13, fontWeight: 600 }}>
-                    README Preview
-                  </span>
+                  <span className="text-sm font-semibold text-foreground">README Preview</span>
                   {readmeQuery.isLoading && (
-                    <span className="text-muted-foreground" style={{ fontSize: 12 }}>
-                      Loading…
-                    </span>
+                    <span className="text-xs text-muted-foreground">Loading…</span>
                   )}
                 </div>
                 <div className="overflow-visible px-4 py-5 sm:px-8 sm:py-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
                   {readmeQuery.isLoading ? (
-                    <div className="text-muted-foreground" style={{ fontSize: 14 }}>
-                      Loading README…
-                    </div>
+                    <p className="text-sm text-muted-foreground">Loading README…</p>
                   ) : readmeQuery.data ? (
                     <Markdown content={readmeQuery.data} />
                   ) : (
-                    <div
-                      className="border border-dashed border-border text-muted-foreground"
-                      style={{
-                        padding: "32px 24px",
-                        borderRadius: 12,
-                        textAlign: "center",
-                        fontSize: 14,
-                      }}
-                    >
+                    <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center text-sm text-muted-foreground">
                       No README available for this repository.
                     </div>
                   )}
@@ -519,10 +472,8 @@ export function ProjectFormLayout({
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center sm:p-8">
                 <FileCode2 size={40} className="text-border" />
-                <p className="text-foreground" style={{ fontSize: 15, fontWeight: 600 }}>
-                  Set a repository URL
-                </p>
-                <p className="text-muted-foreground" style={{ fontSize: 13, maxWidth: 280 }}>
+                <p className="text-sm font-semibold text-foreground">Set a repository URL</p>
+                <p className="text-xs text-muted-foreground max-w-[280px]">
                   The project detail page will fetch and render the README from the default branch.
                 </p>
               </div>
@@ -572,8 +523,7 @@ function ContentWriteTab({
               type="button"
               onClick={() => applyMarkdown(tool)}
               title={tool.label}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-brand-accent hover:bg-brand-accent-light hover:text-foreground active:scale-95"
-              style={{ WebkitTapHighlightColor: "transparent" }}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-foreground active:scale-95 [webkit-tap-highlight-color:transparent]"
             >
               <Icon size={14} />
             </button>
@@ -585,26 +535,13 @@ function ContentWriteTab({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={"# My Idea\n\nDescribe the concept, motivation, and next steps…"}
-        className={`text-foreground bg-muted border-none outline-none resize-none ${error ? "border-t-2 border-destructive" : ""}`}
-        style={{
-          flex: 1,
-          width: "100%",
-          minHeight: 320,
-          padding: "20px 20px 24px",
-          fontFamily: "ui-monospace, SFMono-Regular, monospace",
-          fontSize: 13,
-          lineHeight: "1.65",
-        }}
+        className={cn(
+          "flex-1 w-full min-h-[320px] bg-muted text-foreground border-none outline-none resize-none font-mono text-[13px] leading-relaxed p-5",
+          error ? "border-t-2 border-destructive" : "",
+        )}
       />
       {error && (
-        <div
-          className="bg-status-danger-surface text-destructive border-t border-status-danger-border"
-          style={{
-            padding: "8px 32px",
-            fontSize: 12,
-            flexShrink: 0,
-          }}
-        >
+        <div className="shrink-0 border-t border-destructive/20 bg-destructive/5 px-8 py-2 text-xs text-destructive">
           {error}
         </div>
       )}
@@ -617,25 +554,18 @@ function MarkdownPreviewPanel({ content, compact }: { content: string; compact?:
     <div className="flex min-h-[55vh] flex-col overflow-visible lg:min-h-0 lg:flex-1 lg:overflow-hidden">
       <div className="flex shrink-0 items-center gap-2 border-b border-border bg-card px-4 py-3 sm:px-6">
         <FileText size={14} className="text-muted-foreground" />
-        <span className="text-foreground" style={{ fontSize: 13, fontWeight: 600 }}>
-          Live Preview
-        </span>
+        <span className="text-sm font-semibold text-foreground">Live Preview</span>
       </div>
       <div
-        className={`${compact ? "px-4 py-5 sm:px-6" : "px-4 py-5 sm:px-8 sm:py-6"} overflow-visible lg:min-h-0 lg:flex-1 lg:overflow-y-auto`}
+        className={cn(
+          "overflow-visible lg:min-h-0 lg:flex-1 lg:overflow-y-auto",
+          compact ? "px-4 py-5 sm:px-6" : "px-4 py-5 sm:px-8 sm:py-6",
+        )}
       >
         {content.trim() ? (
           <Markdown content={content} />
         ) : (
-          <div
-            className="border border-dashed border-border text-muted-foreground"
-            style={{
-              padding: "32px 24px",
-              borderRadius: 12,
-              textAlign: "center",
-              fontSize: 14,
-            }}
-          >
+          <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center text-sm text-muted-foreground">
             Start writing to see the preview.
           </div>
         )}
@@ -807,19 +737,15 @@ const MARKDOWN_TOOLS: MarkdownTool[] = [
 
 export function FormLabel({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) {
   return (
-    <label
-      htmlFor={htmlFor}
-      className="text-foreground block"
-      style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}
-    >
+    <Label htmlFor={htmlFor}>
       {children}
-    </label>
+    </Label>
   );
 }
 
 export function HelperText({ children }: { children: ReactNode }) {
   return (
-    <p className="text-muted-foreground" style={{ fontSize: 12, marginTop: 4 }}>
+    <p className="text-xs text-muted-foreground mt-1">
       {children}
     </p>
   );
@@ -827,7 +753,7 @@ export function HelperText({ children }: { children: ReactNode }) {
 
 export function ErrorText({ children }: { children: ReactNode }) {
   return (
-    <p className="text-destructive" style={{ fontSize: 12, marginTop: 4 }}>
+    <p className="text-xs text-destructive mt-1">
       {children}
     </p>
   );
@@ -849,34 +775,16 @@ export function NearTextarea({
   error?: boolean;
 }) {
   return (
-    <textarea
+    <Textarea
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`text-foreground bg-card border-border focus:border-brand-accent ${error ? "border-destructive focus:border-destructive" : ""}`}
-      style={{
-        width: "100%",
-        padding: "10px 14px",
-        borderRadius: 8,
-        fontSize: 14,
-        outline: "none",
-        resize: "vertical",
-        fontFamily: "inherit",
-        lineHeight: "1.5",
-        transition: "border-color 0.12s, box-shadow 0.12s",
-      }}
-      onFocus={(e) => {
-        const el = e.currentTarget as HTMLTextAreaElement;
-        el.style.boxShadow = error
-          ? "0 0 0 3px rgba(229,47,40,0.1)"
-          : "0 0 0 3px rgba(0,217,163,0.1)";
-      }}
-      onBlur={(e) => {
-        const el = e.currentTarget as HTMLTextAreaElement;
-        el.style.boxShadow = "none";
-      }}
+      className={cn(
+        "resize-none",
+        error ? "border-destructive focus-visible:border-destructive" : "",
+      )}
     />
   );
 }
@@ -891,26 +799,17 @@ export function NearSelect({
   onChange: (v: string) => void;
 }) {
   return (
-    <select
-      className="border border-border focus:border-brand-accent text-foreground bg-card"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        width: "100%",
-        height: 40,
-        padding: "0 14px",
-        borderRadius: 8,
-        fontSize: 14,
-        outline: "none",
-        cursor: "pointer",
-        appearance: "auto",
-      }}
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

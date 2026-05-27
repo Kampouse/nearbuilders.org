@@ -43,9 +43,9 @@ function AuthMethodsSettings() {
 
 function EmailMethod({ user }: { user: { email?: string; isAnonymous?: boolean | null } }) {
   return (
-    <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-[10px] border border-border bg-muted flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
           <Mail className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
@@ -88,9 +88,9 @@ function NearMethod({ nearAccountId }: { nearAccountId: string | null }) {
   });
 
   return (
-    <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-[10px] border border-border bg-muted flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
           <Wallet className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
@@ -99,7 +99,7 @@ function NearMethod({ nearAccountId }: { nearAccountId: string | null }) {
             <StatusChip linked={!!nearAccountId} />
           </div>
           {nearAccountId ? (
-            <div className="rounded-[8px] border border-border bg-muted px-3 py-2 font-mono text-xs break-all text-foreground">
+            <div className="rounded-md border border-border bg-muted px-3 py-2 font-mono text-xs break-all text-foreground">
               {nearAccountId}
             </div>
           ) : (
@@ -108,7 +108,7 @@ function NearMethod({ nearAccountId }: { nearAccountId: string | null }) {
                 type="button"
                 onClick={() => linkNearMutation.mutate()}
                 disabled={linkNearMutation.isPending}
-                className="h-9 px-4 inline-flex items-center justify-center gap-2 text-sm font-medium border-2 border-outset border-border-strong bg-card text-foreground shadow-sm hover:shadow-md hover:bg-muted active:border-inset active:shadow-none transition-all duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 rounded-[12px]"
+                className="h-9 px-4 inline-flex items-center justify-center gap-2 text-sm font-medium border border-border bg-card text-foreground hover:bg-muted transition-colors disabled:pointer-events-none disabled:opacity-50 rounded-xl"
               >
                 {linkNearMutation.isPending ? "connecting..." : "connect NEAR wallet"}
               </button>
@@ -128,9 +128,9 @@ function PhoneMethod({
   const phoneNumber = user.phoneNumber ?? null;
 
   return (
-    <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-[10px] border border-border bg-muted flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
           <Smartphone className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
@@ -190,9 +190,9 @@ function PasskeysMethod({ passkeys }: { passkeys: Array<{ id: string; name?: str
 
   return (
     <>
-      <div className="rounded-[12px] border border-border bg-card p-6 space-y-4">
+      <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-[10px] border border-border bg-muted flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
             <KeyRound className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="min-w-0 flex-1 space-y-3">
@@ -209,7 +209,7 @@ function PasskeysMethod({ passkeys }: { passkeys: Array<{ id: string; name?: str
                 {passkeys.map((passkey) => (
                   <div
                     key={passkey.id}
-                    className="flex items-center justify-between gap-3 rounded-[8px] border border-border bg-muted px-3.5 py-2.5"
+                    className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted px-3.5 py-2.5"
                   >
                     <span className="text-sm text-foreground truncate min-w-0 flex-1">
                       {passkey.name || "Passkey"}
@@ -269,7 +269,7 @@ function PasskeysMethod({ passkeys }: { passkeys: Array<{ id: string; name?: str
 function StatusChip({ linked, label }: { linked: boolean; label?: string }) {
   return (
     <span
-      className={`inline-flex items-center rounded-[6px] px-2 py-0.5 text-[10px] font-semibold border ${
+      className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-semibold border ${
         linked
           ? "bg-secondary border-border text-foreground"
           : "bg-muted border-border text-muted-foreground"

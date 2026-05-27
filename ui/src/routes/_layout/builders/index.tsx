@@ -144,7 +144,7 @@ function BuildersPage() {
           connect with the community.
         </p>
 
-        <div className="relative max-w-md">
+        <div className="relative w-full sm:max-w-md">
           <Search
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
@@ -182,7 +182,7 @@ function BuildersPage() {
         </p>
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-sm font-bold no-underline hover:bg-black/80 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-sm font-bold hover:bg-black/80 transition-colors"
         >
           Connect your wallet
         </Link>
@@ -231,7 +231,7 @@ function BuilderCard({ builder }: { builder: Builder }) {
         </span>
         <Link
           to="/projects"
-          className="text-xs font-semibold text-brand-cyan no-underline hover:underline transition-colors"
+          className="text-xs font-semibold text-brand-cyan hover:underline transition-colors"
         >
           View projects →
         </Link>

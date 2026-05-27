@@ -84,11 +84,6 @@ function HeroSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-20 sm:pt-32 sm:pb-28">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-green/30 bg-brand-green/10 text-brand-green text-xs font-semibold mb-8">
-            <span className="size-1.5 rounded-full bg-brand-green" />
-            Open platform · Built on NEAR
-          </div>
-
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight text-foreground mb-6">
             The builder's
             <br />

@@ -18,6 +18,7 @@ import {
 import { type ReactNode, useCallback, useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
+import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
@@ -159,24 +160,12 @@ function ProjectDetailPage() {
     return (
       <div className="flex h-full flex-col">
         <div className="flex shrink-0 items-center gap-3 border-b border-border bg-card px-4 py-3">
-          <div
-            style={{ height: 20, width: 120, borderRadius: 6 }}
-            className="animate-pulse bg-secondary"
-          />
+          <div className="h-5 w-30 rounded animate-pulse bg-secondary" />
         </div>
         <div className="flex flex-1 flex-col gap-4 p-6">
-          <div
-            style={{ height: 32, width: 240, borderRadius: 8 }}
-            className="animate-pulse bg-secondary"
-          />
-          <div
-            style={{ height: 16, width: "70%", borderRadius: 6 }}
-            className="animate-pulse bg-secondary"
-          />
-          <div
-            style={{ height: 16, width: "50%", borderRadius: 6 }}
-            className="animate-pulse bg-secondary"
-          />
+          <div className="h-8 w-60 rounded-md animate-pulse bg-secondary" />
+          <div className="h-4 w-[70%] rounded animate-pulse bg-secondary" />
+          <div className="h-4 w-1/2 rounded animate-pulse bg-secondary" />
         </div>
       </div>
     );
@@ -185,7 +174,7 @@ function ProjectDetailPage() {
   if (projectQuery.isError || !project) {
     return (
       <div className="flex min-h-[calc(100dvh-48px)] flex-col items-center justify-center gap-4 p-6">
-        <p style={{ fontSize: 16, fontWeight: 600 }} className="text-foreground">
+        <p className="text-base font-semibold text-foreground">
           Project not found.
         </p>
         <Link
@@ -196,8 +185,7 @@ function ProjectDetailPage() {
             personal: search.personal,
             private: search.private,
           }}
-          className="text-brand-accent"
-          style={{ fontWeight: 700, fontSize: 14, textDecoration: "none" }}
+          className="text-sm font-bold text-brand-accent hover:underline"
         >
           ← Back to projects
         </Link>
@@ -231,24 +219,21 @@ function ProjectDetailPage() {
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
         {/* breadcrumb */}
         <div className="flex items-center gap-2">
-          <Link
-            to="/projects"
-            search={{
-              preview: project.id,
-              kind: search.kind,
-              personal: search.personal,
-              private: search.private,
-            }}
-            aria-label="Back to projects"
-            className="flex items-center justify-center w-8 h-8 border-2 border-outset border-border-strong bg-card shadow-sm transition-all duration-200 ease-out hover:shadow-md hover:bg-muted rounded-[10px]"
-          >
-            <ArrowLeft size={13} className="text-foreground" />
-          </Link>
-          <span className="hidden text-border sm:inline">/</span>
-          <span
-            style={{ fontSize: 13, fontWeight: 600 }}
-            className="hidden max-w-[160px] truncate text-foreground sm:block"
-          >
+          <Button asChild variant="ghost" size="icon-sm" aria-label="Back to projects">
+            <Link
+              to="/projects"
+              search={{
+                preview: project.id,
+                kind: search.kind,
+                personal: search.personal,
+                private: search.private,
+              }}
+            >
+              <ArrowLeft size={15} />
+            </Link>
+          </Button>
+          <span className="hidden text-muted-foreground sm:inline">/</span>
+          <span className="hidden max-w-[160px] truncate text-sm font-semibold text-foreground sm:block">
             {project.slug}
           </span>
         </div>
@@ -256,16 +241,7 @@ function ProjectDetailPage() {
         {/* actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* vote widget */}
-          <div
-            className="bg-secondary"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              borderRadius: 10,
-              padding: "2px 6px",
-            }}
-          >
+          <div className="inline-flex items-center gap-0.5 rounded-lg px-1.5 py-0.5 bg-secondary">
             <IconButton
               onClick={() => runVote("up")}
               label="Upvote"
@@ -275,10 +251,7 @@ function ProjectDetailPage() {
             >
               <ChevronUp size={18} strokeWidth={2.25} />
             </IconButton>
-            <span
-              className="text-foreground"
-              style={{ minWidth: 20, textAlign: "center", fontSize: 13, fontWeight: 700 }}
-            >
+            <span className="min-w-5 text-center text-[13px] font-bold text-foreground">
               {voteCount}
             </span>
             <IconButton
@@ -286,7 +259,7 @@ function ProjectDetailPage() {
               label="Downvote"
               disabled={!canParticipate || downvoteMutation.isPending}
               active={voteDirection === "down"}
-              activeColor="text-status-danger-fg"
+              activeColor="text-destructive"
             >
               <ChevronDown size={18} strokeWidth={2.25} />
             </IconButton>
@@ -294,42 +267,23 @@ function ProjectDetailPage() {
 
           {/* repo link — hidden on very small screens */}
           {project.repository && (
-            <a
-              href={project.repository}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={project.repository}
-              className="hidden sm:inline-flex bg-secondary hover:bg-border text-foreground"
-              style={{
-                height: 34,
-                padding: "0 10px",
-                borderRadius: 10,
-                fontSize: 12,
-                fontWeight: 600,
-                alignItems: "center",
-                gap: 5,
-                textDecoration: "none",
-                transition: "background 0.12s",
-                flexShrink: 0,
-                maxWidth: 140,
-                overflow: "hidden",
-              }}
-            >
-              {isGithubUrl(project.repository) ? <GithubIcon size={13} /> : <Globe size={13} />}
-              <span
-                style={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
+            <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex max-w-[160px]">
+              <a
+                href={project.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={project.repository}
               >
-                {project.repository
-                  .replace(/^https?:\/\/(www\.)?/, "")
-                  .split("/")
-                  .slice(0, 2)
-                  .join("/")}
-              </span>
-            </a>
+                {isGithubUrl(project.repository) ? <GithubIcon size={13} /> : <Globe size={13} />}
+                <span className="truncate">
+                  {project.repository
+                    .replace(/^https?:\/\/(www\.)?/, "")
+                    .split("/")
+                    .slice(0, 2)
+                    .join("/")}
+                </span>
+              </a>
+            </Button>
           )}
 
           {/* share */}
@@ -354,43 +308,33 @@ function ProjectDetailPage() {
 
           {canManage && (
             <>
-              <Link
-                to="/projects/$id/edit"
-                params={{ id: projectId }}
-                search={{
-                  tab: "write",
-                  kind: search.kind,
-                  personal: search.personal,
-                  private: search.private,
-                }}
-                className="bg-secondary text-foreground hover:bg-border"
-                style={{
-                  height: 34,
-                  padding: "0 10px",
-                  borderRadius: 10,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  textDecoration: "none",
-                  transition: "background 0.12s",
-                }}
-              >
-                <Pencil size={13} />
-                <span className="hidden sm:inline">Edit</span>
-              </Link>
-              <button
+              <Button asChild size="sm" variant="outline">
+                <Link
+                  to="/projects/$id/edit"
+                  params={{ id: projectId }}
+                  search={{
+                    tab: "write",
+                    kind: search.kind,
+                    personal: search.personal,
+                    private: search.private,
+                  }}
+                >
+                  <Pencil size={13} />
+                  <span className="hidden sm:inline">Edit</span>
+                </Link>
+              </Button>
+              <Button
                 type="button"
+                size="sm"
+                variant="destructive"
                 onClick={() => {
                   if (confirm("Delete this project permanently?")) deleteMutation.mutate();
                 }}
                 disabled={deleteMutation.isPending}
-                className="inline-flex h-[34px] items-center gap-1 rounded-[10px] px-2.5 text-[13px] font-bold bg-status-danger-bg text-status-danger-fg hover:bg-status-danger-border transition-colors sm:px-3"
               >
                 <Trash2 size={13} />
                 <span className="hidden sm:inline">Delete</span>
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -407,76 +351,41 @@ function ProjectDetailPage() {
                 {project.status !== "active" && <StatusChip status={project.status as any} />}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1
-                  style={{ fontSize: 26, fontWeight: 600, lineHeight: "1.2" }}
-                  className="text-foreground sm:text-[30px]"
-                >
+                <h1 className="text-[26px] sm:text-[30px] font-semibold leading-tight text-foreground">
                   {project.title}
                 </h1>
                 {project.visibility === "private" && <PrivateIndicator />}
               </div>
               {project.description && (
-                <p style={{ fontSize: 15, lineHeight: "1.5" }} className="text-muted-foreground">
+                <p className="text-[15px] leading-relaxed text-muted-foreground">
                   {project.description}
                 </p>
               )}
               {project.repository && (
-                <a
-                  href={project.repository}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border border-border bg-secondary hover:bg-border text-foreground"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "5px 10px",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    transition: "background 0.12s",
-                    maxWidth: "fit-content",
-                  }}
-                >
-                  {isGithubUrl(project.repository) ? <GithubIcon size={13} /> : <Globe size={13} />}
-                  <span
-                    style={{
-                      maxWidth: 220,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
+                <Button asChild size="sm" variant="outline" className="w-fit">
+                  <a
+                    href={project.repository}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {project.repository.replace(/^https?:\/\/(www\.)?/, "")}
-                  </span>
-                  <ExternalLink
-                    size={11}
-                    className="text-muted-foreground"
-                    style={{ flexShrink: 0 }}
-                  />
-                </a>
+                    {isGithubUrl(project.repository) ? <GithubIcon size={13} /> : <Globe size={13} />}
+                    <span className="max-w-[220px] truncate">
+                      {project.repository.replace(/^https?:\/\/(www\.)?/, "")}
+                    </span>
+                    <ExternalLink size={11} className="text-muted-foreground shrink-0" />
+                  </a>
+                </Button>
               )}
             </div>
 
             <div className="h-px bg-border" />
 
             {project.kind === "project" && readmeQuery.isLoading ? (
-              <div style={{ fontSize: 14 }} className="text-muted-foreground">
-                Loading README…
-              </div>
+              <p className="text-sm text-muted-foreground">Loading README…</p>
             ) : renderedContent ? (
               <Markdown content={renderedContent} />
             ) : (
-              <div
-                className="border border-dashed border-border text-muted-foreground"
-                style={{
-                  padding: "32px 24px",
-                  borderRadius: 12,
-                  textAlign: "center",
-                  fontSize: 14,
-                }}
-              >
+              <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center text-sm text-muted-foreground">
                 {project.kind === "project"
                   ? "No README available for this repository."
                   : "This idea has no content yet."}
@@ -512,12 +421,9 @@ function ProjectDetailPage() {
             style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
           >
             <SheetClose asChild>
-              <button
-                type="button"
-                className="w-full rounded-xl border-2 border-outset border-border-strong bg-secondary py-3 text-sm font-semibold text-foreground"
-              >
+              <Button variant="outline" className="w-full">
                 Close
-              </button>
+              </Button>
             </SheetClose>
           </div>
         </SheetContent>
@@ -547,14 +453,7 @@ function IconButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`inline-flex items-center justify-center rounded-[10px] border border-transparent ${disabled ? "text-disabled bg-transparent" : active ? `${activeColor ?? "text-brand-accent"} bg-card shadow-sm` : "text-muted-foreground hover:text-foreground hover:bg-muted bg-transparent"}`}
-      style={{
-        width: 40,
-        height: 40,
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "color 0.12s, background 0.12s",
-        WebkitTapHighlightColor: "transparent",
-      }}
+      className={`size-10 inline-flex items-center justify-center rounded-lg border border-transparent transition-colors [webkit-tap-highlight-color:transparent] ${disabled ? "text-muted-foreground/40 cursor-not-allowed bg-transparent" : active ? `${activeColor ?? "text-brand-accent"} bg-card shadow-sm cursor-pointer` : "text-muted-foreground hover:text-foreground hover:bg-muted bg-transparent cursor-pointer"}`}
     >
       {children}
     </button>
@@ -574,18 +473,7 @@ function PrivateIndicator() {
 
 function KindChip({ kind }: { kind: "project" | "idea" }) {
   return (
-    <span
-      className="border border-border bg-secondary text-foreground"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "3px 10px",
-        borderRadius: 6,
-        fontSize: 12,
-        fontWeight: 600,
-      }}
-    >
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold border border-border bg-secondary text-foreground">
       {kind === "idea" ? <FileText size={11} /> : <FileCode2 size={11} />}
       {kind}
     </span>
@@ -593,24 +481,13 @@ function KindChip({ kind }: { kind: "project" | "idea" }) {
 }
 
 function StatusChip({ status }: { status: "active" | "paused" | "archived" }) {
+  const variants = {
+    active: "border-brand-accent-border bg-brand-accent-light text-foreground",
+    paused: "border-border bg-secondary text-foreground",
+    archived: "border-destructive/40 bg-destructive/10 text-destructive",
+  };
   return (
-    <span
-      className={`border ${
-        status === "active"
-          ? "border-brand-accent-border bg-brand-accent-light text-foreground"
-          : status === "paused"
-            ? "border-border bg-secondary text-foreground"
-            : "border-status-danger-border bg-status-danger-bg text-status-danger-fg"
-      }`}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 10px",
-        borderRadius: 6,
-        fontSize: 12,
-        fontWeight: 600,
-      }}
-    >
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${variants[status]}`}>
       {status}
     </span>
   );
@@ -618,10 +495,7 @@ function StatusChip({ status }: { status: "active" | "paused" | "archived" }) {
 
 function MetaSectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="text-muted-foreground"
-      style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}
-    >
+    <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
       {children}
     </div>
   );
@@ -630,17 +504,8 @@ function MetaSectionLabel({ children }: { children: ReactNode }) {
 function MetaItem({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="space-y-0.5">
-      <div style={{ fontSize: 11, fontWeight: 600 }} className="text-muted-foreground">
-        {label}
-      </div>
-      <div
-        className="text-foreground"
-        style={{
-          fontSize: 13,
-          fontFamily: mono ? "ui-monospace, SFMono-Regular, monospace" : undefined,
-          wordBreak: "break-all",
-        }}
-      >
+      <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
+      <div className={`text-[13px] text-foreground break-all ${mono ? "font-mono" : ""}`}>
         {value}
       </div>
     </div>

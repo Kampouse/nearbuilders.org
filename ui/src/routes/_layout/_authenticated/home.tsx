@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { type Passkey, type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_layout/_authenticated/home")({
   head: () => ({
@@ -47,67 +49,67 @@ function Home() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
-        <h1 className="text-xl font-semibold text-foreground">Workspace</h1>
-        <Link
-          to="/settings"
-          preload="intent"
-          className="h-9 rounded-[12px] bg-primary px-4 text-sm font-bold text-primary-foreground inline-flex items-center no-underline transition-colors duration-150 hover:opacity-90"
-        >
-          Settings
-        </Link>
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
+        <h1 className="text-lg font-semibold text-foreground">Workspace</h1>
+        <Button asChild size="sm">
+          <Link to="/settings">Settings</Link>
+        </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-2xl space-y-4">
           {!user ? (
-            <div className="text-muted-foreground text-center py-12 text-sm">Loading…</div>
+            <div className="text-center py-12 text-sm text-muted-foreground">Loading…</div>
           ) : (
             <>
-              <div className="rounded-[12px] border border-border bg-card p-6">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <Chip>workspace</Chip>
-                  {profile.isAnonymous && <Chip>anonymous</Chip>}
-                  {profile.isAdmin && <Chip accent>admin</Chip>}
-                </div>
-                <h2 className="text-foreground text-2xl font-semibold mb-1">
-                  {user.name || user.email || user.id.slice(0, 8)}
-                </h2>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Manage your identity and connected accounts.
-                </p>
-              </div>
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <Chip>workspace</Chip>
+                    {profile.isAnonymous && <Chip>anonymous</Chip>}
+                    {profile.isAdmin && <Chip accent>admin</Chip>}
+                  </div>
+                  <CardTitle className="text-xl">
+                    {user.name || user.email || user.id.slice(0, 8)}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your identity and connected accounts.
+                  </p>
+                </CardHeader>
+              </Card>
 
-              <div className="rounded-[12px] border border-border bg-card p-6">
-                <div className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider mb-4">
-                  Identity Status
-                </div>
-                <div className="flex flex-col gap-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Identity Status
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-2">
                   <InfoRow
-                    label="email"
+                    label="Email"
                     value={profile.hasEmail ? (user.email ?? "linked") : "not linked"}
                   />
                   <InfoRow
-                    label="near"
+                    label="NEAR"
                     value={profile.hasNear ? (nearAccountId ?? "linked") : "not linked"}
                     mono
                   />
                   <InfoRow
-                    label="passkeys"
+                    label="Passkeys"
                     value={profile.hasPasskeys ? `${passkeys.length} registered` : "not linked"}
                   />
                   <InfoRow
-                    label="profile"
+                    label="Profile"
                     value={profile.isAnonymous ? "anonymous session" : "persistent account"}
                   />
-                </div>
 
-                {profile.isAnonymous && (
-                  <div className="mt-4 rounded-[8px] bg-brand-accent-light border border-brand-accent-border text-foreground text-[13px] leading-relaxed px-4 py-3">
-                    Link an email or NEAR wallet before signing out to keep your data.
-                  </div>
-                )}
-              </div>
+                  {profile.isAnonymous && (
+                    <div className="mt-2 rounded-lg bg-primary/10 border border-primary/20 text-sm text-foreground leading-relaxed px-4 py-3">
+                      Link an email or NEAR wallet before signing out to keep your data.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </>
           )}
         </div>
@@ -118,11 +120,11 @@ function Home() {
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="grid grid-cols-[100px_1fr] gap-4 rounded-[8px] border border-border bg-muted px-3.5 py-2.5 items-center">
-      <span className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
+    <div className="grid grid-cols-[90px_1fr] gap-3 rounded-md border border-border bg-muted px-3 py-2.5 items-center">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
-      <span className={`text-foreground text-[13px] break-all ${mono ? "font-mono text-xs" : ""}`}>
+      <span className={`text-sm text-foreground break-all ${mono ? "font-mono text-xs" : ""}`}>
         {value}
       </span>
     </div>
@@ -132,7 +134,11 @@ function InfoRow({ label, value, mono }: { label: string; value: string; mono?: 
 function Chip({ children, accent }: { children: React.ReactNode; accent?: boolean }) {
   return (
     <span
-      className={`inline-flex items-center rounded-[6px] px-2.5 py-0.5 text-[11px] font-semibold border ${accent ? "bg-brand-accent-light border-brand-accent-border" : "bg-secondary border-border"} text-foreground`}
+      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold border ${
+        accent
+          ? "bg-primary/10 border-primary/20 text-primary"
+          : "bg-secondary border-border text-muted-foreground"
+      }`}
     >
       {children}
     </span>
