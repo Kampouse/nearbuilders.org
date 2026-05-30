@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { Profile } from "better-near-auth";
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Profile } from "better-near-auth";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { sessionQueryOptions, useApiClient, useAuthClient, type SessionData } from "@/app";
+import { type SessionData, sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { NearProfile } from "@/components/near-profile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -280,10 +280,14 @@ function BuilderProfileCard({
               className="space-y-3"
             >
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-name"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Display name
                 </label>
                 <Input
+                  id="field-name"
                   placeholder="Your name"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -291,10 +295,14 @@ function BuilderProfileCard({
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-bio"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Bio
                 </label>
                 <Textarea
+                  id="field-bio"
                   placeholder="What do you build? What are you working on?"
                   value={form.bio}
                   onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
@@ -303,20 +311,28 @@ function BuilderProfileCard({
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-skills"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Skills <span className="font-normal">(comma-separated)</span>
                 </label>
                 <Input
+                  id="field-skills"
                   placeholder="React, Rust, Smart Contracts…"
                   value={form.skillsRaw}
                   onChange={(e) => setForm((f) => ({ ...f, skillsRaw: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-location"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Location
                 </label>
                 <Input
+                  id="field-location"
                   placeholder="City, Country or Remote"
                   value={form.location}
                   onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}

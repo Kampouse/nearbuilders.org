@@ -251,6 +251,7 @@ function Layout() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
+                    <title>GitHub</title>
                     <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.26-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.28-.5-4.72-.5-7 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.5-.8 1.48-1 3.5.28.28 2 1 3.5 1s3.22-.72 3.5-1" />
                     <path d="M9 18c-4.51 2-5-2-7-2" />
                   </svg>
@@ -269,6 +270,7 @@ function Layout() {
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
+                    <title>X (Twitter)</title>
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>
@@ -290,6 +292,7 @@ function Layout() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
+                    <title>Telegram</title>
                     <path d="m22 2-7 20-4-9-9-4z" />
                     <path d="m22 2-11 11" />
                   </svg>
