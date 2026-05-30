@@ -1,9 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ExternalLink, FolderOpen, Hammer, Loader2, MapPin, Plus, Settings, Wallet, X, Zap } from "lucide-react";
+import {
+  Check,
+  ExternalLink,
+  FolderOpen,
+  Hammer,
+  Loader2,
+  MapPin,
+  Plus,
+  Settings,
+  Wallet,
+  X,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { sessionQueryOptions, useApiClient, useAuthClient, type SessionData } from "@/app";
+import { type SessionData, sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { NearProfile } from "@/components/near-profile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_layout/_authenticated/_dashboard/home")({
   head: () => ({
-    meta: [
-      { title: "Home | app" },
-      { name: "description", content: "Your builder home." },
-    ],
+    meta: [{ title: "Home | app" }, { name: "description", content: "Your builder home." }],
   }),
   component: Home,
 });
@@ -271,10 +280,14 @@ function BuilderProfileCard({
               className="space-y-3"
             >
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-name"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Display name
                 </label>
                 <Input
+                  id="field-name"
                   placeholder="Your name"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -282,10 +295,14 @@ function BuilderProfileCard({
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-bio"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Bio
                 </label>
                 <Textarea
+                  id="field-bio"
                   placeholder="What do you build? What are you working on?"
                   value={form.bio}
                   onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
@@ -294,20 +311,28 @@ function BuilderProfileCard({
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-skills"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Skills <span className="font-normal">(comma-separated)</span>
                 </label>
                 <Input
+                  id="field-skills"
                   placeholder="React, Rust, Smart Contracts…"
                   value={form.skillsRaw}
                   onChange={(e) => setForm((f) => ({ ...f, skillsRaw: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">
+                <label
+                  htmlFor="field-location"
+                  className="text-xs font-semibold text-muted-foreground mb-1 block"
+                >
                   Location
                 </label>
                 <Input
+                  id="field-location"
                   placeholder="City, Country or Remote"
                   value={form.location}
                   onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
@@ -316,9 +341,7 @@ function BuilderProfileCard({
               </div>
               <div className="flex gap-2 pt-1">
                 <Button type="submit" size="sm" disabled={registerMutation.isPending}>
-                  {registerMutation.isPending && (
-                    <Loader2 size={13} className="animate-spin" />
-                  )}
+                  {registerMutation.isPending && <Loader2 size={13} className="animate-spin" />}
                   Submit application
                 </Button>
                 <Button
@@ -468,9 +491,7 @@ function ProjectRow({ project }: { project: Project }) {
             <div className="min-w-0 flex-1">
               <CardTitle className="truncate text-sm font-medium">{project.title}</CardTitle>
               {project.description && (
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {project.description}
-                </p>
+                <p className="mt-1 truncate text-xs text-muted-foreground">{project.description}</p>
               )}
             </div>
             <div className="flex shrink-0 items-center gap-1.5">

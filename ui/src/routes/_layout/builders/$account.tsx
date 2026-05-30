@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
 import type { Profile } from "better-near-auth";
+import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
 import { useApiClient, useAuthClient } from "@/app";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,9 +71,7 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
 
   const avatarUrl =
     profile?.image?.url ??
-    (profile?.image?.ipfs_cid
-      ? `https://ipfs.near.social/ipfs/${profile.image.ipfs_cid}`
-      : null);
+    (profile?.image?.ipfs_cid ? `https://ipfs.near.social/ipfs/${profile.image.ipfs_cid}` : null);
 
   const backgroundUrl =
     profile?.backgroundImage?.url ??
@@ -233,7 +231,10 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
         {(projectsResult?.meta.hasMore ?? false) && (
           <div className="mt-4">
             <Button asChild variant="outline" size="sm">
-              <Link to="/projects" search={{ kind: "all", personal: undefined, private: undefined }}>
+              <Link
+                to="/projects"
+                search={{ kind: "all", personal: undefined, private: undefined }}
+              >
                 View all projects
               </Link>
             </Button>
