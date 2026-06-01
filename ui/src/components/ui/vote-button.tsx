@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-
-function cn(...classes: (string | false | undefined | null)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
+import { cn } from "@/lib/utils";
 
 function VoteButton({
   icon,

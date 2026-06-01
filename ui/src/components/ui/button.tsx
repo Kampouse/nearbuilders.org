@@ -14,9 +14,9 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground rounded-xl hover:bg-[#D21B14] active:bg-[#BA1F19] disabled:opacity-50",
         outline:
-          "bg-card text-foreground border border-border rounded-xl hover:bg-secondary hover:border-[#D5DCE1] active:bg-accent active:border-[#C5CED6] disabled:opacity-50",
+          "bg-card text-foreground border border-border rounded-xl hover:bg-secondary hover:border-border-strong active:bg-accent active:border-border-strong disabled:opacity-50",
         secondary:
-          "bg-secondary text-secondary-foreground border border-border rounded-xl hover:bg-accent hover:border-[#D5DCE1] disabled:opacity-50",
+          "bg-secondary text-secondary-foreground border border-border rounded-xl hover:bg-accent hover:border-border-strong disabled:opacity-50",
         ghost:
           "bg-transparent text-foreground rounded-xl hover:bg-secondary active:bg-accent disabled:opacity-50",
         link: "bg-transparent text-brand-cyan underline-offset-4 hover:underline disabled:opacity-50",

@@ -17,10 +17,12 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient, useOrpc } from "@/app";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
+import { cn } from "@/lib/utils";
 import { type ProjectKindFilter, parseProjectListSearch } from "./-search";
 
 type VoteDirection = "up" | "down" | null;
@@ -389,29 +391,44 @@ function ProjectsList() {
       ? selectedProject.content
       : (selectedReadmeQuery.data ?? selectedProject?.description ?? null);
 
+  const toggleChip =
+    "h-8 px-3 rounded-lg text-sm font-semibold cursor-pointer transition-colors border inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1";
+
   const filterButtons = (
-    <div className="flex flex-wrap items-center gap-1">
-      {(
-        [
-          { value: "all", label: "All" },
-          { value: "project", label: "Projects" },
-          { value: "idea", label: "Ideas" },
-        ] as const
-      ).map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => handleKindChange(opt.value)}
-          className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border ${activeKind === opt.value ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
+        {(
+          [
+            { value: "all", label: "All" },
+            { value: "project", label: "Projects" },
+            { value: "idea", label: "Ideas" },
+          ] as const
+        ).map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => handleKindChange(opt.value)}
+            className={cn(
+              "h-7 px-3 rounded-md text-sm font-semibold cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              activeKind === opt.value
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
 
       <button
         type="button"
         onClick={handlePersonalToggle}
-        className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPersonalOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+        className={cn(
+          toggleChip,
+          isPersonalOnly
+            ? "border-brand-accent bg-brand-accent-light text-foreground"
+            : "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
+        )}
       >
         <User size={13} />
         Personal
@@ -421,7 +438,12 @@ function ProjectsList() {
         <button
           type="button"
           onClick={handlePrivateToggle}
-          className={`h-8 px-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 border inline-flex items-center gap-1.5 ${isPrivateOnly ? "border-brand-accent bg-brand-accent-light text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          className={cn(
+            toggleChip,
+            isPrivateOnly
+              ? "border-brand-accent bg-brand-accent-light text-foreground"
+              : "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
+          )}
         >
           <Lock size={13} />
           Private
@@ -455,27 +477,50 @@ function ProjectsList() {
   const projectList = (
     <div className="flex flex-col overflow-hidden flex-1 min-h-0">
       {isLoading ? (
-        <div className="flex flex-col gap-2 p-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-secondary h-[72px] rounded-xl" />
+        <div className="flex flex-col">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 border-b border-border px-3.5 py-3">
+              <div className="hidden lg:block size-4 shrink-0 rounded bg-secondary animate-pulse" />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="h-3.5 w-1/2 rounded bg-secondary animate-pulse" />
+                <div className="h-3 w-3/4 rounded bg-secondary animate-pulse" />
+              </div>
+              <div className="flex shrink-0 flex-col items-center gap-1">
+                <div className="size-5 rounded bg-secondary animate-pulse" />
+                <div className="h-2.5 w-4 rounded bg-secondary animate-pulse" />
+                <div className="size-5 rounded bg-secondary animate-pulse" />
+              </div>
+            </div>
           ))}
         </div>
       ) : rankedProjects.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-          <p className="text-sm text-muted-foreground">No entries yet.</p>
+          <div className="flex size-12 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+            <FileText size={22} />
+          </div>
+          <div className="space-y-1">
+            <p className="text-base font-semibold text-foreground">No entries yet</p>
+            <p className="mx-auto max-w-[260px] text-sm text-muted-foreground">
+              {canParticipate
+                ? "Share a project or idea and let the community rank it."
+                : "Projects and ideas show up here once they're published."}
+            </p>
+          </div>
           {canParticipate && (
-            <Link
-              to="/projects/new"
-              search={{
-                tab: "write",
-                kind: search.kind,
-                personal: search.personal,
-                private: search.private,
-              }}
-              className="text-sm font-bold text-brand-accent hover:underline"
-            >
-              Create the first one
-            </Link>
+            <Button asChild size="sm" className="mt-1">
+              <Link
+                to="/projects/new"
+                search={{
+                  tab: "write",
+                  kind: search.kind,
+                  personal: search.personal,
+                  private: search.private,
+                }}
+              >
+                <Plus size={14} />
+                New entry
+              </Link>
+            </Button>
           )}
         </div>
       ) : (
@@ -747,7 +792,7 @@ function ListRow({
 }) {
   return (
     <div
-      className={`border-b border-border flex items-center gap-2.5 px-3.5 py-3 transition-all duration-[120ms] ${isSelected ? "lg:bg-brand-accent-light lg:border-l-[3px] lg:border-l-brand-accent" : "border-l-[3px] border-l-transparent"}`}
+      className={`border-b border-border flex items-center gap-2.5 px-3.5 py-3 transition-all duration-[120ms] ${isSelected ? "lg:bg-brand-accent-light lg:border-l-[3px] lg:border-l-brand-accent" : "border-l-[3px] border-l-transparent hover:bg-muted/60"}`}
     >
       <span
         className={`hidden lg:block w-6 text-xs font-bold text-center shrink-0 ${isSelected ? "text-brand-accent" : "text-muted-foreground/40"}`}
@@ -758,7 +803,7 @@ function ListRow({
       <button
         type="button"
         onClick={onMobileTap}
-        className="flex flex-1 min-w-0 items-center gap-3 text-left bg-transparent border-none p-0 cursor-pointer lg:hidden"
+        className="flex flex-1 min-w-0 items-center gap-3 text-left bg-transparent border-none p-0 cursor-pointer lg:hidden rounded-md outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         <span className="w-5 text-[11px] font-bold text-center text-muted-foreground/40 shrink-0">
           {rank}
@@ -778,7 +823,7 @@ function ListRow({
       <button
         type="button"
         onClick={onDesktopSelect}
-        className="hidden lg:flex flex-1 min-w-0 items-center gap-2 cursor-pointer bg-transparent border-none p-0"
+        className="hidden lg:flex flex-1 min-w-0 items-center gap-2 cursor-pointer bg-transparent border-none p-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
@@ -867,26 +912,36 @@ function KindBadge({
 }) {
   const isCompact = compact ?? size === "sidebar";
   return (
-    <span
-      className={`inline-flex items-center shrink-0 font-semibold rounded-[4px] border border-border text-foreground ${kind === "idea" ? "bg-muted" : "bg-secondary"} ${size === "sidebar" ? "gap-1 px-2 py-0.5 text-[11px]" : isCompact ? "gap-0.5 px-1.5 py-0 text-[10px]" : "gap-1 px-2 py-0.5 text-[11px]"}`}
+    <Badge
+      variant="secondary"
+      className={cn(
+        "shrink-0 rounded-[4px] border-border text-foreground",
+        kind === "idea" ? "bg-muted" : "bg-secondary",
+        size === "sidebar"
+          ? "gap-1 px-2 py-0.5 text-[11px] [&>svg]:size-2.5"
+          : isCompact
+            ? "gap-0.5 px-1.5 py-0 text-[10px] [&>svg]:size-[9px]"
+            : "gap-1 px-2 py-0.5 text-[11px] [&>svg]:size-2.5",
+      )}
     >
-      {kind === "idea" ? <FileText size={size === "sidebar" ? 10 : isCompact ? 9 : 10} /> : null}
+      {kind === "idea" ? <FileText /> : null}
       {kind}
-    </span>
+    </Badge>
   );
 }
 
 function StatusBadge({ status }: { status: "active" | "paused" | "archived" }) {
-  const classes = {
-    active: "bg-brand-accent-light border-brand-accent text-foreground",
-    paused: "bg-secondary border-border text-foreground",
-    archived: "bg-destructive/10 border-destructive/40 text-destructive",
+  const statusClasses = {
+    active: "border-brand-accent bg-brand-accent-light text-foreground",
+    paused: "border-border bg-secondary text-foreground",
+    archived: "border-destructive/40 bg-destructive/10 text-destructive",
   };
   return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-[4px] border ${classes[status]}`}
+    <Badge
+      variant="outline"
+      className={cn("rounded-[4px] px-2 py-0.5 text-[11px]", statusClasses[status])}
     >
       {status}
-    </span>
+    </Badge>
   );
 }

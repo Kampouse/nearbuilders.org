@@ -34,7 +34,7 @@ export function MemberCard({
             {user?.image ? (
               <img
                 src={user.image}
-                alt=""
+                alt={user?.name || user?.email || "Member avatar"}
                 className="w-9 h-9 rounded-full object-cover border border-border"
               />
             ) : (

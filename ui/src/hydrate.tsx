@@ -13,8 +13,6 @@ export async function hydrate() {
   }
 
   window.__EVERYTHING_DEV_HYDRATE_PROMISE__ = (async () => {
-    console.log("[Hydrate] Starting...");
-
     const runtimeConfig = getRuntimeConfig();
 
     const { QueryClientProvider } = await import("@tanstack/react-query");
@@ -51,7 +49,6 @@ export async function hydrate() {
       const { hydrateRoot } = await import("react-dom/client");
       const { RouterClient } = await import("@tanstack/react-router/ssr/client");
 
-      console.log("[Hydrate] Calling hydrateRoot...");
       hydrateRoot(
         document,
         <QueryClientProvider client={client}>
@@ -62,15 +59,12 @@ export async function hydrate() {
       const { createRoot } = await import("react-dom/client");
       const { RouterProvider } = await import("@tanstack/react-router");
 
-      console.log("[Hydrate] Calling createRoot...");
       createRoot(document).render(
         <QueryClientProvider client={client}>
           <RouterProvider router={router} />
         </QueryClientProvider>,
       );
     }
-
-    console.log("[Hydrate] Complete!");
   })();
 
   return window.__EVERYTHING_DEV_HYDRATE_PROMISE__;

@@ -167,7 +167,7 @@ function AccountAppsPage() {
                         <a
                           href={app.openUrl}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="hidden sm:inline-flex"
                         >

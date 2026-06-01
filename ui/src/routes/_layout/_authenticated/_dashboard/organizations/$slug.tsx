@@ -550,7 +550,7 @@ function OrganizationDetail() {
                     <select
                       value={inviteRole}
                       onChange={(e) => setInviteRole(e.target.value as "admin" | "member")}
-                      className="w-full px-3 py-2 text-sm bg-card text-foreground border border-border rounded-md outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full h-10 px-3 py-2 text-sm bg-card text-foreground border border-border rounded-md outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20 transition-[border-color,box-shadow]"
                     >
                       <option value="member">Member</option>
                       <option value="admin">Admin</option>

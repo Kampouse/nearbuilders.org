@@ -429,7 +429,7 @@ function AppPreview({
           <div className="flex items-center gap-1.5 shrink-0">
             {app.openUrl && (
               <Button asChild size="sm" className="h-7 px-2.5 text-xs gap-1">
-                <a href={app.openUrl} target="_blank" rel="noreferrer">
+                <a href={app.openUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={10} />
                   open
                 </a>
@@ -529,7 +529,7 @@ function AppPreview({
                 <a
                   href={detail.canonicalConfigUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-[11px] text-muted-foreground hover:text-foreground transition-colors duration-150 underline"
                 >
                   FastKV config
@@ -581,7 +581,7 @@ function RuntimeRow({
         <a
           href={value}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="font-mono text-foreground hover:underline break-all"
         >
           {value}

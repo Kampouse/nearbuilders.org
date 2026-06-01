@@ -93,7 +93,7 @@ function BuildersPage() {
             placeholder="Search by name, skill, or location…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 rounded-full bg-secondary border-border focus-visible:ring-brand-green"
+            className="pl-9 rounded-full bg-secondary"
           />
         </div>
       </div>

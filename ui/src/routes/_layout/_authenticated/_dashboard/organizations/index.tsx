@@ -251,7 +251,7 @@ function OrganizationsList() {
                       {org.logo ? (
                         <img
                           src={org.logo}
-                          alt=""
+                          alt={org.name}
                           className="w-14 h-14 rounded-lg border border-border object-cover shrink-0"
                         />
                       ) : (

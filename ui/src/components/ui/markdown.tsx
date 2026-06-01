@@ -135,16 +135,25 @@ const markdownComponents: Components = {
     </pre>
   ),
 
-  a: ({ href, children }) => (
-    <a
-      href={href ?? "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-brand-cyan font-medium underline-offset-4 hover:underline"
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children }) => {
+    const className = "text-brand-cyan font-medium underline-offset-4 hover:underline";
+
+    if (!href) {
+      return <span className={className}>{children}</span>;
+    }
+
+    const isExternal = /^https?:\/\//i.test(href);
+
+    return (
+      <a
+        href={href}
+        className={className}
+        {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {children}
+      </a>
+    );
+  },
 
   img: ({ src, alt }) => (
     <img src={src} alt={alt ?? ""} className="max-w-full rounded-lg my-4 block" />

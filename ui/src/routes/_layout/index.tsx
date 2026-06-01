@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ExternalLink } from "lucide-react";
+import { useState } from "react";
 import multiagencyLogo from "@/assets/multiagency-logo.svg";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_layout/")({
   head: () => ({
@@ -131,6 +133,42 @@ const ecosystemLinks: EcosystemLink[] = [
   },
 ];
 
+function EcosystemLogo({
+  src,
+  alt,
+  fallbackText,
+  fallbackBg,
+  fallbackTextClass,
+}: {
+  src?: string;
+  alt: string;
+  fallbackText: string;
+  fallbackBg: string;
+  fallbackTextClass: string;
+}) {
+  const [errored, setErrored] = useState(false);
+
+  if (!src || errored) {
+    return (
+      <div
+        className={cn("size-10 rounded-md flex items-center justify-center mb-3", fallbackBg)}
+        aria-hidden="true"
+      >
+        <span className={cn("font-bold text-sm", fallbackTextClass)}>{fallbackText}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setErrored(true)}
+      className="size-10 object-contain mb-3 group-hover:-translate-y-0.5 transition-transform duration-200"
+    />
+  );
+}
+
 function EcosystemStrip() {
   return (
     <div className="mt-12">
@@ -152,10 +190,12 @@ function EcosystemStrip() {
                   size={10}
                   className="absolute top-2.5 right-2.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
-                <img
+                <EcosystemLogo
                   src="https://ironclaw.com/images/iron_claw_guy1.png"
                   alt="IronClaw mascot"
-                  className="size-10 object-contain mb-3 group-hover:-translate-y-0.5 transition-transform duration-200"
+                  fallbackText={item.label[0]}
+                  fallbackBg="bg-slate-800"
+                  fallbackTextClass="text-white"
                 />
                 <span className="text-sm font-bold text-white leading-tight">{item.label}</span>
                 <span className="text-[11px] text-slate-400 mt-0.5 leading-tight">
@@ -179,17 +219,13 @@ function EcosystemStrip() {
                   size={10}
                   className="absolute top-2.5 right-2.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                 />
-                {item.logoSrc ? (
-                  <img
-                    src={item.logoSrc}
-                    alt={item.label}
-                    className="size-10 object-contain mb-3 group-hover:-translate-y-0.5 transition-transform duration-200"
-                  />
-                ) : (
-                  <div className="size-10 rounded-md bg-brand-green/15 flex items-center justify-center mb-3">
-                    <span className="text-brand-green font-bold text-sm">{item.label[0]}</span>
-                  </div>
-                )}
+                <EcosystemLogo
+                  src={item.logoSrc}
+                  alt={item.label}
+                  fallbackText={item.label[0]}
+                  fallbackBg="bg-brand-green/15"
+                  fallbackTextClass="text-brand-green"
+                />
                 <span className="text-sm font-bold text-foreground leading-tight">
                   {item.label}
                 </span>
@@ -216,17 +252,13 @@ function EcosystemStrip() {
                   size={10}
                   className="absolute top-2.5 right-2.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                 />
-                {item.logoSrc ? (
-                  <img
-                    src={item.logoSrc}
-                    alt={item.label}
-                    className="size-10 object-contain mb-3 group-hover:-translate-y-0.5 transition-transform duration-200"
-                  />
-                ) : (
-                  <div className="size-10 rounded-md bg-yellow-400/15 flex items-center justify-center mb-3">
-                    <span className="text-yellow-400 font-bold text-sm">{item.label[0]}</span>
-                  </div>
-                )}
+                <EcosystemLogo
+                  src={item.logoSrc}
+                  alt={item.label}
+                  fallbackText={item.label[0]}
+                  fallbackBg="bg-yellow-400/15"
+                  fallbackTextClass="text-yellow-400"
+                />
                 <span className="text-sm font-bold text-foreground leading-tight">
                   {item.label}
                 </span>
@@ -250,19 +282,13 @@ function EcosystemStrip() {
                 size={10}
                 className="absolute top-2.5 right-2.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
               />
-              {item.logoSrc ? (
-                <img
-                  src={item.logoSrc}
-                  alt={item.label}
-                  className="size-10 object-contain mb-3 group-hover:-translate-y-0.5 transition-transform duration-200"
-                />
-              ) : (
-                <div className="size-10 rounded-md bg-secondary flex items-center justify-center mb-3">
-                  <span className="text-muted-foreground group-hover:text-brand-cyan transition-colors font-bold text-sm">
-                    {item.label[0]}
-                  </span>
-                </div>
-              )}
+              <EcosystemLogo
+                src={item.logoSrc}
+                alt={item.label}
+                fallbackText={item.label[0]}
+                fallbackBg="bg-secondary"
+                fallbackTextClass="text-muted-foreground group-hover:text-brand-cyan transition-colors"
+              />
               <span className="text-sm font-bold text-foreground leading-tight">{item.label}</span>
               <span className="text-[11px] text-muted-foreground mt-0.5 leading-tight">
                 {item.tagline}

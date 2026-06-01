@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const BASE_RUNTIME = "bos://dev.everything.near/everything.dev";
@@ -290,7 +291,7 @@ function AppDetailPage() {
           <div className="flex items-center gap-2">
             {app.openUrl && (
               <Button asChild size="sm" className="h-8 gap-1.5">
-                <a href={app.openUrl} target="_blank" rel="noreferrer">
+                <a href={app.openUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={11} />
                   open app
                 </a>
@@ -380,7 +381,7 @@ function AppDetailPage() {
                   <a
                     href={app.metadata.repoUrl}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
                   >
                     repository
@@ -390,7 +391,7 @@ function AppDetailPage() {
                   <a
                     href={app.metadata.homepageUrl}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
                   >
                     homepage
@@ -399,7 +400,7 @@ function AppDetailPage() {
                 <a
                   href={app.canonicalConfigUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
                 >
                   FastKV config
@@ -432,7 +433,7 @@ function AppDetailPage() {
                     <a
                       href={`https://${app.domain}`}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="font-mono text-foreground hover:underline"
                     >
                       {app.domain}
@@ -504,7 +505,7 @@ function AppDetailPage() {
                           <a
                             href={prod}
                             target="_blank"
-                            rel="noreferrer"
+                            rel="noopener noreferrer"
                             className="font-mono text-foreground hover:underline break-all"
                           >
                             {prod}
@@ -534,7 +535,7 @@ function AppDetailPage() {
                                   <a
                                     href={prod}
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="noopener noreferrer"
                                     className="font-mono text-foreground hover:underline break-all"
                                     style={{ fontSize: 10 }}
                                   >
@@ -661,13 +662,12 @@ function AppDetailPage() {
                     </FormField>
                   </div>
                   <FormField label="Description" htmlFor="meta-desc">
-                    <textarea
+                    <Textarea
                       id="meta-desc"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows={3}
                       placeholder="Short description"
-                      className="flex w-full rounded-md border-2 border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-[color,box-shadow]"
                     />
                   </FormField>
 
@@ -813,7 +813,7 @@ function RuntimeRow({
         <a
           href={value}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="font-mono text-foreground hover:underline break-all"
         >
           {value}

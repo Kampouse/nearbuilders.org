@@ -24,7 +24,7 @@ type SearchParams = ReturnType<typeof parseProjectListSearch> & {
   tab: "write" | "preview";
 };
 
-export const Route = createFileRoute("/_layout/_authenticated/_dashboard/projects/$id/edit")({
+export const Route = createFileRoute("/_layout/_authenticated/_dashboard/projects/$id_/edit")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     ...parseProjectListSearch(search),
     tab: search.tab === "preview" ? "preview" : "write",

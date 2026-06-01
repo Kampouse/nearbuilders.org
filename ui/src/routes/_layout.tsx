@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sessionQueryOptions } from "@/app";
 import builtOn from "@/assets/built_on.png";
 import builtOnRev from "@/assets/built_on_rev.png";
@@ -32,6 +32,24 @@ function Layout() {
   const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
   const appName = "Near Builders";
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // While the mobile menu is open: close on Escape and lock body scroll.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
 
   return (
     <div className="min-h-dvh flex flex-col bg-background text-foreground">
@@ -76,14 +94,30 @@ function Layout() {
               className="md:hidden size-9 rounded-md"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </Button>
           </div>
         </div>
+      </header>
 
-        {mobileOpen && (
-          <div className="md:hidden border-t border-border bg-background animate-fade-in">
+      {mobileOpen && (
+        <div className="md:hidden">
+          {/* Backdrop — rendered outside <header> so the header's backdrop-blur
+              doesn't trap this fixed element inside its box. */}
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-x-0 bottom-0 top-16 z-40 bg-foreground/20 backdrop-blur-[2px] animate-fade-in"
+          />
+          <div
+            id="mobile-menu"
+            className="fixed inset-x-0 top-16 z-50 border-b border-border bg-background shadow-xl animate-fade-in-up"
+          >
             <nav className="mx-auto max-w-7xl px-4 py-4 flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
@@ -101,8 +135,8 @@ function Layout() {
               </div>
             </nav>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       <main className="flex-1 animate-fade-in-up">
         <Outlet />

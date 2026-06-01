@@ -71,7 +71,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         },
         { title },
         { name: "description", content: description },
-        { name: "theme-color", content: "#ffffff" },
+        {
+          name: "theme-color",
+          media: "(prefers-color-scheme: light)",
+          content: "#ffffff",
+        },
+        {
+          name: "theme-color",
+          media: "(prefers-color-scheme: dark)",
+          content: "#0d1520",
+        },
         { name: "color-scheme", content: "light dark" },
         { name: "application-name", content: title },
         { name: "mobile-web-app-capable", content: "yes" },
