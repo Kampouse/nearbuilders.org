@@ -100,7 +100,7 @@ export type {
   RouterModule,
 } from "everything-dev/ui/types";
 
-export interface RouterContext extends BaseRouterContextWithApi<ApiClient, SessionData> {
+export interface RouterContext extends Omit<BaseRouterContextWithApi<ApiClient, SessionData>, "assetsUrl"> {
   apiClient: ApiClient;
   authClient: AuthClientType;
 }
@@ -108,10 +108,9 @@ export interface RouterContext extends BaseRouterContextWithApi<ApiClient, Sessi
 export interface CreateRouterOptions
   extends Omit<BaseCreateRouterOptions<ApiClient, SessionData>, "context"> {
   context: RouterContext;
-  cspNonce?: string;
 }
 
-export interface RenderOptions extends Omit<BaseRenderOptions<SessionData>, "runtimeConfig"> {
+export interface RenderOptions extends Omit<BaseRenderOptions<SessionData>, "runtimeConfig" | "assetsUrl"> {
   runtimeConfig: BaseRenderOptions<SessionData>["runtimeConfig"];
   apiClient: ApiClient;
   authClient?: AuthClientType;

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Hammer, Loader2, MapPin, UserPlus } from "lucide-react";
+import { ArrowLeft, Check, Hammer, Loader2, MapPin, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
@@ -42,8 +42,8 @@ function NominateBuilderPage() {
 
   if (sessionLoading) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-        <div className="flex items-center justify-center py-12">
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+        <div className="flex items-center justify-center py-20">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       </div>
@@ -52,25 +52,29 @@ function NominateBuilderPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-            <UserPlus className="size-6 text-muted-foreground" />
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+        <div className="rounded-2xl border border-border bg-card p-10 text-center">
+          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-muted">
+            <UserPlus className="size-7 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-foreground mb-2">
+          <h1 className="text-3xl font-black tracking-tight text-foreground mb-2">
             Nominate a Builder
           </h1>
-          <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-            Connect your NEAR wallet to nominate a builder for the NEAR Builders directory.
-            All nominations are reviewed by admins.
+          <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
+            Connect your NEAR wallet to nominate a builder for the NEAR Builders directory. All
+            nominations are reviewed by admins.
           </p>
           <div className="flex flex-col gap-3 items-center">
-            <Button asChild size="lg" className="rounded-full px-8">
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full px-8 h-12 bg-brand-green hover:bg-brand-green/90 text-black font-bold shadow-lg shadow-brand-green/20"
+            >
               <Link to="/login" search={{ redirect: "/builders/add" }}>
                 Connect wallet to continue
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm">
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
               <Link to="/builders">Browse builders</Link>
             </Button>
           </div>
@@ -81,18 +85,22 @@ function NominateBuilderPage() {
 
   if (!nearAccountId) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-            <Hammer className="size-6 text-muted-foreground" />
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+        <div className="rounded-2xl border border-border bg-card p-10 text-center">
+          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-muted">
+            <Hammer className="size-7 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-foreground mb-2">
+          <h1 className="text-3xl font-black tracking-tight text-foreground mb-2">
             Link your NEAR wallet
           </h1>
-          <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+          <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto leading-relaxed">
             You need a linked NEAR account to nominate a builder.
           </p>
-          <Button onClick={() => auth.signIn.near()} size="lg" className="rounded-full px-8">
+          <Button
+            onClick={() => auth.signIn.near()}
+            size="lg"
+            className="rounded-full px-8 h-12 bg-brand-cyan text-black font-bold"
+          >
             Connect NEAR wallet
           </Button>
         </div>
@@ -101,18 +109,19 @@ function NominateBuilderPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <div className="mb-8">
         <Link
           to="/builders"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
-          &larr; All builders
+          <ArrowLeft size={14} />
+          All builders
         </Link>
-        <h1 className="text-2xl font-black tracking-tight text-foreground mb-1">
+        <h1 className="text-4xl font-black tracking-tight text-foreground mb-2">
           {isSelfNomination ? "Join as a builder" : "Nominate a builder"}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground leading-relaxed">
           {isSelfNomination
             ? "Submit your profile for the NEAR Builders directory. All submissions are reviewed by admins."
             : "Nominate someone for the NEAR Builders directory. All nominations are reviewed by admins."}
@@ -190,28 +199,30 @@ function NominationForm({
       );
       setSubmitted(true);
     },
-    onError: (err: Error) =>
-      toast.error(err.message || "Failed to submit nomination"),
+    onError: (err: Error) => toast.error(err.message || "Failed to submit nomination"),
   });
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-brand-accent bg-brand-accent-light p-8 text-center">
-        <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-brand-green/20">
-          <Hammer className="size-5 text-brand-green" />
+      <div className="rounded-2xl border border-brand-accent bg-brand-accent-light p-10 text-center">
+        <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-brand-green/20">
+          <Check className="size-6 text-brand-green" />
         </div>
-        <h2 className="text-lg font-bold text-foreground mb-1">
+        <h2 className="text-2xl font-black text-foreground mb-2">
           {isSelfNomination ? "Application submitted!" : "Nomination submitted!"}
         </h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto leading-relaxed">
           Your submission is pending admin review. We'll update the status soon.
         </p>
         <div className="flex flex-col gap-2 items-center">
-          <Button asChild size="sm">
+          <Button
+            asChild
+            className="rounded-full px-8 bg-brand-green hover:bg-brand-green/90 text-black font-bold"
+          >
             <Link to="/builders">Browse builders</Link>
           </Button>
           {isSelfNomination && (
-            <Button asChild variant="ghost" size="sm">
+            <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
               <Link to="/home">Go to dashboard</Link>
             </Button>
           )}
@@ -230,13 +241,10 @@ function NominationForm({
         }
         nominateMutation.mutate();
       }}
-      className="space-y-5"
+      className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-6"
     >
       <div>
-        <label
-          htmlFor="field-account"
-          className="text-sm font-semibold text-foreground mb-1.5 block"
-        >
+        <label htmlFor="field-account" className="text-sm font-semibold text-foreground mb-1.5 block">
           NEAR Account <span className="text-destructive">*</span>
         </label>
         <p className="text-xs text-muted-foreground mb-2">
@@ -245,7 +253,7 @@ function NominationForm({
             : "The NEAR account of the builder you're nominating."}
         </p>
         {isSelfNomination ? (
-          <div className="flex items-center gap-2 h-10 px-3 rounded-md border border-brand-accent bg-brand-accent-light text-sm font-mono text-brand-cyan">
+          <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-brand-accent bg-brand-accent-light text-sm font-mono text-brand-cyan">
             <MapPin size={12} className="text-muted-foreground shrink-0" />
             {nearAccount}
           </div>
@@ -260,27 +268,36 @@ function NominationForm({
         )}
       </div>
 
-      <div>
-        <label
-          htmlFor="field-name"
-          className="text-sm font-semibold text-foreground mb-1.5 block"
-        >
-          Display name
-        </label>
-        <Input
-          id="field-name"
-          placeholder="Builder name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={100}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label htmlFor="field-name" className="text-sm font-semibold text-foreground mb-1.5 block">
+            Display name
+          </label>
+          <Input
+            id="field-name"
+            placeholder="Builder name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={100}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="field-location" className="text-sm font-semibold text-foreground mb-1.5 block">
+            Location
+          </label>
+          <Input
+            id="field-location"
+            placeholder="City, Country or Remote"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            maxLength={100}
+          />
+        </div>
       </div>
 
       <div>
-        <label
-          htmlFor="field-bio"
-          className="text-sm font-semibold text-foreground mb-1.5 block"
-        >
+        <label htmlFor="field-bio" className="text-sm font-semibold text-foreground mb-1.5 block">
           Bio
         </label>
         <Textarea
@@ -289,16 +306,14 @@ function NominationForm({
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           maxLength={1000}
-          rows={3}
+          rows={4}
         />
       </div>
 
       <div>
-        <label
-          htmlFor="field-skills"
-          className="text-sm font-semibold text-foreground mb-1.5 block"
-        >
-          Skills <span className="font-normal text-muted-foreground">(comma-separated)</span>
+        <label htmlFor="field-skills" className="text-sm font-semibold text-foreground mb-1.5 block">
+          Skills{" "}
+          <span className="font-normal text-muted-foreground">(comma-separated)</span>
         </label>
         <Input
           id="field-skills"
@@ -308,28 +323,16 @@ function NominationForm({
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="field-location"
-          className="text-sm font-semibold text-foreground mb-1.5 block"
+      <div className="flex gap-3 pt-2 border-t border-border">
+        <Button
+          type="submit"
+          disabled={nominateMutation.isPending}
+          className="rounded-full px-6"
         >
-          Location
-        </label>
-        <Input
-          id="field-location"
-          placeholder="City, Country or Remote"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          maxLength={100}
-        />
-      </div>
-
-      <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={nominateMutation.isPending}>
           {nominateMutation.isPending && <Loader2 size={14} className="animate-spin" />}
           {isSelfNomination ? "Join as builder" : "Nominate builder"}
         </Button>
-        <Button asChild variant="ghost">
+        <Button asChild variant="ghost" className="text-muted-foreground">
           <Link to="/builders">Cancel</Link>
         </Button>
       </div>
