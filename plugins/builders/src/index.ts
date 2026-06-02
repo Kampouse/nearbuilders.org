@@ -93,12 +93,6 @@ export default createPlugin({
         return await runEffect(services.builder.listBuilders(input));
       }),
 
-      listPendingBuilders: builder.listPendingBuilders
-        .use(requireAdmin)
-        .handler(async ({ input }) => {
-          return await runEffect(services.builder.listPendingBuilders(input));
-        }),
-
       getBuilder: builder.getBuilder.handler(async ({ input, errors }) => {
         const result = await runEffect(services.builder.getBuilder(input.nearAccount));
         if (!result) {
@@ -119,15 +113,10 @@ export default createPlugin({
           return { data: result };
         }),
 
-      registerBuilder: builder.registerBuilder
-        .use(requireAuth)
-        .handler(async ({ input, context }) => {
-          const nearAccount = context.walletAddress ?? context.userId;
-          const result = await runEffect(
-            services.builder.registerBuilder(input, nearAccount, context.userId),
-          );
-          return { data: result };
-        }),
+      createBuilder: builder.createBuilder.use(requireAdmin).handler(async ({ input }) => {
+        const result = await runEffect(services.builder.createBuilder(input));
+        return { data: result };
+      }),
 
       updateBuilderProfile: builder.updateBuilderProfile
         .use(requireAuth)
@@ -150,30 +139,8 @@ export default createPlugin({
           return { data: result };
         }),
 
-      approveBuilder: builder.approveBuilder
-        .use(requireAdmin)
-        .handler(async ({ input, errors }) => {
-          const result = await runEffect(services.builder.approveBuilder(input.nearAccount));
-          if (!result) {
-            throw errors.NOT_FOUND({
-              message: "Builder not found",
-              data: { resource: "builder", resourceId: input.nearAccount },
-            });
-          }
-          return { data: result };
-        }),
-
-      rejectBuilder: builder.rejectBuilder.use(requireAdmin).handler(async ({ input, errors }) => {
-        const result = await runEffect(
-          services.builder.rejectBuilder(input.nearAccount, input.reason),
-        );
-        if (!result) {
-          throw errors.NOT_FOUND({
-            message: "Builder not found",
-            data: { resource: "builder", resourceId: input.nearAccount },
-          });
-        }
-        return { data: result };
+      deleteBuilder: builder.deleteBuilder.use(requireAdmin).handler(async ({ input }) => {
+        return await runEffect(services.builder.deleteBuilder(input.nearAccount));
       }),
     };
   },

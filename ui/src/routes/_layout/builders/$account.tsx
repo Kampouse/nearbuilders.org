@@ -101,33 +101,41 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
         </Link>
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden mb-8">
-        <div className="relative h-36 bg-gradient-to-r from-brand-green/30 to-brand-cyan/30">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden mb-8">
+        <div className="relative h-40 sm:h-48">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: backgroundUrl
+                ? undefined
+                : "radial-gradient(ellipse at top left, color-mix(in srgb, var(--brand-green) 25%, transparent), color-mix(in srgb, var(--brand-cyan) 15%, transparent))",
+            }}
+          />
           {backgroundUrl && (
             <img
               src={backgroundUrl}
               alt="Profile background"
-              className="h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
             />
           )}
-          <div className="absolute -bottom-8 left-6">
-            <div className="size-16 rounded-full overflow-hidden bg-muted border-4 border-card flex items-center justify-center">
+          <div className="absolute -bottom-10 left-6 sm:left-8">
+            <div className="size-20 rounded-full overflow-hidden bg-muted border-4 border-card flex items-center justify-center shadow-lg">
               {profileLoading ? (
-                <Skeleton className="size-16 rounded-full" />
+                <Skeleton className="size-20 rounded-full" />
               ) : avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt={displayName}
-                  className="size-16 object-cover"
+                  className="size-20 object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <span className="text-xl font-black text-muted-foreground">
+                <span className="text-2xl font-black text-muted-foreground">
                   {getInitials(displayName)}
                 </span>
               )}
@@ -135,56 +143,57 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
           </div>
         </div>
 
-        <div className="pt-12 px-6 pb-6">
+        <div className="pt-14 px-6 sm:px-8 pb-8">
           {profileLoading ? (
             <div className="space-y-2">
-              <Skeleton className="h-7 w-40" />
-              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
             </div>
           ) : (
-            <>
-              <h1 className="text-2xl font-black text-foreground leading-tight">{displayName}</h1>
-              <p className="text-sm font-mono text-brand-cyan mt-0.5">{account}</p>
-              {builder.location && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                  <MapPin size={12} />
-                  {builder.location}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-black text-foreground leading-tight">{displayName}</h1>
+                <p className="text-sm font-mono text-brand-cyan mt-1">{account}</p>
+                {builder.location && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1.5">
+                    <MapPin size={13} />
+                    {builder.location}
+                  </div>
+                )}
+              </div>
+              {Object.keys(allLinks).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(allLinks).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs bg-secondary border border-border hover:bg-muted hover:border-border/80 transition-all duration-150 font-medium"
+                    >
+                      {platform}
+                      <ExternalLink size={10} className="opacity-40" />
+                    </a>
+                  ))}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {bio && (
-            <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-2xl">{bio}</p>
+            <p className="mt-5 text-sm text-muted-foreground leading-relaxed max-w-2xl">{bio}</p>
           )}
 
           {builder.skills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-4">
+            <div className="flex flex-wrap gap-1.5 mt-5">
               {builder.skills.map((skill) => (
                 <Badge
                   key={skill}
                   variant="secondary"
-                  className="text-xs px-2.5 py-1 rounded-full font-medium"
+                  className="text-xs px-3 py-1 rounded-full font-medium"
                 >
                   {skill}
                 </Badge>
-              ))}
-            </div>
-          )}
-
-          {Object.keys(allLinks).length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {Object.entries(allLinks).map(([platform, url]) => (
-                <a
-                  key={platform}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-secondary border border-border hover:bg-muted transition-colors font-medium"
-                >
-                  {platform}
-                  <ExternalLink size={10} className="opacity-50" />
-                </a>
               ))}
             </div>
           )}
@@ -192,15 +201,18 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
       </div>
 
       <section>
-        <h2 className="text-lg font-bold text-foreground mb-4">Projects</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-black text-foreground">Projects</h2>
+        </div>
+
         {projectsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse bg-secondary h-20 rounded-lg" />
+              <div key={i} className="animate-pulse bg-secondary h-20 rounded-xl" />
             ))}
           </div>
         ) : projects.length === 0 ? (
-          <div className="rounded-lg border border-border bg-muted/30 px-6 py-8 text-center">
+          <div className="rounded-xl border border-border bg-muted/30 px-6 py-10 text-center">
             <p className="text-sm text-muted-foreground">No public projects yet.</p>
           </div>
         ) : (
@@ -210,13 +222,13 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
                 key={project.id}
                 to="/projects/$id"
                 params={{ id: project.id }}
-                className="group bg-card border border-border rounded-lg px-4 py-3 hover:border-border/80 hover:shadow-sm transition-all duration-150 flex flex-col gap-1"
+                className="group bg-card border border-border rounded-xl px-5 py-4 hover:border-border/80 hover:shadow-md transition-all duration-150 flex flex-col gap-1.5"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground truncate flex-1">
+                  <span className="text-sm font-semibold text-foreground truncate flex-1 group-hover:text-brand-cyan transition-colors">
                     {project.title}
                   </span>
-                  <span className="text-[10px] font-semibold border border-border rounded-[3px] px-1.5 py-0.5 text-muted-foreground shrink-0">
+                  <span className="text-[10px] font-semibold border border-border rounded-[4px] px-1.5 py-0.5 text-muted-foreground shrink-0">
                     {project.kind}
                   </span>
                 </div>
@@ -230,7 +242,7 @@ function LoadedProfile({ account, builder }: { account: string; builder: Builder
 
         {(projectsResult?.meta.hasMore ?? false) && (
           <div className="mt-4">
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="rounded-full">
               <Link
                 to="/projects"
                 search={{ kind: "all", personal: undefined, private: undefined }}
@@ -257,10 +269,10 @@ function ProfileSkeleton({ account }: { account: string }) {
           All builders
         </Link>
       </div>
-      <div className="bg-card border border-border rounded-xl overflow-hidden mb-8">
-        <Skeleton className="h-36 w-full rounded-none" />
-        <div className="pt-12 px-6 pb-6 space-y-3">
-          <Skeleton className="h-7 w-40" />
+      <div className="bg-card border border-border rounded-2xl overflow-hidden mb-8">
+        <Skeleton className="h-40 sm:h-48 w-full rounded-none" />
+        <div className="pt-14 px-6 sm:px-8 pb-8 space-y-3">
+          <Skeleton className="h-8 w-48" />
           <p className="text-sm font-mono text-brand-cyan">{account}</p>
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-3/4" />
@@ -272,15 +284,17 @@ function ProfileSkeleton({ account }: { account: string }) {
 
 function BuilderNotFound() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-      <div className="text-4xl mb-4">🔍</div>
-      <h1 className="text-xl font-bold text-foreground mb-2">Builder not found</h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        This builder profile doesn't exist or hasn't been approved yet.
-      </p>
-      <Button asChild variant="outline">
-        <Link to="/builders">Browse builders</Link>
-      </Button>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="text-5xl mb-6">🔍</div>
+        <h1 className="text-2xl font-black text-foreground mb-2">Builder not found</h1>
+        <p className="text-sm text-muted-foreground mb-8 max-w-sm leading-relaxed">
+          This builder profile doesn't exist or hasn't been approved yet.
+        </p>
+        <Button asChild className="rounded-full px-6">
+          <Link to="/builders">Browse builders</Link>
+        </Button>
+      </div>
     </div>
   );
 }

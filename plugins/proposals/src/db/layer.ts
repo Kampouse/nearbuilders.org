@@ -1,7 +1,11 @@
 import { Context, Effect, Layer } from "every-plugin/effect";
-import type { ApiDatabase } from "./index";
+import type { ProposalsDatabase } from "./index";
+import { migrate } from "./migrator";
 
-export class DatabaseTag extends Context.Tag("api/Database")<ApiDatabase, ApiDatabase>() {}
+export const DatabaseTag = Context.Tag("proposals/Database")<
+  ProposalsDatabase,
+  ProposalsDatabase
+>();
 
 export const DatabaseLive = (url: string) =>
   Layer.scoped(
@@ -10,6 +14,11 @@ export const DatabaseLive = (url: string) =>
       Effect.promise(async () => {
         const { createDatabaseDriver } = await import("./index");
         const driver = await createDatabaseDriver(url);
+
+        const migrations = await import("virtual:drizzle-migrations.sql");
+        await migrate(driver.db, migrations.default);
+        console.log("[Proposals] Migrations applied");
+
         return driver.db;
       }),
       () => Effect.void,

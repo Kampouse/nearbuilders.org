@@ -185,7 +185,7 @@ function ProjectsList() {
       await Promise.all(
         projects.map(async (p) => {
           try {
-            const result = await apiClient.getUpvoteCount({ thingId: p.id });
+            const result = await apiClient.getUpvoteCount({ entityId: p.id });
             counts[p.id] = result.totalCount ?? 0;
           } catch {
             counts[p.id] = 0;
@@ -212,7 +212,7 @@ function ProjectsList() {
       await Promise.all(
         projects.map(async (p) => {
           try {
-            const result = await apiClient.getUserVote({ thingId: p.id });
+            const result = await apiClient.getUserVote({ entityId: p.id });
             votes[p.id] = result.hasUpvote ? "up" : null;
           } catch {
             votes[p.id] = null;
@@ -232,17 +232,17 @@ function ProjectsList() {
 
   useEffect(() => {
     if (!latestVote) return;
-    const { thingId, totalCount, type } = latestVote;
+    const { entityId: latestEntityId, totalCount, type } = latestVote;
     queryClient.setQueryData(
       ["upvoteCounts", projectIds],
-      (old: Record<string, number> | undefined) => ({ ...old, [thingId]: totalCount }),
+      (old: Record<string, number> | undefined) => ({ ...old, [latestEntityId]: totalCount }),
     );
     if (userId && latestVote.userId === userId) {
       queryClient.setQueryData(
         ["userVoteStates", projectIds],
         (old: Record<string, VoteDirection> | undefined) => ({
           ...old,
-          [thingId]: type === "downvote" ? "down" : "up",
+          [latestEntityId]: type === "downvote" ? "down" : "up",
         }),
       );
     }
@@ -273,30 +273,30 @@ function ProjectsList() {
   });
 
   const upvoteMutation = useMutation({
-    mutationFn: (thingId: string) => apiClient.upvoteThing({ thingId }),
+    mutationFn: (entityId: string) => apiClient.upvote({ entityId }),
     onSuccess: (data) => {
       queryClient.setQueryData(
         ["upvoteCounts", projectIds],
-        (old: Record<string, number> | undefined) => ({ ...old, [data.thingId]: data.totalCount }),
+        (old: Record<string, number> | undefined) => ({ ...old, [data.entityId]: data.totalCount }),
       );
       queryClient.setQueryData(
         ["userVoteStates", projectIds],
-        (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.thingId]: "up" }),
+        (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.entityId]: "up" }),
       );
     },
     onError: (err: Error) => toast.error(err.message || "Failed to upvote"),
   });
 
   const downvoteMutation = useMutation({
-    mutationFn: (thingId: string) => apiClient.downvoteThing({ thingId }),
+    mutationFn: (entityId: string) => apiClient.downvote({ entityId }),
     onSuccess: (data) => {
       queryClient.setQueryData(
         ["upvoteCounts", projectIds],
-        (old: Record<string, number> | undefined) => ({ ...old, [data.thingId]: data.totalCount }),
+        (old: Record<string, number> | undefined) => ({ ...old, [data.entityId]: data.totalCount }),
       );
       queryClient.setQueryData(
         ["userVoteStates", projectIds],
-        (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.thingId]: "down" }),
+        (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.entityId]: "down" }),
       );
     },
     onError: (err: Error) => toast.error(err.message || "Failed to downvote"),

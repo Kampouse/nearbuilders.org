@@ -3,10 +3,10 @@ import { dirname } from "node:path";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import * as schema from "./schema";
 
-export type ApiDatabase = PgDatabase<PgQueryResultHKT, typeof schema>;
+export type VotesDatabase = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export interface DatabaseDriver {
-  readonly db: ApiDatabase;
+  readonly db: VotesDatabase;
   close(): Promise<void>;
 }
 
@@ -19,12 +19,9 @@ export async function createDatabaseDriver(url: string): Promise<DatabaseDriver>
       mkdirSync(dirname(dataDir), { recursive: true });
     }
     const db = drizzle(dataDir, { schema });
-    const pglite = (db as any).$client;
     return {
       db,
-      close: async () => {
-        await pglite?.close?.();
-      },
+      close: async () => {},
     };
   }
 

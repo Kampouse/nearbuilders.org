@@ -50,8 +50,30 @@ services:
     volumes:
       - postgres_projects_data:/var/lib/postgresql/data
 
+  postgres-proposals:
+    <<: *pg-common
+    environment:
+      <<: *pg-env
+      POSTGRES_DB: proposals_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_proposals_data:/var/lib/postgresql/data
+
+  postgres-votes:
+    <<: *pg-common
+    environment:
+      <<: *pg-env
+      POSTGRES_DB: votes_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_votes_data:/var/lib/postgresql/data
+
 volumes:
   postgres_api_data:
   postgres_auth_data:
   postgres_builders_data:
   postgres_projects_data:
+  postgres_proposals_data:
+  postgres_votes_data:

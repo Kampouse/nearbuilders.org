@@ -15,12 +15,6 @@ export declare const contract: {
             skills: z.ZodArray<z.ZodString>;
             location: z.ZodNullable<z.ZodString>;
             links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
             createdAt: z.ZodISODateTime;
             updatedAt: z.ZodISODateTime;
         }, z.core.$strip>>;
@@ -42,54 +36,6 @@ export declare const contract: {
             }, z.core.$strip>;
         };
     }>>, Record<never, never>>;
-    listPendingBuilders: import("@orpc/contract").ContractProcedure<z.ZodObject<{
-        limit: z.ZodOptional<z.ZodNumber>;
-        cursor: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>, z.ZodObject<{
-        data: z.ZodArray<z.ZodObject<{
-            id: z.ZodString;
-            nearAccount: z.ZodString;
-            userId: z.ZodNullable<z.ZodString>;
-            name: z.ZodNullable<z.ZodString>;
-            bio: z.ZodNullable<z.ZodString>;
-            skills: z.ZodArray<z.ZodString>;
-            location: z.ZodNullable<z.ZodString>;
-            links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
-            createdAt: z.ZodISODateTime;
-            updatedAt: z.ZodISODateTime;
-        }, z.core.$strip>>;
-        meta: z.ZodObject<{
-            total: z.ZodNumber;
-            hasMore: z.ZodBoolean;
-            nextCursor: z.ZodNullable<z.ZodString>;
-        }, z.core.$strip>;
-    }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
-        UNAUTHORIZED: {
-            readonly status: 401;
-            readonly data: z.ZodObject<{
-                apiKeyProvided: z.ZodBoolean;
-                provider: z.ZodOptional<z.ZodString>;
-                authType: z.ZodOptional<z.ZodEnum<{
-                    apiKey: "apiKey";
-                    oauth: "oauth";
-                    token: "token";
-                }>>;
-            }, z.core.$strip>;
-        };
-        FORBIDDEN: {
-            readonly status: 403;
-            readonly data: z.ZodObject<{
-                requiredPermissions: z.ZodOptional<z.ZodArray<z.ZodString>>;
-                action: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>;
-        };
-    }>>, Record<never, never>>;
     getBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
         nearAccount: z.ZodString;
     }, z.core.$strip>, z.ZodObject<{
@@ -102,12 +48,6 @@ export declare const contract: {
             skills: z.ZodArray<z.ZodString>;
             location: z.ZodNullable<z.ZodString>;
             links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
             createdAt: z.ZodISODateTime;
             updatedAt: z.ZodISODateTime;
         }, z.core.$strip>;
@@ -130,12 +70,6 @@ export declare const contract: {
             skills: z.ZodArray<z.ZodString>;
             location: z.ZodNullable<z.ZodString>;
             links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
             createdAt: z.ZodISODateTime;
             updatedAt: z.ZodISODateTime;
         }, z.core.$strip>>;
@@ -153,7 +87,9 @@ export declare const contract: {
             }, z.core.$strip>;
         };
     }>>, Record<never, never>>;
-    registerBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+    createBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+        nearAccount: z.ZodString;
+        userId: z.ZodOptional<z.ZodString>;
         name: z.ZodOptional<z.ZodString>;
         bio: z.ZodOptional<z.ZodString>;
         skills: z.ZodOptional<z.ZodArray<z.ZodString>>;
@@ -169,12 +105,6 @@ export declare const contract: {
             skills: z.ZodArray<z.ZodString>;
             location: z.ZodNullable<z.ZodString>;
             links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
             createdAt: z.ZodISODateTime;
             updatedAt: z.ZodISODateTime;
         }, z.core.$strip>;
@@ -189,6 +119,13 @@ export declare const contract: {
                     oauth: "oauth";
                     token: "token";
                 }>>;
+            }, z.core.$strip>;
+        };
+        FORBIDDEN: {
+            readonly status: 403;
+            readonly data: z.ZodObject<{
+                requiredPermissions: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                action: z.ZodOptional<z.ZodString>;
             }, z.core.$strip>;
         };
         BAD_REQUEST: {
@@ -220,12 +157,6 @@ export declare const contract: {
             skills: z.ZodArray<z.ZodString>;
             location: z.ZodNullable<z.ZodString>;
             links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
             createdAt: z.ZodISODateTime;
             updatedAt: z.ZodISODateTime;
         }, z.core.$strip>;
@@ -257,77 +188,10 @@ export declare const contract: {
             }, z.core.$strip>;
         };
     }>>, Record<never, never>>;
-    approveBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+    deleteBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
         nearAccount: z.ZodString;
     }, z.core.$strip>, z.ZodObject<{
-        data: z.ZodObject<{
-            id: z.ZodString;
-            nearAccount: z.ZodString;
-            userId: z.ZodNullable<z.ZodString>;
-            name: z.ZodNullable<z.ZodString>;
-            bio: z.ZodNullable<z.ZodString>;
-            skills: z.ZodArray<z.ZodString>;
-            location: z.ZodNullable<z.ZodString>;
-            links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
-            createdAt: z.ZodISODateTime;
-            updatedAt: z.ZodISODateTime;
-        }, z.core.$strip>;
-    }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
-        UNAUTHORIZED: {
-            readonly status: 401;
-            readonly data: z.ZodObject<{
-                apiKeyProvided: z.ZodBoolean;
-                provider: z.ZodOptional<z.ZodString>;
-                authType: z.ZodOptional<z.ZodEnum<{
-                    apiKey: "apiKey";
-                    oauth: "oauth";
-                    token: "token";
-                }>>;
-            }, z.core.$strip>;
-        };
-        FORBIDDEN: {
-            readonly status: 403;
-            readonly data: z.ZodObject<{
-                requiredPermissions: z.ZodOptional<z.ZodArray<z.ZodString>>;
-                action: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>;
-        };
-        NOT_FOUND: {
-            readonly status: 404;
-            readonly data: z.ZodObject<{
-                resource: z.ZodOptional<z.ZodString>;
-                resourceId: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>;
-        };
-    }>>, Record<never, never>>;
-    rejectBuilder: import("@orpc/contract").ContractProcedure<z.ZodObject<{
-        nearAccount: z.ZodString;
-        reason: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>, z.ZodObject<{
-        data: z.ZodObject<{
-            id: z.ZodString;
-            nearAccount: z.ZodString;
-            userId: z.ZodNullable<z.ZodString>;
-            name: z.ZodNullable<z.ZodString>;
-            bio: z.ZodNullable<z.ZodString>;
-            skills: z.ZodArray<z.ZodString>;
-            location: z.ZodNullable<z.ZodString>;
-            links: z.ZodNullable<z.ZodRecord<z.ZodString, z.ZodString>>;
-            status: z.ZodEnum<{
-                pending: "pending";
-                approved: "approved";
-                rejected: "rejected";
-            }>;
-            rejectionReason: z.ZodNullable<z.ZodString>;
-            createdAt: z.ZodISODateTime;
-            updatedAt: z.ZodISODateTime;
-        }, z.core.$strip>;
+        deleted: z.ZodBoolean;
     }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
         UNAUTHORIZED: {
             readonly status: 401;

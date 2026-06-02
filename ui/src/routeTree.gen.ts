@@ -8,593 +8,618 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as LayoutRouteImport } from "./routes/_layout";
-import { Route as LayoutAdminRouteImport } from "./routes/_layout/_admin";
-import { Route as LayoutAdminDashboardRouteImport } from "./routes/_layout/_admin/dashboard";
-import { Route as LayoutAuthenticatedRouteImport } from "./routes/_layout/_authenticated";
-import { Route as LayoutAuthenticatedDashboardRouteImport } from "./routes/_layout/_authenticated/_dashboard";
-import { Route as LayoutAuthenticatedDashboardHomeRouteImport } from "./routes/_layout/_authenticated/_dashboard/home";
-import { Route as LayoutAuthenticatedDashboardOrganizationsSlugRouteImport } from "./routes/_layout/_authenticated/_dashboard/organizations/$slug";
-import { Route as LayoutAuthenticatedDashboardOrganizationsIndexRouteImport } from "./routes/_layout/_authenticated/_dashboard/organizations/index";
-import { Route as LayoutAuthenticatedDashboardOrganizationsNewRouteImport } from "./routes/_layout/_authenticated/_dashboard/organizations/new";
-import { Route as LayoutAuthenticatedDashboardProjectsIdRouteImport } from "./routes/_layout/_authenticated/_dashboard/projects/$id";
-import { Route as LayoutAuthenticatedDashboardProjectsIdEditRouteImport } from "./routes/_layout/_authenticated/_dashboard/projects/$id_.edit";
-import { Route as LayoutAuthenticatedDashboardProjectsIndexRouteImport } from "./routes/_layout/_authenticated/_dashboard/projects/index";
-import { Route as LayoutAuthenticatedDashboardProjectsNewRouteImport } from "./routes/_layout/_authenticated/_dashboard/projects/new";
-import { Route as LayoutAuthenticatedDashboardSettingsRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings";
-import { Route as LayoutAuthenticatedDashboardSettingsApiKeysRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings/api-keys";
-import { Route as LayoutAuthenticatedDashboardSettingsAuthMethodsRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings/auth-methods";
-import { Route as LayoutAuthenticatedDashboardSettingsIndexRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings/index";
-import { Route as LayoutAuthenticatedDashboardSettingsProfileRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings/profile";
-import { Route as LayoutAuthenticatedDashboardSettingsSecurityRouteImport } from "./routes/_layout/_authenticated/_dashboard/settings/security";
-import { Route as LayoutAuthenticatedAcceptInvitationIdRouteImport } from "./routes/_layout/_authenticated/accept-invitation.$id";
-import { Route as LayoutAboutRouteImport } from "./routes/_layout/about";
-import { Route as LayoutAppsAccountIdGatewayIdRouteImport } from "./routes/_layout/apps/$accountId/$gatewayId";
-import { Route as LayoutAppsAccountIdIndexRouteImport } from "./routes/_layout/apps/$accountId/index";
-import { Route as LayoutAppsIndexRouteImport } from "./routes/_layout/apps/index";
-import { Route as LayoutBuildersAccountRouteImport } from "./routes/_layout/builders/$account";
-import { Route as LayoutBuildersIndexRouteImport } from "./routes/_layout/builders/index";
-import { Route as LayoutIndexRouteImport } from "./routes/_layout/index";
-import { Route as LayoutLoginRouteImport } from "./routes/_layout/login";
-import { Route as LayoutSkillRouteImport } from "./routes/_layout/skill";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutSkillRouteImport } from './routes/_layout/skill'
+import { Route as LayoutLoginRouteImport } from './routes/_layout/login'
+import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
+import { Route as LayoutAuthenticatedRouteImport } from './routes/_layout/_authenticated'
+import { Route as LayoutAdminRouteImport } from './routes/_layout/_admin'
+import { Route as LayoutBuildersIndexRouteImport } from './routes/_layout/builders/index'
+import { Route as LayoutAppsIndexRouteImport } from './routes/_layout/apps/index'
+import { Route as LayoutBuildersAddRouteImport } from './routes/_layout/builders/add'
+import { Route as LayoutBuildersAccountRouteImport } from './routes/_layout/builders/$account'
+import { Route as LayoutAuthenticatedDashboardRouteImport } from './routes/_layout/_authenticated/_dashboard'
+import { Route as LayoutAdminDashboardRouteImport } from './routes/_layout/_admin/dashboard'
+import { Route as LayoutAppsAccountIdIndexRouteImport } from './routes/_layout/apps/$accountId/index'
+import { Route as LayoutAppsAccountIdGatewayIdRouteImport } from './routes/_layout/apps/$accountId/$gatewayId'
+import { Route as LayoutAuthenticatedAcceptInvitationIdRouteImport } from './routes/_layout/_authenticated/accept-invitation.$id'
+import { Route as LayoutAuthenticatedDashboardSettingsRouteImport } from './routes/_layout/_authenticated/_dashboard/settings'
+import { Route as LayoutAuthenticatedDashboardHomeRouteImport } from './routes/_layout/_authenticated/_dashboard/home'
+import { Route as LayoutAuthenticatedDashboardSettingsIndexRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/index'
+import { Route as LayoutAuthenticatedDashboardProjectsIndexRouteImport } from './routes/_layout/_authenticated/_dashboard/projects/index'
+import { Route as LayoutAuthenticatedDashboardOrganizationsIndexRouteImport } from './routes/_layout/_authenticated/_dashboard/organizations/index'
+import { Route as LayoutAuthenticatedDashboardSettingsSecurityRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/security'
+import { Route as LayoutAuthenticatedDashboardSettingsProfileRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/profile'
+import { Route as LayoutAuthenticatedDashboardSettingsAuthMethodsRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/auth-methods'
+import { Route as LayoutAuthenticatedDashboardSettingsApiKeysRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/api-keys'
+import { Route as LayoutAuthenticatedDashboardProjectsNewRouteImport } from './routes/_layout/_authenticated/_dashboard/projects/new'
+import { Route as LayoutAuthenticatedDashboardProjectsIdRouteImport } from './routes/_layout/_authenticated/_dashboard/projects/$id'
+import { Route as LayoutAuthenticatedDashboardOrganizationsNewRouteImport } from './routes/_layout/_authenticated/_dashboard/organizations/new'
+import { Route as LayoutAuthenticatedDashboardOrganizationsSlugRouteImport } from './routes/_layout/_authenticated/_dashboard/organizations/$slug'
+import { Route as LayoutAuthenticatedDashboardProjectsIdEditRouteImport } from './routes/_layout/_authenticated/_dashboard/projects/$id_.edit'
 
 const LayoutRoute = LayoutRouteImport.update({
-  id: "/_layout",
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutSkillRoute = LayoutSkillRouteImport.update({
-  id: "/skill",
-  path: "/skill",
+  id: '/skill',
+  path: '/skill',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutLoginRoute = LayoutLoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutAboutRoute = LayoutAboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutAuthenticatedRoute = LayoutAuthenticatedRouteImport.update({
-  id: "/_authenticated",
+  id: '/_authenticated',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
-  id: "/_admin",
+  id: '/_admin',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutBuildersIndexRoute = LayoutBuildersIndexRouteImport.update({
-  id: "/builders/",
-  path: "/builders/",
+  id: '/builders/',
+  path: '/builders/',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
 const LayoutAppsIndexRoute = LayoutAppsIndexRouteImport.update({
-  id: "/apps/",
-  path: "/apps/",
+  id: '/apps/',
+  path: '/apps/',
   getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
+const LayoutBuildersAddRoute = LayoutBuildersAddRouteImport.update({
+  id: '/builders/add',
+  path: '/builders/add',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutBuildersAccountRoute = LayoutBuildersAccountRouteImport.update({
-  id: "/builders/$account",
-  path: "/builders/$account",
+  id: '/builders/$account',
+  path: '/builders/$account',
   getParentRoute: () => LayoutRoute,
-} as any);
-const LayoutAuthenticatedDashboardRoute = LayoutAuthenticatedDashboardRouteImport.update({
-  id: "/_dashboard",
-  getParentRoute: () => LayoutAuthenticatedRoute,
-} as any);
+} as any)
+const LayoutAuthenticatedDashboardRoute =
+  LayoutAuthenticatedDashboardRouteImport.update({
+    id: '/_dashboard',
+    getParentRoute: () => LayoutAuthenticatedRoute,
+  } as any)
 const LayoutAdminDashboardRoute = LayoutAdminDashboardRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => LayoutAdminRoute,
-} as any);
-const LayoutAppsAccountIdIndexRoute = LayoutAppsAccountIdIndexRouteImport.update({
-  id: "/apps/$accountId/",
-  path: "/apps/$accountId/",
-  getParentRoute: () => LayoutRoute,
-} as any);
-const LayoutAppsAccountIdGatewayIdRoute = LayoutAppsAccountIdGatewayIdRouteImport.update({
-  id: "/apps/$accountId/$gatewayId",
-  path: "/apps/$accountId/$gatewayId",
-  getParentRoute: () => LayoutRoute,
-} as any);
+} as any)
+const LayoutAppsAccountIdIndexRoute =
+  LayoutAppsAccountIdIndexRouteImport.update({
+    id: '/apps/$accountId/',
+    path: '/apps/$accountId/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutAppsAccountIdGatewayIdRoute =
+  LayoutAppsAccountIdGatewayIdRouteImport.update({
+    id: '/apps/$accountId/$gatewayId',
+    path: '/apps/$accountId/$gatewayId',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 const LayoutAuthenticatedAcceptInvitationIdRoute =
   LayoutAuthenticatedAcceptInvitationIdRouteImport.update({
-    id: "/accept-invitation/$id",
-    path: "/accept-invitation/$id",
+    id: '/accept-invitation/$id',
+    path: '/accept-invitation/$id',
     getParentRoute: () => LayoutAuthenticatedRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardSettingsRoute =
   LayoutAuthenticatedDashboardSettingsRouteImport.update({
-    id: "/settings",
-    path: "/settings",
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
-const LayoutAuthenticatedDashboardHomeRoute = LayoutAuthenticatedDashboardHomeRouteImport.update({
-  id: "/home",
-  path: "/home",
-  getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-} as any);
+  } as any)
+const LayoutAuthenticatedDashboardHomeRoute =
+  LayoutAuthenticatedDashboardHomeRouteImport.update({
+    id: '/home',
+    path: '/home',
+    getParentRoute: () => LayoutAuthenticatedDashboardRoute,
+  } as any)
 const LayoutAuthenticatedDashboardSettingsIndexRoute =
   LayoutAuthenticatedDashboardSettingsIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => LayoutAuthenticatedDashboardSettingsRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardProjectsIndexRoute =
   LayoutAuthenticatedDashboardProjectsIndexRouteImport.update({
-    id: "/projects/",
-    path: "/projects/",
+    id: '/projects/',
+    path: '/projects/',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardOrganizationsIndexRoute =
   LayoutAuthenticatedDashboardOrganizationsIndexRouteImport.update({
-    id: "/organizations/",
-    path: "/organizations/",
+    id: '/organizations/',
+    path: '/organizations/',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardSettingsSecurityRoute =
   LayoutAuthenticatedDashboardSettingsSecurityRouteImport.update({
-    id: "/security",
-    path: "/security",
+    id: '/security',
+    path: '/security',
     getParentRoute: () => LayoutAuthenticatedDashboardSettingsRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardSettingsProfileRoute =
   LayoutAuthenticatedDashboardSettingsProfileRouteImport.update({
-    id: "/profile",
-    path: "/profile",
+    id: '/profile',
+    path: '/profile',
     getParentRoute: () => LayoutAuthenticatedDashboardSettingsRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardSettingsAuthMethodsRoute =
   LayoutAuthenticatedDashboardSettingsAuthMethodsRouteImport.update({
-    id: "/auth-methods",
-    path: "/auth-methods",
+    id: '/auth-methods',
+    path: '/auth-methods',
     getParentRoute: () => LayoutAuthenticatedDashboardSettingsRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardSettingsApiKeysRoute =
   LayoutAuthenticatedDashboardSettingsApiKeysRouteImport.update({
-    id: "/api-keys",
-    path: "/api-keys",
+    id: '/api-keys',
+    path: '/api-keys',
     getParentRoute: () => LayoutAuthenticatedDashboardSettingsRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardProjectsNewRoute =
   LayoutAuthenticatedDashboardProjectsNewRouteImport.update({
-    id: "/projects/new",
-    path: "/projects/new",
+    id: '/projects/new',
+    path: '/projects/new',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardProjectsIdRoute =
   LayoutAuthenticatedDashboardProjectsIdRouteImport.update({
-    id: "/projects/$id",
-    path: "/projects/$id",
+    id: '/projects/$id',
+    path: '/projects/$id',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardOrganizationsNewRoute =
   LayoutAuthenticatedDashboardOrganizationsNewRouteImport.update({
-    id: "/organizations/new",
-    path: "/organizations/new",
+    id: '/organizations/new',
+    path: '/organizations/new',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardOrganizationsSlugRoute =
   LayoutAuthenticatedDashboardOrganizationsSlugRouteImport.update({
-    id: "/organizations/$slug",
-    path: "/organizations/$slug",
+    id: '/organizations/$slug',
+    path: '/organizations/$slug',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 const LayoutAuthenticatedDashboardProjectsIdEditRoute =
   LayoutAuthenticatedDashboardProjectsIdEditRouteImport.update({
-    id: "/projects/$id_/edit",
-    path: "/projects/$id/edit",
+    id: '/projects/$id_/edit',
+    path: '/projects/$id/edit',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
-  } as any);
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof LayoutIndexRoute;
-  "/about": typeof LayoutAboutRoute;
-  "/login": typeof LayoutLoginRoute;
-  "/skill": typeof LayoutSkillRoute;
-  "/dashboard": typeof LayoutAdminDashboardRoute;
-  "/builders/$account": typeof LayoutBuildersAccountRoute;
-  "/apps/": typeof LayoutAppsIndexRoute;
-  "/builders/": typeof LayoutBuildersIndexRoute;
-  "/home": typeof LayoutAuthenticatedDashboardHomeRoute;
-  "/settings": typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren;
-  "/accept-invitation/$id": typeof LayoutAuthenticatedAcceptInvitationIdRoute;
-  "/apps/$accountId/$gatewayId": typeof LayoutAppsAccountIdGatewayIdRoute;
-  "/apps/$accountId/": typeof LayoutAppsAccountIdIndexRoute;
-  "/organizations/$slug": typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute;
-  "/organizations/new": typeof LayoutAuthenticatedDashboardOrganizationsNewRoute;
-  "/projects/$id": typeof LayoutAuthenticatedDashboardProjectsIdRoute;
-  "/projects/new": typeof LayoutAuthenticatedDashboardProjectsNewRoute;
-  "/settings/api-keys": typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute;
-  "/settings/auth-methods": typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute;
-  "/settings/profile": typeof LayoutAuthenticatedDashboardSettingsProfileRoute;
-  "/settings/security": typeof LayoutAuthenticatedDashboardSettingsSecurityRoute;
-  "/organizations/": typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute;
-  "/projects/": typeof LayoutAuthenticatedDashboardProjectsIndexRoute;
-  "/settings/": typeof LayoutAuthenticatedDashboardSettingsIndexRoute;
-  "/projects/$id/edit": typeof LayoutAuthenticatedDashboardProjectsIdEditRoute;
+  '/': typeof LayoutIndexRoute
+  '/about': typeof LayoutAboutRoute
+  '/login': typeof LayoutLoginRoute
+  '/skill': typeof LayoutSkillRoute
+  '/dashboard': typeof LayoutAdminDashboardRoute
+  '/builders/$account': typeof LayoutBuildersAccountRoute
+  '/builders/add': typeof LayoutBuildersAddRoute
+  '/apps/': typeof LayoutAppsIndexRoute
+  '/builders/': typeof LayoutBuildersIndexRoute
+  '/home': typeof LayoutAuthenticatedDashboardHomeRoute
+  '/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
+  '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
+  '/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
+  '/apps/$accountId/': typeof LayoutAppsAccountIdIndexRoute
+  '/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
+  '/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
+  '/projects/$id': typeof LayoutAuthenticatedDashboardProjectsIdRoute
+  '/projects/new': typeof LayoutAuthenticatedDashboardProjectsNewRoute
+  '/settings/api-keys': typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute
+  '/settings/auth-methods': typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute
+  '/settings/profile': typeof LayoutAuthenticatedDashboardSettingsProfileRoute
+  '/settings/security': typeof LayoutAuthenticatedDashboardSettingsSecurityRoute
+  '/organizations/': typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute
+  '/projects/': typeof LayoutAuthenticatedDashboardProjectsIndexRoute
+  '/settings/': typeof LayoutAuthenticatedDashboardSettingsIndexRoute
+  '/projects/$id/edit': typeof LayoutAuthenticatedDashboardProjectsIdEditRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof LayoutIndexRoute;
-  "/about": typeof LayoutAboutRoute;
-  "/login": typeof LayoutLoginRoute;
-  "/skill": typeof LayoutSkillRoute;
-  "/dashboard": typeof LayoutAdminDashboardRoute;
-  "/builders/$account": typeof LayoutBuildersAccountRoute;
-  "/apps": typeof LayoutAppsIndexRoute;
-  "/builders": typeof LayoutBuildersIndexRoute;
-  "/home": typeof LayoutAuthenticatedDashboardHomeRoute;
-  "/accept-invitation/$id": typeof LayoutAuthenticatedAcceptInvitationIdRoute;
-  "/apps/$accountId/$gatewayId": typeof LayoutAppsAccountIdGatewayIdRoute;
-  "/apps/$accountId": typeof LayoutAppsAccountIdIndexRoute;
-  "/organizations/$slug": typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute;
-  "/organizations/new": typeof LayoutAuthenticatedDashboardOrganizationsNewRoute;
-  "/projects/$id": typeof LayoutAuthenticatedDashboardProjectsIdRoute;
-  "/projects/new": typeof LayoutAuthenticatedDashboardProjectsNewRoute;
-  "/settings/api-keys": typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute;
-  "/settings/auth-methods": typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute;
-  "/settings/profile": typeof LayoutAuthenticatedDashboardSettingsProfileRoute;
-  "/settings/security": typeof LayoutAuthenticatedDashboardSettingsSecurityRoute;
-  "/organizations": typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute;
-  "/projects": typeof LayoutAuthenticatedDashboardProjectsIndexRoute;
-  "/settings": typeof LayoutAuthenticatedDashboardSettingsIndexRoute;
-  "/projects/$id/edit": typeof LayoutAuthenticatedDashboardProjectsIdEditRoute;
+  '/': typeof LayoutIndexRoute
+  '/about': typeof LayoutAboutRoute
+  '/login': typeof LayoutLoginRoute
+  '/skill': typeof LayoutSkillRoute
+  '/dashboard': typeof LayoutAdminDashboardRoute
+  '/builders/$account': typeof LayoutBuildersAccountRoute
+  '/builders/add': typeof LayoutBuildersAddRoute
+  '/apps': typeof LayoutAppsIndexRoute
+  '/builders': typeof LayoutBuildersIndexRoute
+  '/home': typeof LayoutAuthenticatedDashboardHomeRoute
+  '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
+  '/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
+  '/apps/$accountId': typeof LayoutAppsAccountIdIndexRoute
+  '/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
+  '/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
+  '/projects/$id': typeof LayoutAuthenticatedDashboardProjectsIdRoute
+  '/projects/new': typeof LayoutAuthenticatedDashboardProjectsNewRoute
+  '/settings/api-keys': typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute
+  '/settings/auth-methods': typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute
+  '/settings/profile': typeof LayoutAuthenticatedDashboardSettingsProfileRoute
+  '/settings/security': typeof LayoutAuthenticatedDashboardSettingsSecurityRoute
+  '/organizations': typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute
+  '/projects': typeof LayoutAuthenticatedDashboardProjectsIndexRoute
+  '/settings': typeof LayoutAuthenticatedDashboardSettingsIndexRoute
+  '/projects/$id/edit': typeof LayoutAuthenticatedDashboardProjectsIdEditRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/_layout": typeof LayoutRouteWithChildren;
-  "/_layout/_admin": typeof LayoutAdminRouteWithChildren;
-  "/_layout/_authenticated": typeof LayoutAuthenticatedRouteWithChildren;
-  "/_layout/about": typeof LayoutAboutRoute;
-  "/_layout/login": typeof LayoutLoginRoute;
-  "/_layout/skill": typeof LayoutSkillRoute;
-  "/_layout/": typeof LayoutIndexRoute;
-  "/_layout/_admin/dashboard": typeof LayoutAdminDashboardRoute;
-  "/_layout/_authenticated/_dashboard": typeof LayoutAuthenticatedDashboardRouteWithChildren;
-  "/_layout/builders/$account": typeof LayoutBuildersAccountRoute;
-  "/_layout/apps/": typeof LayoutAppsIndexRoute;
-  "/_layout/builders/": typeof LayoutBuildersIndexRoute;
-  "/_layout/_authenticated/_dashboard/home": typeof LayoutAuthenticatedDashboardHomeRoute;
-  "/_layout/_authenticated/_dashboard/settings": typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren;
-  "/_layout/_authenticated/accept-invitation/$id": typeof LayoutAuthenticatedAcceptInvitationIdRoute;
-  "/_layout/apps/$accountId/$gatewayId": typeof LayoutAppsAccountIdGatewayIdRoute;
-  "/_layout/apps/$accountId/": typeof LayoutAppsAccountIdIndexRoute;
-  "/_layout/_authenticated/_dashboard/organizations/$slug": typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute;
-  "/_layout/_authenticated/_dashboard/organizations/new": typeof LayoutAuthenticatedDashboardOrganizationsNewRoute;
-  "/_layout/_authenticated/_dashboard/projects/$id": typeof LayoutAuthenticatedDashboardProjectsIdRoute;
-  "/_layout/_authenticated/_dashboard/projects/new": typeof LayoutAuthenticatedDashboardProjectsNewRoute;
-  "/_layout/_authenticated/_dashboard/settings/api-keys": typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute;
-  "/_layout/_authenticated/_dashboard/settings/auth-methods": typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute;
-  "/_layout/_authenticated/_dashboard/settings/profile": typeof LayoutAuthenticatedDashboardSettingsProfileRoute;
-  "/_layout/_authenticated/_dashboard/settings/security": typeof LayoutAuthenticatedDashboardSettingsSecurityRoute;
-  "/_layout/_authenticated/_dashboard/organizations/": typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute;
-  "/_layout/_authenticated/_dashboard/projects/": typeof LayoutAuthenticatedDashboardProjectsIndexRoute;
-  "/_layout/_authenticated/_dashboard/settings/": typeof LayoutAuthenticatedDashboardSettingsIndexRoute;
-  "/_layout/_authenticated/_dashboard/projects/$id_/edit": typeof LayoutAuthenticatedDashboardProjectsIdEditRoute;
+  __root__: typeof rootRouteImport
+  '/_layout': typeof LayoutRouteWithChildren
+  '/_layout/_admin': typeof LayoutAdminRouteWithChildren
+  '/_layout/_authenticated': typeof LayoutAuthenticatedRouteWithChildren
+  '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/login': typeof LayoutLoginRoute
+  '/_layout/skill': typeof LayoutSkillRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/_admin/dashboard': typeof LayoutAdminDashboardRoute
+  '/_layout/_authenticated/_dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
+  '/_layout/builders/$account': typeof LayoutBuildersAccountRoute
+  '/_layout/builders/add': typeof LayoutBuildersAddRoute
+  '/_layout/apps/': typeof LayoutAppsIndexRoute
+  '/_layout/builders/': typeof LayoutBuildersIndexRoute
+  '/_layout/_authenticated/_dashboard/home': typeof LayoutAuthenticatedDashboardHomeRoute
+  '/_layout/_authenticated/_dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
+  '/_layout/_authenticated/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
+  '/_layout/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
+  '/_layout/apps/$accountId/': typeof LayoutAppsAccountIdIndexRoute
+  '/_layout/_authenticated/_dashboard/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
+  '/_layout/_authenticated/_dashboard/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
+  '/_layout/_authenticated/_dashboard/projects/$id': typeof LayoutAuthenticatedDashboardProjectsIdRoute
+  '/_layout/_authenticated/_dashboard/projects/new': typeof LayoutAuthenticatedDashboardProjectsNewRoute
+  '/_layout/_authenticated/_dashboard/settings/api-keys': typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute
+  '/_layout/_authenticated/_dashboard/settings/auth-methods': typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute
+  '/_layout/_authenticated/_dashboard/settings/profile': typeof LayoutAuthenticatedDashboardSettingsProfileRoute
+  '/_layout/_authenticated/_dashboard/settings/security': typeof LayoutAuthenticatedDashboardSettingsSecurityRoute
+  '/_layout/_authenticated/_dashboard/organizations/': typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute
+  '/_layout/_authenticated/_dashboard/projects/': typeof LayoutAuthenticatedDashboardProjectsIndexRoute
+  '/_layout/_authenticated/_dashboard/settings/': typeof LayoutAuthenticatedDashboardSettingsIndexRoute
+  '/_layout/_authenticated/_dashboard/projects/$id_/edit': typeof LayoutAuthenticatedDashboardProjectsIdEditRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/about"
-    | "/login"
-    | "/skill"
-    | "/dashboard"
-    | "/builders/$account"
-    | "/apps/"
-    | "/builders/"
-    | "/home"
-    | "/settings"
-    | "/accept-invitation/$id"
-    | "/apps/$accountId/$gatewayId"
-    | "/apps/$accountId/"
-    | "/organizations/$slug"
-    | "/organizations/new"
-    | "/projects/$id"
-    | "/projects/new"
-    | "/settings/api-keys"
-    | "/settings/auth-methods"
-    | "/settings/profile"
-    | "/settings/security"
-    | "/organizations/"
-    | "/projects/"
-    | "/settings/"
-    | "/projects/$id/edit";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/about'
+    | '/login'
+    | '/skill'
+    | '/dashboard'
+    | '/builders/$account'
+    | '/builders/add'
+    | '/apps/'
+    | '/builders/'
+    | '/home'
+    | '/settings'
+    | '/accept-invitation/$id'
+    | '/apps/$accountId/$gatewayId'
+    | '/apps/$accountId/'
+    | '/organizations/$slug'
+    | '/organizations/new'
+    | '/projects/$id'
+    | '/projects/new'
+    | '/settings/api-keys'
+    | '/settings/auth-methods'
+    | '/settings/profile'
+    | '/settings/security'
+    | '/organizations/'
+    | '/projects/'
+    | '/settings/'
+    | '/projects/$id/edit'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/about"
-    | "/login"
-    | "/skill"
-    | "/dashboard"
-    | "/builders/$account"
-    | "/apps"
-    | "/builders"
-    | "/home"
-    | "/accept-invitation/$id"
-    | "/apps/$accountId/$gatewayId"
-    | "/apps/$accountId"
-    | "/organizations/$slug"
-    | "/organizations/new"
-    | "/projects/$id"
-    | "/projects/new"
-    | "/settings/api-keys"
-    | "/settings/auth-methods"
-    | "/settings/profile"
-    | "/settings/security"
-    | "/organizations"
-    | "/projects"
-    | "/settings"
-    | "/projects/$id/edit";
+    | '/'
+    | '/about'
+    | '/login'
+    | '/skill'
+    | '/dashboard'
+    | '/builders/$account'
+    | '/builders/add'
+    | '/apps'
+    | '/builders'
+    | '/home'
+    | '/accept-invitation/$id'
+    | '/apps/$accountId/$gatewayId'
+    | '/apps/$accountId'
+    | '/organizations/$slug'
+    | '/organizations/new'
+    | '/projects/$id'
+    | '/projects/new'
+    | '/settings/api-keys'
+    | '/settings/auth-methods'
+    | '/settings/profile'
+    | '/settings/security'
+    | '/organizations'
+    | '/projects'
+    | '/settings'
+    | '/projects/$id/edit'
   id:
-    | "__root__"
-    | "/_layout"
-    | "/_layout/_admin"
-    | "/_layout/_authenticated"
-    | "/_layout/about"
-    | "/_layout/login"
-    | "/_layout/skill"
-    | "/_layout/"
-    | "/_layout/_admin/dashboard"
-    | "/_layout/_authenticated/_dashboard"
-    | "/_layout/builders/$account"
-    | "/_layout/apps/"
-    | "/_layout/builders/"
-    | "/_layout/_authenticated/_dashboard/home"
-    | "/_layout/_authenticated/_dashboard/settings"
-    | "/_layout/_authenticated/accept-invitation/$id"
-    | "/_layout/apps/$accountId/$gatewayId"
-    | "/_layout/apps/$accountId/"
-    | "/_layout/_authenticated/_dashboard/organizations/$slug"
-    | "/_layout/_authenticated/_dashboard/organizations/new"
-    | "/_layout/_authenticated/_dashboard/projects/$id"
-    | "/_layout/_authenticated/_dashboard/projects/new"
-    | "/_layout/_authenticated/_dashboard/settings/api-keys"
-    | "/_layout/_authenticated/_dashboard/settings/auth-methods"
-    | "/_layout/_authenticated/_dashboard/settings/profile"
-    | "/_layout/_authenticated/_dashboard/settings/security"
-    | "/_layout/_authenticated/_dashboard/organizations/"
-    | "/_layout/_authenticated/_dashboard/projects/"
-    | "/_layout/_authenticated/_dashboard/settings/"
-    | "/_layout/_authenticated/_dashboard/projects/$id_/edit";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/_layout'
+    | '/_layout/_admin'
+    | '/_layout/_authenticated'
+    | '/_layout/about'
+    | '/_layout/login'
+    | '/_layout/skill'
+    | '/_layout/'
+    | '/_layout/_admin/dashboard'
+    | '/_layout/_authenticated/_dashboard'
+    | '/_layout/builders/$account'
+    | '/_layout/builders/add'
+    | '/_layout/apps/'
+    | '/_layout/builders/'
+    | '/_layout/_authenticated/_dashboard/home'
+    | '/_layout/_authenticated/_dashboard/settings'
+    | '/_layout/_authenticated/accept-invitation/$id'
+    | '/_layout/apps/$accountId/$gatewayId'
+    | '/_layout/apps/$accountId/'
+    | '/_layout/_authenticated/_dashboard/organizations/$slug'
+    | '/_layout/_authenticated/_dashboard/organizations/new'
+    | '/_layout/_authenticated/_dashboard/projects/$id'
+    | '/_layout/_authenticated/_dashboard/projects/new'
+    | '/_layout/_authenticated/_dashboard/settings/api-keys'
+    | '/_layout/_authenticated/_dashboard/settings/auth-methods'
+    | '/_layout/_authenticated/_dashboard/settings/profile'
+    | '/_layout/_authenticated/_dashboard/settings/security'
+    | '/_layout/_authenticated/_dashboard/organizations/'
+    | '/_layout/_authenticated/_dashboard/projects/'
+    | '/_layout/_authenticated/_dashboard/settings/'
+    | '/_layout/_authenticated/_dashboard/projects/$id_/edit'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  LayoutRoute: typeof LayoutRouteWithChildren;
+  LayoutRoute: typeof LayoutRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_layout": {
-      id: "/_layout";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof LayoutRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_layout/": {
-      id: "/_layout/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof LayoutIndexRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/skill": {
-      id: "/_layout/skill";
-      path: "/skill";
-      fullPath: "/skill";
-      preLoaderRoute: typeof LayoutSkillRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/login": {
-      id: "/_layout/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LayoutLoginRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/about": {
-      id: "/_layout/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof LayoutAboutRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/_authenticated": {
-      id: "/_layout/_authenticated";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof LayoutAuthenticatedRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/_admin": {
-      id: "/_layout/_admin";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof LayoutAdminRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/builders/": {
-      id: "/_layout/builders/";
-      path: "/builders";
-      fullPath: "/builders/";
-      preLoaderRoute: typeof LayoutBuildersIndexRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/apps/": {
-      id: "/_layout/apps/";
-      path: "/apps";
-      fullPath: "/apps/";
-      preLoaderRoute: typeof LayoutAppsIndexRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/builders/$account": {
-      id: "/_layout/builders/$account";
-      path: "/builders/$account";
-      fullPath: "/builders/$account";
-      preLoaderRoute: typeof LayoutBuildersAccountRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/_authenticated/_dashboard": {
-      id: "/_layout/_authenticated/_dashboard";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardRouteImport;
-      parentRoute: typeof LayoutAuthenticatedRoute;
-    };
-    "/_layout/_admin/dashboard": {
-      id: "/_layout/_admin/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof LayoutAdminDashboardRouteImport;
-      parentRoute: typeof LayoutAdminRoute;
-    };
-    "/_layout/apps/$accountId/": {
-      id: "/_layout/apps/$accountId/";
-      path: "/apps/$accountId";
-      fullPath: "/apps/$accountId/";
-      preLoaderRoute: typeof LayoutAppsAccountIdIndexRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/apps/$accountId/$gatewayId": {
-      id: "/_layout/apps/$accountId/$gatewayId";
-      path: "/apps/$accountId/$gatewayId";
-      fullPath: "/apps/$accountId/$gatewayId";
-      preLoaderRoute: typeof LayoutAppsAccountIdGatewayIdRouteImport;
-      parentRoute: typeof LayoutRoute;
-    };
-    "/_layout/_authenticated/accept-invitation/$id": {
-      id: "/_layout/_authenticated/accept-invitation/$id";
-      path: "/accept-invitation/$id";
-      fullPath: "/accept-invitation/$id";
-      preLoaderRoute: typeof LayoutAuthenticatedAcceptInvitationIdRouteImport;
-      parentRoute: typeof LayoutAuthenticatedRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings": {
-      id: "/_layout/_authenticated/_dashboard/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/home": {
-      id: "/_layout/_authenticated/_dashboard/home";
-      path: "/home";
-      fullPath: "/home";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardHomeRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings/": {
-      id: "/_layout/_authenticated/_dashboard/settings/";
-      path: "/";
-      fullPath: "/settings/";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsIndexRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute;
-    };
-    "/_layout/_authenticated/_dashboard/projects/": {
-      id: "/_layout/_authenticated/_dashboard/projects/";
-      path: "/projects";
-      fullPath: "/projects/";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIndexRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/organizations/": {
-      id: "/_layout/_authenticated/_dashboard/organizations/";
-      path: "/organizations";
-      fullPath: "/organizations/";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsIndexRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings/security": {
-      id: "/_layout/_authenticated/_dashboard/settings/security";
-      path: "/security";
-      fullPath: "/settings/security";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsSecurityRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings/profile": {
-      id: "/_layout/_authenticated/_dashboard/settings/profile";
-      path: "/profile";
-      fullPath: "/settings/profile";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsProfileRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings/auth-methods": {
-      id: "/_layout/_authenticated/_dashboard/settings/auth-methods";
-      path: "/auth-methods";
-      fullPath: "/settings/auth-methods";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute;
-    };
-    "/_layout/_authenticated/_dashboard/settings/api-keys": {
-      id: "/_layout/_authenticated/_dashboard/settings/api-keys";
-      path: "/api-keys";
-      fullPath: "/settings/api-keys";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsApiKeysRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute;
-    };
-    "/_layout/_authenticated/_dashboard/projects/new": {
-      id: "/_layout/_authenticated/_dashboard/projects/new";
-      path: "/projects/new";
-      fullPath: "/projects/new";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsNewRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/projects/$id": {
-      id: "/_layout/_authenticated/_dashboard/projects/$id";
-      path: "/projects/$id";
-      fullPath: "/projects/$id";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIdRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/organizations/new": {
-      id: "/_layout/_authenticated/_dashboard/organizations/new";
-      path: "/organizations/new";
-      fullPath: "/organizations/new";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsNewRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/organizations/$slug": {
-      id: "/_layout/_authenticated/_dashboard/organizations/$slug";
-      path: "/organizations/$slug";
-      fullPath: "/organizations/$slug";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsSlugRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
-    "/_layout/_authenticated/_dashboard/projects/$id_/edit": {
-      id: "/_layout/_authenticated/_dashboard/projects/$id_/edit";
-      path: "/projects/$id/edit";
-      fullPath: "/projects/$id/edit";
-      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIdEditRouteImport;
-      parentRoute: typeof LayoutAuthenticatedDashboardRoute;
-    };
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_layout/': {
+      id: '/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/skill': {
+      id: '/_layout/skill'
+      path: '/skill'
+      fullPath: '/skill'
+      preLoaderRoute: typeof LayoutSkillRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/login': {
+      id: '/_layout/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LayoutLoginRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/about': {
+      id: '/_layout/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof LayoutAboutRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/_authenticated': {
+      id: '/_layout/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutAuthenticatedRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/_admin': {
+      id: '/_layout/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutAdminRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/builders/': {
+      id: '/_layout/builders/'
+      path: '/builders'
+      fullPath: '/builders/'
+      preLoaderRoute: typeof LayoutBuildersIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/apps/': {
+      id: '/_layout/apps/'
+      path: '/apps'
+      fullPath: '/apps/'
+      preLoaderRoute: typeof LayoutAppsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/builders/add': {
+      id: '/_layout/builders/add'
+      path: '/builders/add'
+      fullPath: '/builders/add'
+      preLoaderRoute: typeof LayoutBuildersAddRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/builders/$account': {
+      id: '/_layout/builders/$account'
+      path: '/builders/$account'
+      fullPath: '/builders/$account'
+      preLoaderRoute: typeof LayoutBuildersAccountRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/_authenticated/_dashboard': {
+      id: '/_layout/_authenticated/_dashboard'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardRouteImport
+      parentRoute: typeof LayoutAuthenticatedRoute
+    }
+    '/_layout/_admin/dashboard': {
+      id: '/_layout/_admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof LayoutAdminDashboardRouteImport
+      parentRoute: typeof LayoutAdminRoute
+    }
+    '/_layout/apps/$accountId/': {
+      id: '/_layout/apps/$accountId/'
+      path: '/apps/$accountId'
+      fullPath: '/apps/$accountId/'
+      preLoaderRoute: typeof LayoutAppsAccountIdIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/apps/$accountId/$gatewayId': {
+      id: '/_layout/apps/$accountId/$gatewayId'
+      path: '/apps/$accountId/$gatewayId'
+      fullPath: '/apps/$accountId/$gatewayId'
+      preLoaderRoute: typeof LayoutAppsAccountIdGatewayIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/_authenticated/accept-invitation/$id': {
+      id: '/_layout/_authenticated/accept-invitation/$id'
+      path: '/accept-invitation/$id'
+      fullPath: '/accept-invitation/$id'
+      preLoaderRoute: typeof LayoutAuthenticatedAcceptInvitationIdRouteImport
+      parentRoute: typeof LayoutAuthenticatedRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings': {
+      id: '/_layout/_authenticated/_dashboard/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/home': {
+      id: '/_layout/_authenticated/_dashboard/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardHomeRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings/': {
+      id: '/_layout/_authenticated/_dashboard/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsIndexRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute
+    }
+    '/_layout/_authenticated/_dashboard/projects/': {
+      id: '/_layout/_authenticated/_dashboard/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIndexRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/organizations/': {
+      id: '/_layout/_authenticated/_dashboard/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations/'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsIndexRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings/security': {
+      id: '/_layout/_authenticated/_dashboard/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsSecurityRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings/profile': {
+      id: '/_layout/_authenticated/_dashboard/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsProfileRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings/auth-methods': {
+      id: '/_layout/_authenticated/_dashboard/settings/auth-methods'
+      path: '/auth-methods'
+      fullPath: '/settings/auth-methods'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute
+    }
+    '/_layout/_authenticated/_dashboard/settings/api-keys': {
+      id: '/_layout/_authenticated/_dashboard/settings/api-keys'
+      path: '/api-keys'
+      fullPath: '/settings/api-keys'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsApiKeysRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardSettingsRoute
+    }
+    '/_layout/_authenticated/_dashboard/projects/new': {
+      id: '/_layout/_authenticated/_dashboard/projects/new'
+      path: '/projects/new'
+      fullPath: '/projects/new'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsNewRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/projects/$id': {
+      id: '/_layout/_authenticated/_dashboard/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIdRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/organizations/new': {
+      id: '/_layout/_authenticated/_dashboard/organizations/new'
+      path: '/organizations/new'
+      fullPath: '/organizations/new'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsNewRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/organizations/$slug': {
+      id: '/_layout/_authenticated/_dashboard/organizations/$slug'
+      path: '/organizations/$slug'
+      fullPath: '/organizations/$slug'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardOrganizationsSlugRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/_layout/_authenticated/_dashboard/projects/$id_/edit': {
+      id: '/_layout/_authenticated/_dashboard/projects/$id_/edit'
+      path: '/projects/$id/edit'
+      fullPath: '/projects/$id/edit'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardProjectsIdEditRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
   }
 }
 
 interface LayoutAdminRouteChildren {
-  LayoutAdminDashboardRoute: typeof LayoutAdminDashboardRoute;
+  LayoutAdminDashboardRoute: typeof LayoutAdminDashboardRoute
 }
 
 const LayoutAdminRouteChildren: LayoutAdminRouteChildren = {
   LayoutAdminDashboardRoute: LayoutAdminDashboardRoute,
-};
+}
 
-const LayoutAdminRouteWithChildren = LayoutAdminRoute._addFileChildren(LayoutAdminRouteChildren);
+const LayoutAdminRouteWithChildren = LayoutAdminRoute._addFileChildren(
+  LayoutAdminRouteChildren,
+)
 
 interface LayoutAuthenticatedDashboardSettingsRouteChildren {
-  LayoutAuthenticatedDashboardSettingsApiKeysRoute: typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute;
-  LayoutAuthenticatedDashboardSettingsAuthMethodsRoute: typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute;
-  LayoutAuthenticatedDashboardSettingsProfileRoute: typeof LayoutAuthenticatedDashboardSettingsProfileRoute;
-  LayoutAuthenticatedDashboardSettingsSecurityRoute: typeof LayoutAuthenticatedDashboardSettingsSecurityRoute;
-  LayoutAuthenticatedDashboardSettingsIndexRoute: typeof LayoutAuthenticatedDashboardSettingsIndexRoute;
+  LayoutAuthenticatedDashboardSettingsApiKeysRoute: typeof LayoutAuthenticatedDashboardSettingsApiKeysRoute
+  LayoutAuthenticatedDashboardSettingsAuthMethodsRoute: typeof LayoutAuthenticatedDashboardSettingsAuthMethodsRoute
+  LayoutAuthenticatedDashboardSettingsProfileRoute: typeof LayoutAuthenticatedDashboardSettingsProfileRoute
+  LayoutAuthenticatedDashboardSettingsSecurityRoute: typeof LayoutAuthenticatedDashboardSettingsSecurityRoute
+  LayoutAuthenticatedDashboardSettingsIndexRoute: typeof LayoutAuthenticatedDashboardSettingsIndexRoute
 }
 
 const LayoutAuthenticatedDashboardSettingsRouteChildren: LayoutAuthenticatedDashboardSettingsRouteChildren =
@@ -607,70 +632,82 @@ const LayoutAuthenticatedDashboardSettingsRouteChildren: LayoutAuthenticatedDash
       LayoutAuthenticatedDashboardSettingsProfileRoute,
     LayoutAuthenticatedDashboardSettingsSecurityRoute:
       LayoutAuthenticatedDashboardSettingsSecurityRoute,
-    LayoutAuthenticatedDashboardSettingsIndexRoute: LayoutAuthenticatedDashboardSettingsIndexRoute,
-  };
+    LayoutAuthenticatedDashboardSettingsIndexRoute:
+      LayoutAuthenticatedDashboardSettingsIndexRoute,
+  }
 
 const LayoutAuthenticatedDashboardSettingsRouteWithChildren =
   LayoutAuthenticatedDashboardSettingsRoute._addFileChildren(
     LayoutAuthenticatedDashboardSettingsRouteChildren,
-  );
+  )
 
 interface LayoutAuthenticatedDashboardRouteChildren {
-  LayoutAuthenticatedDashboardHomeRoute: typeof LayoutAuthenticatedDashboardHomeRoute;
-  LayoutAuthenticatedDashboardSettingsRoute: typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren;
-  LayoutAuthenticatedDashboardOrganizationsSlugRoute: typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute;
-  LayoutAuthenticatedDashboardOrganizationsNewRoute: typeof LayoutAuthenticatedDashboardOrganizationsNewRoute;
-  LayoutAuthenticatedDashboardProjectsIdRoute: typeof LayoutAuthenticatedDashboardProjectsIdRoute;
-  LayoutAuthenticatedDashboardProjectsNewRoute: typeof LayoutAuthenticatedDashboardProjectsNewRoute;
-  LayoutAuthenticatedDashboardOrganizationsIndexRoute: typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute;
-  LayoutAuthenticatedDashboardProjectsIndexRoute: typeof LayoutAuthenticatedDashboardProjectsIndexRoute;
-  LayoutAuthenticatedDashboardProjectsIdEditRoute: typeof LayoutAuthenticatedDashboardProjectsIdEditRoute;
+  LayoutAuthenticatedDashboardHomeRoute: typeof LayoutAuthenticatedDashboardHomeRoute
+  LayoutAuthenticatedDashboardSettingsRoute: typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
+  LayoutAuthenticatedDashboardOrganizationsSlugRoute: typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
+  LayoutAuthenticatedDashboardOrganizationsNewRoute: typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
+  LayoutAuthenticatedDashboardProjectsIdRoute: typeof LayoutAuthenticatedDashboardProjectsIdRoute
+  LayoutAuthenticatedDashboardProjectsNewRoute: typeof LayoutAuthenticatedDashboardProjectsNewRoute
+  LayoutAuthenticatedDashboardOrganizationsIndexRoute: typeof LayoutAuthenticatedDashboardOrganizationsIndexRoute
+  LayoutAuthenticatedDashboardProjectsIndexRoute: typeof LayoutAuthenticatedDashboardProjectsIndexRoute
+  LayoutAuthenticatedDashboardProjectsIdEditRoute: typeof LayoutAuthenticatedDashboardProjectsIdEditRoute
 }
 
-const LayoutAuthenticatedDashboardRouteChildren: LayoutAuthenticatedDashboardRouteChildren = {
-  LayoutAuthenticatedDashboardHomeRoute: LayoutAuthenticatedDashboardHomeRoute,
-  LayoutAuthenticatedDashboardSettingsRoute: LayoutAuthenticatedDashboardSettingsRouteWithChildren,
-  LayoutAuthenticatedDashboardOrganizationsSlugRoute:
-    LayoutAuthenticatedDashboardOrganizationsSlugRoute,
-  LayoutAuthenticatedDashboardOrganizationsNewRoute:
-    LayoutAuthenticatedDashboardOrganizationsNewRoute,
-  LayoutAuthenticatedDashboardProjectsIdRoute: LayoutAuthenticatedDashboardProjectsIdRoute,
-  LayoutAuthenticatedDashboardProjectsNewRoute: LayoutAuthenticatedDashboardProjectsNewRoute,
-  LayoutAuthenticatedDashboardOrganizationsIndexRoute:
-    LayoutAuthenticatedDashboardOrganizationsIndexRoute,
-  LayoutAuthenticatedDashboardProjectsIndexRoute: LayoutAuthenticatedDashboardProjectsIndexRoute,
-  LayoutAuthenticatedDashboardProjectsIdEditRoute: LayoutAuthenticatedDashboardProjectsIdEditRoute,
-};
+const LayoutAuthenticatedDashboardRouteChildren: LayoutAuthenticatedDashboardRouteChildren =
+  {
+    LayoutAuthenticatedDashboardHomeRoute:
+      LayoutAuthenticatedDashboardHomeRoute,
+    LayoutAuthenticatedDashboardSettingsRoute:
+      LayoutAuthenticatedDashboardSettingsRouteWithChildren,
+    LayoutAuthenticatedDashboardOrganizationsSlugRoute:
+      LayoutAuthenticatedDashboardOrganizationsSlugRoute,
+    LayoutAuthenticatedDashboardOrganizationsNewRoute:
+      LayoutAuthenticatedDashboardOrganizationsNewRoute,
+    LayoutAuthenticatedDashboardProjectsIdRoute:
+      LayoutAuthenticatedDashboardProjectsIdRoute,
+    LayoutAuthenticatedDashboardProjectsNewRoute:
+      LayoutAuthenticatedDashboardProjectsNewRoute,
+    LayoutAuthenticatedDashboardOrganizationsIndexRoute:
+      LayoutAuthenticatedDashboardOrganizationsIndexRoute,
+    LayoutAuthenticatedDashboardProjectsIndexRoute:
+      LayoutAuthenticatedDashboardProjectsIndexRoute,
+    LayoutAuthenticatedDashboardProjectsIdEditRoute:
+      LayoutAuthenticatedDashboardProjectsIdEditRoute,
+  }
 
 const LayoutAuthenticatedDashboardRouteWithChildren =
-  LayoutAuthenticatedDashboardRoute._addFileChildren(LayoutAuthenticatedDashboardRouteChildren);
+  LayoutAuthenticatedDashboardRoute._addFileChildren(
+    LayoutAuthenticatedDashboardRouteChildren,
+  )
 
 interface LayoutAuthenticatedRouteChildren {
-  LayoutAuthenticatedDashboardRoute: typeof LayoutAuthenticatedDashboardRouteWithChildren;
-  LayoutAuthenticatedAcceptInvitationIdRoute: typeof LayoutAuthenticatedAcceptInvitationIdRoute;
+  LayoutAuthenticatedDashboardRoute: typeof LayoutAuthenticatedDashboardRouteWithChildren
+  LayoutAuthenticatedAcceptInvitationIdRoute: typeof LayoutAuthenticatedAcceptInvitationIdRoute
 }
 
 const LayoutAuthenticatedRouteChildren: LayoutAuthenticatedRouteChildren = {
-  LayoutAuthenticatedDashboardRoute: LayoutAuthenticatedDashboardRouteWithChildren,
-  LayoutAuthenticatedAcceptInvitationIdRoute: LayoutAuthenticatedAcceptInvitationIdRoute,
-};
+  LayoutAuthenticatedDashboardRoute:
+    LayoutAuthenticatedDashboardRouteWithChildren,
+  LayoutAuthenticatedAcceptInvitationIdRoute:
+    LayoutAuthenticatedAcceptInvitationIdRoute,
+}
 
-const LayoutAuthenticatedRouteWithChildren = LayoutAuthenticatedRoute._addFileChildren(
-  LayoutAuthenticatedRouteChildren,
-);
+const LayoutAuthenticatedRouteWithChildren =
+  LayoutAuthenticatedRoute._addFileChildren(LayoutAuthenticatedRouteChildren)
 
 interface LayoutRouteChildren {
-  LayoutAdminRoute: typeof LayoutAdminRouteWithChildren;
-  LayoutAuthenticatedRoute: typeof LayoutAuthenticatedRouteWithChildren;
-  LayoutAboutRoute: typeof LayoutAboutRoute;
-  LayoutLoginRoute: typeof LayoutLoginRoute;
-  LayoutSkillRoute: typeof LayoutSkillRoute;
-  LayoutIndexRoute: typeof LayoutIndexRoute;
-  LayoutBuildersAccountRoute: typeof LayoutBuildersAccountRoute;
-  LayoutAppsIndexRoute: typeof LayoutAppsIndexRoute;
-  LayoutBuildersIndexRoute: typeof LayoutBuildersIndexRoute;
-  LayoutAppsAccountIdGatewayIdRoute: typeof LayoutAppsAccountIdGatewayIdRoute;
-  LayoutAppsAccountIdIndexRoute: typeof LayoutAppsAccountIdIndexRoute;
+  LayoutAdminRoute: typeof LayoutAdminRouteWithChildren
+  LayoutAuthenticatedRoute: typeof LayoutAuthenticatedRouteWithChildren
+  LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutLoginRoute: typeof LayoutLoginRoute
+  LayoutSkillRoute: typeof LayoutSkillRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutBuildersAccountRoute: typeof LayoutBuildersAccountRoute
+  LayoutBuildersAddRoute: typeof LayoutBuildersAddRoute
+  LayoutAppsIndexRoute: typeof LayoutAppsIndexRoute
+  LayoutBuildersIndexRoute: typeof LayoutBuildersIndexRoute
+  LayoutAppsAccountIdGatewayIdRoute: typeof LayoutAppsAccountIdGatewayIdRoute
+  LayoutAppsAccountIdIndexRoute: typeof LayoutAppsAccountIdIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -681,17 +718,19 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSkillRoute: LayoutSkillRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutBuildersAccountRoute: LayoutBuildersAccountRoute,
+  LayoutBuildersAddRoute: LayoutBuildersAddRoute,
   LayoutAppsIndexRoute: LayoutAppsIndexRoute,
   LayoutBuildersIndexRoute: LayoutBuildersIndexRoute,
   LayoutAppsAccountIdGatewayIdRoute: LayoutAppsAccountIdGatewayIdRoute,
   LayoutAppsAccountIdIndexRoute: LayoutAppsAccountIdIndexRoute,
-};
+}
 
-const LayoutRouteWithChildren = LayoutRoute._addFileChildren(LayoutRouteChildren);
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

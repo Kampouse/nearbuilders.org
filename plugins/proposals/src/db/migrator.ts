@@ -1,6 +1,6 @@
 import type { Migration } from "virtual:drizzle-migrations.sql";
 import { sql } from "drizzle-orm";
-import type { ApiDatabase } from "./index";
+import type { ProposalsDatabase } from "./index";
 
 function normalizeRows<T>(result: unknown): T[] {
   if (Array.isArray(result)) return result as T[];
@@ -10,7 +10,7 @@ function normalizeRows<T>(result: unknown): T[] {
   return [];
 }
 
-export async function migrate(db: ApiDatabase, migrations: Migration[]): Promise<void> {
+export async function migrate(db: ProposalsDatabase, migrations: Migration[]): Promise<void> {
   await db.execute(sql`
     CREATE TABLE IF NOT EXISTS "drizzle_migrations" (
       id SERIAL PRIMARY KEY,
@@ -29,7 +29,7 @@ export async function migrate(db: ApiDatabase, migrations: Migration[]): Promise
 
   for (const migration of migrations) {
     if (appliedHashes.has(migration.hash)) continue;
-    console.log(`[API] Applying migration: ${migration.tag}`);
+    console.log(`[Proposals] Applying migration: ${migration.tag}`);
 
     await db.transaction(async (tx) => {
       for (const statement of migration.sql) {

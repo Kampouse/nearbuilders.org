@@ -15,7 +15,6 @@ export const Route = createFileRoute("/_layout")({
       sessionQueryOptions(authClient, context.session),
     );
     return {
-      assetsUrl: context.assetsUrl || "",
       runtimeConfig: context.runtimeConfig,
       session,
     };
