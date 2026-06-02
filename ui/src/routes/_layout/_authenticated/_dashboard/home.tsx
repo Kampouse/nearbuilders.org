@@ -56,7 +56,19 @@ function Home() {
     enabled: Boolean(user && !user.isAnonymous),
   });
 
+  const { data: builderProposalResult, isLoading: builderProposalLoading } = useQuery({
+    queryKey: ["builder-proposals", nearAccountId],
+    queryFn: () =>
+      apiClient.getProposals({
+        pluginId: "builders",
+        entityId: nearAccountId!,
+        limit: 1,
+      }),
+    enabled: Boolean(nearAccountId),
+  });
+
   const builderProfile = builderResult?.data ?? null;
+  const builderProposal = builderProposalResult?.data[0] ?? null;
 
   const projects = projectsData?.data ?? [];
   const projectCount = projectsData?.meta.total ?? projects.length;
@@ -91,7 +103,6 @@ function Home() {
       </div>
     );
   }
-
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <DashboardHeader />
@@ -144,7 +155,8 @@ function Home() {
 
           <BuilderProfileCard
             builderProfile={builderProfile}
-            isLoading={builderLoading}
+            builderProposal={builderProposal}
+            isLoading={builderLoading || builderProposalLoading}
             nearAccountId={nearAccountId}
             apiClient={apiClient}
           />
@@ -191,25 +203,46 @@ function Home() {
   );
 }
 
-type BuilderStatus = "pending" | "approved" | "rejected";
-
 interface BuilderProfileData {
   nearAccount: string;
   name: string | null;
   bio: string | null;
   skills: string[];
   location: string | null;
-  status: BuilderStatus;
+}
+
+type ProposalStatus = "pending" | "approved" | "rejected" | "removed";
+
+interface BuilderProposalData {
+  pluginId: string;
+  entityId: string;
+  payload: unknown;
+  reviewStatus: ProposalStatus;
   rejectionReason: string | null;
+}
+
+function readProposalPayload(payload: unknown) {
+  const data = payload && typeof payload === "object" && !Array.isArray(payload) ? payload : {};
+  const record = data as Record<string, unknown>;
+  return {
+    name: typeof record.name === "string" ? record.name : null,
+    bio: typeof record.bio === "string" ? record.bio : null,
+    skills: Array.isArray(record.skills)
+      ? record.skills.filter((item): item is string => typeof item === "string")
+      : [],
+    location: typeof record.location === "string" ? record.location : null,
+  };
 }
 
 function BuilderProfileCard({
   builderProfile,
+  builderProposal,
   isLoading,
   nearAccountId,
   apiClient,
 }: {
   builderProfile: BuilderProfileData | null;
+  builderProposal: BuilderProposalData | null;
   isLoading: boolean;
   nearAccountId: string;
   apiClient: ReturnType<typeof useApiClient>;
@@ -225,19 +258,24 @@ function BuilderProfileCard({
 
   const registerMutation = useMutation({
     mutationFn: () =>
-      apiClient.builders.registerBuilder({
-        name: form.name.trim() || undefined,
-        bio: form.bio.trim() || undefined,
-        skills: form.skillsRaw
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-        location: form.location.trim() || undefined,
+      apiClient.propose({
+        pluginId: "builders",
+        entityId: nearAccountId,
+        payload: {
+          name: form.name.trim() || undefined,
+          bio: form.bio.trim() || undefined,
+          skills: form.skillsRaw
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          location: form.location.trim() || undefined,
+        },
       }),
     onSuccess: () => {
       toast.success("Builder profile submitted for review");
       setShowRegisterForm(false);
       queryClient.invalidateQueries({ queryKey: ["my-builder-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["builder-proposals", nearAccountId] });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to register"),
   });
@@ -255,7 +293,7 @@ function BuilderProfileCard({
     );
   }
 
-  if (!builderProfile) {
+  if (!builderProfile && !builderProposal) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -365,6 +403,73 @@ function BuilderProfileCard({
     );
   }
 
+  if (!builderProfile && builderProposal) {
+    const proposalPayload = readProposalPayload(builderProposal.payload);
+
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Hammer size={14} className="text-muted-foreground" />
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Builder Proposal
+              </p>
+            </div>
+            <BuilderStatusPill status={builderProposal.reviewStatus} />
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-3">
+          <div className="space-y-0.5">
+            <div className="font-semibold text-foreground text-sm">
+              {proposalPayload.name || nearAccountId}
+            </div>
+            <div className="text-xs font-mono text-brand-cyan">{nearAccountId}</div>
+            {proposalPayload.location && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin size={10} />
+                {proposalPayload.location}
+              </div>
+            )}
+          </div>
+
+          {proposalPayload.bio && (
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+              {proposalPayload.bio}
+            </p>
+          )}
+
+          {proposalPayload.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {proposalPayload.skills.slice(0, 6).map((skill) => (
+                <Badge key={skill} variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {builderProposal.reviewStatus === "pending" && (
+            <div className="rounded-lg bg-muted border border-border text-sm text-muted-foreground px-3 py-2.5">
+              Your application is under review. We'll update your status soon.
+            </div>
+          )}
+
+          {builderProposal.reviewStatus === "rejected" && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-sm px-3 py-2.5">
+              <span className="font-semibold text-destructive">Not approved</span>
+              {builderProposal.rejectionReason && (
+                <span className="text-muted-foreground"> - {builderProposal.rejectionReason}</span>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const approvedBuilder = builderProfile!;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -375,32 +480,32 @@ function BuilderProfileCard({
               Builder Profile
             </p>
           </div>
-          <BuilderStatusPill status={builderProfile.status} />
+          <BuilderStatusPill status="approved" />
         </div>
       </CardHeader>
       <CardContent className="pt-0 space-y-3">
         <div className="space-y-0.5">
           <div className="font-semibold text-foreground text-sm">
-            {builderProfile.name || nearAccountId}
+            {approvedBuilder.name || nearAccountId}
           </div>
           <div className="text-xs font-mono text-brand-cyan">{nearAccountId}</div>
-          {builderProfile.location && (
+          {approvedBuilder.location && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin size={10} />
-              {builderProfile.location}
+              {approvedBuilder.location}
             </div>
           )}
         </div>
 
-        {builderProfile.bio && (
+        {approvedBuilder.bio && (
           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-            {builderProfile.bio}
+            {approvedBuilder.bio}
           </p>
         )}
 
-        {builderProfile.skills.length > 0 && (
+        {approvedBuilder.skills.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {builderProfile.skills.slice(0, 6).map((skill) => (
+            {approvedBuilder.skills.slice(0, 6).map((skill) => (
               <Badge key={skill} variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
                 {skill}
               </Badge>
@@ -408,34 +513,17 @@ function BuilderProfileCard({
           </div>
         )}
 
-        {builderProfile.status === "pending" && (
-          <div className="rounded-lg bg-muted border border-border text-sm text-muted-foreground px-3 py-2.5">
-            Your application is under review. We'll update your status soon.
-          </div>
-        )}
-
-        {builderProfile.status === "rejected" && (
-          <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-sm px-3 py-2.5">
-            <span className="font-semibold text-destructive">Not approved</span>
-            {builderProfile.rejectionReason && (
-              <span className="text-muted-foreground"> — {builderProfile.rejectionReason}</span>
-            )}
-          </div>
-        )}
-
-        {builderProfile.status === "approved" && (
-          <Button asChild size="sm" variant="outline">
-            <Link to="/builders/$account" params={{ account: nearAccountId }}>
-              View public profile →
-            </Link>
-          </Button>
-        )}
+        <Button asChild size="sm" variant="outline">
+          <Link to="/builders/$account" params={{ account: nearAccountId }}>
+            View public profile →
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );
 }
 
-function BuilderStatusPill({ status }: { status: BuilderStatus }) {
+function BuilderStatusPill({ status }: { status: ProposalStatus | "approved" }) {
   if (status === "approved") {
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-accent-light border border-brand-accent text-foreground">

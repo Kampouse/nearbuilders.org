@@ -106,6 +106,7 @@ export class ProjectService extends Context.Tag("projects/ProjectService")<
 
     createProject: (
       input: {
+        id?: string;
         kind: ProjectKind;
         title: string;
         slug: string;
@@ -374,6 +375,31 @@ export const ProjectServiceLive = Layer.effect(
           const effectiveOwnerId =
             userRole === "admin" && input.ownerId?.trim() ? input.ownerId.trim() : userId;
 
+          if (input.id?.trim()) {
+            const [existingById] = yield* Effect.promise(() =>
+              db.select().from(projects).where(eq(projects.id, input.id!.trim())).limit(1),
+            );
+
+            if (existingById) {
+              return {
+                id: existingById.id,
+                ownerId: existingById.ownerId,
+                organizationId: existingById.organizationId,
+                kind: existingById.kind as ProjectKind,
+                slug: existingById.slug,
+                title: existingById.title,
+                description: existingById.description,
+                content: existingById.content ?? null,
+                status: existingById.status as ProjectStatus,
+                visibility: existingById.visibility as ProjectVisibility,
+                repository: existingById.repository ?? null,
+                domain: existingById.domain ?? null,
+                createdAt: toIsoString(existingById.createdAt),
+                updatedAt: toIsoString(existingById.updatedAt),
+              };
+            }
+          }
+
           const [existing] = yield* Effect.promise(() =>
             db
               .select()
@@ -391,7 +417,7 @@ export const ProjectServiceLive = Layer.effect(
           }
 
           const now = new Date();
-          const id = generateId();
+          const id = input.id?.trim() || generateId();
           const description = normalizeOptionalText(input.description);
           const content = normalizeOptionalText(input.content);
           const repository = normalizeOptionalText(input.repository);

@@ -91,12 +91,12 @@ function ProjectDetailPage() {
 
   const upvoteCountQuery = useQuery({
     queryKey: ["upvoteCount", projectId],
-    queryFn: () => apiClient.getUpvoteCount({ thingId: projectId }),
+    queryFn: () => apiClient.getUpvoteCount({ entityId: projectId }),
   });
 
   const userVoteQuery = useQuery({
     queryKey: ["userVoteState", projectId],
-    queryFn: () => apiClient.getUserVote({ thingId: projectId }),
+    queryFn: () => apiClient.getUserVote({ entityId: projectId }),
     select: (data): "up" | "down" | null => (data.hasUpvote ? "up" : null),
     enabled: canParticipate,
   });
@@ -120,7 +120,7 @@ function ProjectDetailPage() {
   });
 
   const upvoteMutation = useMutation({
-    mutationFn: () => apiClient.upvoteThing({ thingId: projectId }),
+    mutationFn: () => apiClient.upvote({ entityId: projectId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });
@@ -130,7 +130,7 @@ function ProjectDetailPage() {
   });
 
   const downvoteMutation = useMutation({
-    mutationFn: () => apiClient.downvoteThing({ thingId: projectId }),
+    mutationFn: () => apiClient.downvote({ entityId: projectId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });

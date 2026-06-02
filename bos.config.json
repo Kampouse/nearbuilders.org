@@ -10,6 +10,18 @@
   },
   "repository": "https://github.com/nearbuilders/everything-dev",
   "app": {
+    "host": {
+      "development": "local:host",
+      "production": "https://elliot-braem-4158-host-everything-dev-nearbuilder-ae2099c40-ze.zephyrcloud.app",
+      "secrets": [
+        "CORS_ORIGIN",
+        "TENANT_WHITELIST",
+        "ALLOW_OVERRIDE",
+        "ALLOW_UNTRUSTED_SSR",
+        "CSP_STRICT"
+      ],
+      "integrity": "sha384-CN3qLruSxLxGPULplCsf+9QA0MMYDqsXEhSLCz6x3pTvgXuLMAWIJhTcJr2U/Yi7"
+    },
     "ui": {
       "development": "local:ui",
       "production": "https://elliot-braem-4146-ui-nearbuilders-org-nearbuilder-cdb0b826f-ze.zephyrcloud.app",
@@ -19,11 +31,31 @@
     },
     "api": {
       "development": "local:api",
-      "secrets": [
-        "API_DATABASE_URL"
-      ],
       "production": "https://elliot-braem-4148-api-nearbuilders-org-nearbuilde-d5a551aab-ze.zephyrcloud.app",
       "integrity": "sha384-b/yKcaQ3SK3uqaae1mdjXqutKCd3OlZRdrTrLNqej/IRe1nSQisO2/TP3MhHjQVk"
+    },
+    "auth": {
+      "name": "everything-dev_auth-plugin",
+      "development": "local:plugins/auth",
+      "production": "https://elliot-braem-4155-everything-dev-auth-plugin-bett-917891cb0-ze.zephyrcloud.app",
+      "integrity": "sha384-HGCj8X8OaADQo1cBP6gyaTEdaGpEqO7EWWlpdp/3Xx4LyM/uVHmLfXTTgdl3NZ9S",
+      "secrets": [
+        "AUTH_DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "CORS_ORIGIN",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "PASSKEY_RP_ID",
+        "PASSKEY_RP_NAME",
+        "PASSKEY_ORIGIN",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_PHONE_NUMBER",
+        "NEAR_RELAYER_ACCOUNT_ID",
+        "NEAR_RELAYER_PRIVATE_KEY",
+        "NEAR_SUB_ACCOUNT_PARENT_KEY_MAINNET",
+        "NEAR_SUB_ACCOUNT_PARENT_KEY_TESTNET"
+      ]
     }
   },
   "plugins": {
@@ -72,6 +104,18 @@
       ],
       "production": "https://elliot-braem-4151-everything-dev-builders-plugin--45d7c9b73-ze.zephyrcloud.app",
       "integrity": "sha384-q1b4V9SbWtvOff7GDnT/RSQNFGlH907ujgle53/SVGCWxw50DyRNJuYF8zvzRIU0"
+    },
+    "proposals": {
+      "development": "local:plugins/proposals",
+      "secrets": [
+        "PROPOSALS_DATABASE_URL"
+      ]
+    },
+    "votes": {
+      "development": "local:plugins/votes",
+      "secrets": [
+        "VOTES_DATABASE_URL"
+      ]
     }
   },
   "shared": {

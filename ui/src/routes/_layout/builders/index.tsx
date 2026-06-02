@@ -130,19 +130,33 @@ function BuildersPage() {
         </>
       )}
 
-      <div className="mt-16 rounded-xl bg-foreground p-8">
-        <h2 className="text-xl font-black text-background mb-1">Are you building on NEAR?</h2>
-        <p className="text-sm text-background/60 mb-4">
-          {isAuthenticated
-            ? "Claim your builder profile and get discovered by the community."
-            : "Connect your NEAR wallet and register as a builder."}
-        </p>
-        <Link
-          to={isAuthenticated ? "/home" : "/login"}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-cyan text-black text-sm font-bold hover:opacity-90 transition-opacity"
-        >
-          {isAuthenticated ? "Manage your profile" : "Connect your wallet"}
-        </Link>
+      <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-xl bg-foreground p-8">
+          <h2 className="text-xl font-black text-background mb-1">Are you building on NEAR?</h2>
+          <p className="text-sm text-background/60 mb-4">
+            {isAuthenticated
+              ? "Claim your builder profile and get discovered by the community."
+              : "Connect your NEAR wallet and register as a builder."}
+          </p>
+          <Link
+            to={isAuthenticated ? "/home" : "/login"}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-cyan text-black text-sm font-bold hover:opacity-90 transition-opacity"
+          >
+            {isAuthenticated ? "Manage your profile" : "Connect your wallet"}
+          </Link>
+        </div>
+        <div className="rounded-xl bg-foreground p-8">
+          <h2 className="text-xl font-black text-background mb-1">Know a builder?</h2>
+          <p className="text-sm text-background/60 mb-4">
+            Nominate someone from the NEAR community to be recognized as a builder.
+          </p>
+          <Link
+            to="/builders/add"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-black text-sm font-bold hover:opacity-90 transition-opacity"
+          >
+            Nominate a builder
+          </Link>
+        </div>
       </div>
     </div>
   );

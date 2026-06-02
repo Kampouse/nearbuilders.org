@@ -55,6 +55,7 @@ export const Route = createFileRoute("/_layout/_authenticated/_dashboard/project
 });
 
 const slugId = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 6);
+const proposalId = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 const slugSuffixRef: { current: string } = { current: "" };
 
 const generateSlug = (v: string) => {
@@ -104,6 +105,8 @@ function NewProjectPage() {
     }),
   } satisfies ProjectFormValues;
 
+  const projectEntityIdRef = useRef(`proj_${proposalId()}`);
+
   const form = useForm({
     defaultValues: initialDraft as ProjectFormValues,
     canSubmitWhenInvalid: true,
@@ -121,30 +124,35 @@ function NewProjectPage() {
 
   const createMutation = useMutation({
     mutationFn: (values: ProjectFormValues) =>
-      apiClient.projects.createProject({
-        kind: values.kind,
-        title: values.title.trim(),
-        slug: generateSlug(values.title),
-        description: values.description?.trim() || undefined,
-        repository: values.repository?.trim() || undefined,
-        content: values.content?.trim() || undefined,
-        visibility: values.visibility,
-        ownerId: values.ownerId?.trim() || undefined,
-        domain: values.domain?.trim() || undefined,
+      apiClient.propose({
+        pluginId: "projects",
+        entityId: projectEntityIdRef.current,
+        payload: {
+          kind: values.kind,
+          title: values.title.trim(),
+          slug: generateSlug(values.title),
+          description: values.description?.trim() || undefined,
+          repository: values.repository?.trim() || undefined,
+          content: values.content?.trim() || undefined,
+          visibility: values.visibility,
+          ownerId: values.ownerId?.trim() || undefined,
+          domain: values.domain?.trim() || undefined,
+        },
       }),
-    onSuccess: (result) => {
-      clearDraft(result.kind === "idea" ? "idea" : "project");
-      toast.success(`${result.kind === "idea" ? "Idea" : "Project"} created`);
+    onSuccess: (_result, values) => {
+      clearDraft(values.kind === "idea" ? "idea" : "project");
+      toast.success(`${values.kind === "idea" ? "Idea" : "Project"} submitted for review`);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-proposals", "projects"] });
       navigate({
-        to: "/projects/$id",
-        params: { id: result.id },
+        to: "/projects",
         search: {
           kind: search.kind,
           personal: search.personal,
           private: search.private,
         },
       });
+      projectEntityIdRef.current = `proj_${proposalId()}`;
     },
     onError: (err: Error) => toast.error(err.message || "Failed to create"),
   });
@@ -211,10 +219,10 @@ function NewProjectPage() {
                 size="sm"
               >
                 {createMutation.isPending
-                  ? "Creating…"
+                  ? "Submitting…"
                   : kind === "idea"
-                    ? "Create Idea"
-                    : "Create Project"}
+                    ? "Submit Idea"
+                    : "Submit Project"}
               </Button>
             )}
           </form.Subscribe>

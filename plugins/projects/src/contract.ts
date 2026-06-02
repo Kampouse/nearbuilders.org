@@ -84,6 +84,7 @@ export const contract = oc.router({
     .route({ method: "POST", path: "/v1/projects" })
     .input(
       z.object({
+        id: z.string().optional(),
         kind: z.enum(["project", "idea"]),
         title: z.string().min(1).max(200),
         slug: z

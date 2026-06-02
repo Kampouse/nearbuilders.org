@@ -113,6 +113,7 @@ export declare const contract: {
         };
     }>>, Record<never, never>>;
     createProject: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+        id: z.ZodOptional<z.ZodString>;
         kind: z.ZodEnum<{
             project: "project";
             idea: "idea";

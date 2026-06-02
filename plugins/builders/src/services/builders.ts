@@ -4,8 +4,6 @@ import { ORPCError } from "every-plugin/orpc";
 import { DatabaseTag } from "../db/layer";
 import { builders } from "../db/schema";
 
-type BuilderStatus = "pending" | "approved" | "rejected";
-
 function toIsoString(value: Date | string | null | undefined): string {
   if (!value) return new Date().toISOString();
   return typeof value === "string" ? value : value.toISOString();
@@ -49,8 +47,6 @@ export interface Builder {
   skills: string[];
   location: string | null;
   links: Record<string, string> | null;
-  status: BuilderStatus;
-  rejectionReason: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -65,8 +61,6 @@ function rowToBuilder(row: any): Builder {
     skills: parseSkills(row.skills),
     location: row.location ?? null,
     links: parseLinks(row.links),
-    status: row.status as BuilderStatus,
-    rejectionReason: row.rejectionReason ?? null,
     createdAt: toIsoString(row.createdAt),
     updatedAt: toIsoString(row.updatedAt),
   };
@@ -92,14 +86,6 @@ export class BuilderService extends Context.Tag("builders/BuilderService")<
       ORPCError<string, unknown>
     >;
 
-    listPendingBuilders: (input: { limit?: number; cursor?: string }) => Effect.Effect<
-      {
-        data: Builder[];
-        meta: { total: number; hasMore: boolean; nextCursor: string | null };
-      },
-      ORPCError<string, unknown>
-    >;
-
     getBuilder: (nearAccount: string) => Effect.Effect<Builder | null, ORPCError<string, unknown>>;
 
     getBuilderByUserId: (
@@ -107,17 +93,15 @@ export class BuilderService extends Context.Tag("builders/BuilderService")<
       walletAddress?: string,
     ) => Effect.Effect<Builder | null, ORPCError<string, unknown>>;
 
-    registerBuilder: (
-      input: {
-        name?: string;
-        bio?: string;
-        skills?: string[];
-        location?: string;
-        links?: Record<string, string>;
-      },
-      nearAccount: string,
-      userId: string,
-    ) => Effect.Effect<Builder, ORPCError<string, unknown>>;
+    createBuilder: (input: {
+      nearAccount: string;
+      userId?: string;
+      name?: string;
+      bio?: string;
+      skills?: string[];
+      location?: string;
+      links?: Record<string, string>;
+    }) => Effect.Effect<Builder, ORPCError<string, unknown>>;
 
     updateBuilderProfile: (
       nearAccount: string,
@@ -133,12 +117,9 @@ export class BuilderService extends Context.Tag("builders/BuilderService")<
       userRole?: string,
     ) => Effect.Effect<Builder, ORPCError<string, unknown>>;
 
-    approveBuilder: (nearAccount: string) => Effect.Effect<Builder, ORPCError<string, unknown>>;
-
-    rejectBuilder: (
+    deleteBuilder: (
       nearAccount: string,
-      reason?: string,
-    ) => Effect.Effect<Builder, ORPCError<string, unknown>>;
+    ) => Effect.Effect<{ deleted: boolean }, ORPCError<string, unknown>>;
   }
 >() {}
 
@@ -152,7 +133,7 @@ export const BuilderServiceLive = Layer.effect(
         Effect.gen(function* () {
           const limit = Math.min(input.limit ?? 24, 100);
           const offset = input.cursor ? parseInt(input.cursor, 10) : 0;
-          const conditions: any[] = [eq(builders.status, "approved")];
+          const conditions: any[] = [];
 
           if (input.search) {
             const pattern = `%${input.search}%`;
@@ -202,45 +183,14 @@ export const BuilderServiceLive = Layer.effect(
           };
         }),
 
-      listPendingBuilders: (input) =>
-        Effect.gen(function* () {
-          const limit = Math.min(input.limit ?? 24, 100);
-          const offset = input.cursor ? parseInt(input.cursor, 10) : 0;
-          const whereClause = eq(builders.status, "pending");
-
-          const [totalResult] = yield* Effect.promise(() =>
-            db.select({ count: count() }).from(builders).where(whereClause),
-          );
-
-          const total = totalResult?.count ?? 0;
-
-          const records = yield* Effect.promise(() =>
-            db
-              .select()
-              .from(builders)
-              .where(whereClause)
-              .orderBy(desc(builders.createdAt))
-              .limit(limit)
-              .offset(offset),
-          );
-
-          const nextOffset = offset + limit;
-          const hasMore = nextOffset < total;
-
-          return {
-            data: records.map(rowToBuilder),
-            meta: {
-              total,
-              hasMore,
-              nextCursor: hasMore ? String(nextOffset) : null,
-            },
-          };
-        }),
-
       getBuilder: (nearAccount) =>
         Effect.gen(function* () {
           const [row] = yield* Effect.promise(() =>
-            db.select().from(builders).where(eq(builders.nearAccount, nearAccount)).limit(1),
+            db
+              .select()
+              .from(builders)
+              .where(eq(builders.nearAccount, nearAccount))
+              .limit(1),
           );
           return row ? rowToBuilder(row) : null;
         }),
@@ -255,28 +205,45 @@ export const BuilderServiceLive = Layer.effect(
             db
               .select()
               .from(builders)
-              .where(or(...conditions))
+              .where(and(or(...conditions)))
               .limit(1),
           );
           return row ? rowToBuilder(row) : null;
         }),
 
-      registerBuilder: (input, nearAccount, userId) =>
+      createBuilder: (input) =>
         Effect.gen(function* () {
           const [existing] = yield* Effect.promise(() =>
-            db
-              .select()
-              .from(builders)
-              .where(or(eq(builders.nearAccount, nearAccount), eq(builders.userId, userId)))
-              .limit(1),
+            db.select().from(builders).where(eq(builders.nearAccount, input.nearAccount)).limit(1),
           );
 
           if (existing) {
-            return yield* Effect.fail(
-              new ORPCError("BAD_REQUEST", {
-                message: "A builder profile already exists for this account",
-              }),
+            const now = new Date();
+            yield* Effect.promise(() =>
+              db
+                .update(builders)
+                .set({
+                  userId: input.userId ?? existing.userId,
+                  name: input.name?.trim() ?? existing.name,
+                  bio: input.bio?.trim() ?? existing.bio,
+                  skills:
+                    input.skills !== undefined ? serializeSkills(input.skills) : existing.skills,
+                  location: input.location?.trim() ?? existing.location,
+                  links: input.links !== undefined ? serializeLinks(input.links) : existing.links,
+                  updatedAt: now,
+                })
+                .where(eq(builders.nearAccount, input.nearAccount)),
             );
+
+            const [updated] = yield* Effect.promise(() =>
+              db
+                .select()
+                .from(builders)
+                .where(eq(builders.nearAccount, input.nearAccount))
+                .limit(1),
+            );
+
+            return rowToBuilder(updated);
           }
 
           const now = new Date();
@@ -285,15 +252,13 @@ export const BuilderServiceLive = Layer.effect(
           yield* Effect.promise(() =>
             db.insert(builders).values({
               id,
-              nearAccount,
-              userId,
+              nearAccount: input.nearAccount,
+              userId: input.userId ?? null,
               name: input.name?.trim() ?? null,
               bio: input.bio?.trim() ?? null,
               skills: serializeSkills(input.skills),
               location: input.location?.trim() ?? null,
               links: serializeLinks(input.links),
-              status: "pending",
-              rejectionReason: null,
               createdAt: now,
               updatedAt: now,
             }),
@@ -301,15 +266,13 @@ export const BuilderServiceLive = Layer.effect(
 
           return {
             id,
-            nearAccount,
-            userId,
+            nearAccount: input.nearAccount,
+            userId: input.userId ?? null,
             name: input.name?.trim() ?? null,
             bio: input.bio?.trim() ?? null,
             skills: input.skills ?? [],
             location: input.location?.trim() ?? null,
             links: input.links && Object.keys(input.links).length > 0 ? input.links : null,
-            status: "pending" as BuilderStatus,
-            rejectionReason: null,
             createdAt: toIsoString(now),
             updatedAt: toIsoString(now),
           };
@@ -360,7 +323,7 @@ export const BuilderServiceLive = Layer.effect(
           return rowToBuilder(updated);
         }),
 
-      approveBuilder: (nearAccount) =>
+      deleteBuilder: (nearAccount) =>
         Effect.gen(function* () {
           const [existing] = yield* Effect.promise(() =>
             db.select().from(builders).where(eq(builders.nearAccount, nearAccount)).limit(1),
@@ -372,52 +335,11 @@ export const BuilderServiceLive = Layer.effect(
             );
           }
 
-          const now = new Date();
           yield* Effect.promise(() =>
-            db
-              .update(builders)
-              .set({ status: "approved", rejectionReason: null, updatedAt: now })
-              .where(eq(builders.nearAccount, nearAccount)),
+            db.delete(builders).where(eq(builders.nearAccount, nearAccount)),
           );
 
-          return rowToBuilder({
-            ...existing,
-            status: "approved",
-            rejectionReason: null,
-            updatedAt: now,
-          });
-        }),
-
-      rejectBuilder: (nearAccount, reason) =>
-        Effect.gen(function* () {
-          const [existing] = yield* Effect.promise(() =>
-            db.select().from(builders).where(eq(builders.nearAccount, nearAccount)).limit(1),
-          );
-
-          if (!existing) {
-            return yield* Effect.fail(
-              new ORPCError("NOT_FOUND", { message: "Builder profile not found" }),
-            );
-          }
-
-          const now = new Date();
-          yield* Effect.promise(() =>
-            db
-              .update(builders)
-              .set({
-                status: "rejected",
-                rejectionReason: reason?.trim() ?? null,
-                updatedAt: now,
-              })
-              .where(eq(builders.nearAccount, nearAccount)),
-          );
-
-          return rowToBuilder({
-            ...existing,
-            status: "rejected",
-            rejectionReason: reason?.trim() ?? null,
-            updatedAt: now,
-          });
+          return { deleted: true };
         }),
     };
   }),
