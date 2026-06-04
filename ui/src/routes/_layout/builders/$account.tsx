@@ -37,10 +37,13 @@ export const Route = createFileRoute("/_layout/builders/$account")({
     const proposalIds = proposalsData?.data?.map((p) => p.id) ?? [];
 
     if (proposalIds.length > 0) {
-      await Promise.allSettled([
-        queryClient.prefetchQuery(upvoteCountsOptions(apiClient, proposalIds)),
-        isAuthenticated && queryClient.prefetchQuery(userVotesOptions(apiClient, proposalIds, true)),
-      ].filter(Boolean));
+      await Promise.allSettled(
+        [
+          queryClient.prefetchQuery(upvoteCountsOptions(apiClient, proposalIds)),
+          isAuthenticated &&
+            queryClient.prefetchQuery(userVotesOptions(apiClient, proposalIds, true)),
+        ].filter(Boolean),
+      );
     }
   },
   head: ({ params }) => ({

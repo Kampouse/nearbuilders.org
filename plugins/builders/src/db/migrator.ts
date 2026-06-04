@@ -10,7 +10,8 @@ function normalizeRows<T>(result: unknown): T[] {
   return [];
 }
 
-const IDEMPOTENT_ERRORS = /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
+const IDEMPOTENT_ERRORS =
+  /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
 const COMPATIBLE_HASHES: Record<string, string[]> = {
   "861bd3f224fec88502017bd57fb2b27734e8a5eb1f9eb943b4372a7e60520fa1": [
     "858442979d275c5476ce7a0c8e970c38ced82867b63594c608e174d4110a209d",

@@ -10,7 +10,8 @@ function normalizeRows<T>(result: unknown): T[] {
   return [];
 }
 
-const IDEMPOTENT_ERRORS = /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
+const IDEMPOTENT_ERRORS =
+  /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
 const COMPATIBLE_HASHES: Record<string, string[]> = {
   fb0c442ab5c44674aa091eb326b64ee14f70e21d4c5a02c0cd515d245310c4ea: [
     "eec69b017bf3e9c6d619db80f8303e59a26af6ae4077e2028f9a9ad39ddd66d3",
@@ -65,7 +66,9 @@ export async function migrate(db: ProposalsDatabase, migrations: Migration[]): P
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         if (IDEMPOTENT_ERRORS.test(msg)) {
-          console.log(`[Proposals] Skipping statement (already applied): ${statement.slice(0, 80)}`);
+          console.log(
+            `[Proposals] Skipping statement (already applied): ${statement.slice(0, 80)}`,
+          );
           continue;
         }
         throw err;

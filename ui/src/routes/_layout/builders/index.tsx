@@ -57,10 +57,13 @@ export const Route = createFileRoute("/_layout/builders/")({
     const proposalIds = proposalsData?.data?.map((p) => p.id) ?? [];
 
     if (proposalIds.length > 0) {
-      await Promise.allSettled([
-        queryClient.prefetchQuery(upvoteCountsOptions(apiClient, proposalIds)),
-        isAuthenticated && queryClient.prefetchQuery(userVotesOptions(apiClient, proposalIds, true)),
-      ].filter(Boolean));
+      await Promise.allSettled(
+        [
+          queryClient.prefetchQuery(upvoteCountsOptions(apiClient, proposalIds)),
+          isAuthenticated &&
+            queryClient.prefetchQuery(userVotesOptions(apiClient, proposalIds, true)),
+        ].filter(Boolean),
+      );
     }
   },
   head: () => ({
@@ -626,7 +629,10 @@ function BuilderCard({
             </motion.div>
           </div>
         )}
-        <ArrowRight size={14} className="text-brand-cyan group-hover:translate-x-0.5 transition-transform" />
+        <ArrowRight
+          size={14}
+          className="text-brand-cyan group-hover:translate-x-0.5 transition-transform"
+        />
       </div>
     </Link>
   );
