@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Check, Copy, Mail, ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
-import { Button } from "@/components";
+import { Badge, Button } from "@/components";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_layout/_authenticated/_dashboard/settings/profile")({
@@ -18,14 +19,63 @@ function ProfileSettings() {
   if (!user) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      <AccountSummary user={user} />
       <IdentityCard user={user} />
-      {user.isAnonymous && (
-        <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground leading-relaxed">
-          This session is temporary. Link an email or NEAR wallet before signing out if you want the
-          account to remain recoverable.
+      {user.isAnonymous && <TemporaryAccountNotice />}
+    </div>
+  );
+}
+
+function AccountSummary({
+  user,
+}: {
+  user: { email?: string; name?: string; isAnonymous?: boolean | null };
+}) {
+  const displayName = user.name?.trim() || "Anonymous";
+  const accountState = user.isAnonymous ? "Temporary account" : "Standard account";
+  const recoveryState = user.isAnonymous ? "Recovery needed" : "Recovery ready";
+  const RecoveryIcon = user.isAnonymous ? ShieldAlert : ShieldCheck;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-4">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-base font-bold text-foreground">
+            {displayName.slice(0, 2).toUpperCase()}
+          </div>
+          <div className="min-w-0 space-y-2">
+            <div className="space-y-1">
+              <h2 className="truncate text-lg font-semibold leading-tight text-foreground">
+                {displayName}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Manage your public identity and account recovery status.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={user.isAnonymous ? "secondary" : "success"}>
+                <UserRound />
+                {accountState}
+              </Badge>
+              <Badge variant={user.isAnonymous ? "destructive" : "success"}>
+                <RecoveryIcon />
+                {recoveryState}
+              </Badge>
+            </div>
+          </div>
         </div>
-      )}
+
+        <div className="min-w-0 rounded-lg border border-border bg-muted px-3.5 py-3 sm:w-64">
+          <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Mail className="h-3.5 w-3.5" />
+            Primary email
+          </div>
+          <div className="truncate text-sm font-medium text-foreground">
+            {user.email ?? "Not linked yet"}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -48,20 +98,29 @@ function IdentityCard({
   });
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-        Identity
+    <div className="space-y-4 rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-1">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          Identity
+        </div>
+        <p className="text-sm text-muted-foreground">
+          These values identify your account inside NEAR Builders.
+        </p>
       </div>
       <div className="flex flex-col gap-2">
         <InfoRow label="user id" value={user.id} mono />
         <InfoRow label="email" value={user.email ?? "not linked"} />
-        <InfoRow label="account type" value={user.isAnonymous ? "anonymous" : "standard"} />
+        <InfoRow
+          label="account type"
+          value={user.isAnonymous ? "anonymous" : "standard"}
+          copyable={false}
+        />
       </div>
       <div className="space-y-2">
         <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           Display name
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             type="text"
             value={name}
@@ -83,15 +142,80 @@ function IdentityCard({
   );
 }
 
-function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function InfoRow({
+  label,
+  value,
+  mono,
+  copyable = true,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  copyable?: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+  const canCopy = copyable && value !== "not linked";
+
+  const handleCopy = async () => {
+    if (!canCopy) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast.success(`${label} copied`);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-4 rounded-md border border-border bg-muted px-3.5 py-2.5 items-center">
-      <span className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
+    <div className="grid gap-2 rounded-md border border-border bg-muted px-3.5 py-3 sm:grid-cols-[120px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
-      <span className={`text-foreground text-[13px] break-all ${mono ? "font-mono text-xs" : ""}`}>
+      <span
+        className={`min-w-0 truncate text-[13px] text-foreground ${mono ? "font-mono text-xs" : ""}`}
+        title={value}
+      >
         {value}
       </span>
+      {canCopy && (
+        <Button
+          type="button"
+          onClick={handleCopy}
+          variant="ghost"
+          size="icon-sm"
+          className="justify-self-start text-muted-foreground hover:text-foreground sm:justify-self-auto"
+          aria-label={`Copy ${label}`}
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function TemporaryAccountNotice() {
+  return (
+    <div className="rounded-xl border border-brand-pink-soft bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-brand-pink-soft bg-brand-pink-light">
+            <ShieldAlert className="h-4 w-4 text-destructive" />
+          </div>
+          <div className="space-y-1">
+            <div className="font-semibold text-foreground">Make this account recoverable</div>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              This session is temporary. Link an email or NEAR wallet before signing out so you can
+              return to this account later.
+            </p>
+          </div>
+        </div>
+        <Button asChild variant="outline" size="sm" className="self-start">
+          <Link to="/settings/auth-methods">Review auth methods</Link>
+        </Button>
+      </div>
     </div>
   );
 }

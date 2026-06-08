@@ -1,4 +1,4 @@
-import { Copy } from "lucide-react";
+import { Copy, KeyRound, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
@@ -40,18 +40,35 @@ export function ApiKeyForm({ onCreate, isPending }: ApiKeyFormProps) {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground uppercase tracking-wide">name</Label>
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="API key name"
-        />
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+        <div className="space-y-2">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Key name
+          </Label>
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Local CLI"
+          />
+        </div>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isPending || !name.trim()}
+          variant={name.trim() ? "default" : "outline"}
+          size="sm"
+          className="sm:mb-0.5"
+        >
+          <KeyRound className="h-3.5 w-3.5" />
+          {isPending ? "creating..." : "create key"}
+        </Button>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground uppercase tracking-wide">expiration</Label>
+        <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          Expiration
+        </Label>
         <div className="flex flex-wrap gap-2">
           {EXPIRATION_PRESETS.map((preset) => (
             <Button
@@ -67,20 +84,9 @@ export function ApiKeyForm({ onCreate, isPending }: ApiKeyFormProps) {
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground leading-relaxed">
-        Permissions, rate limits, and refill configuration are server-only and cannot be set from
-        the browser. Provision them through a server-side endpoint or admin tooling.
-      </p>
-
-      <div className="flex gap-2">
-        <Button
-          onClick={handleSubmit}
-          disabled={isPending || !name.trim()}
-          variant="outline"
-          size="sm"
-        >
-          {isPending ? "creating..." : "create key"}
-        </Button>
+      <div className="rounded-md border border-border bg-muted px-3.5 py-3 text-xs leading-relaxed text-muted-foreground">
+        API keys inherit your account access. Store secrets securely and revoke keys that are no
+        longer used.
       </div>
     </div>
   );
@@ -110,19 +116,25 @@ export function ApiKeyReveal({ apiKey, onDismiss }: ApiKeyRevealProps) {
 
   return (
     <Card>
-      <CardContent className="p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="font-medium">New API key ready</div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Copy and store this key now. You will only be able to see the full secret once.
-            </p>
+      <CardContent className="p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-brand-pink-soft bg-brand-pink-light">
+              <ShieldAlert className="h-4 w-4 text-destructive" />
+            </div>
+            <div className="space-y-1">
+              <div className="font-semibold text-foreground">New API key ready</div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Copy and store this key now. You will only be able to see the full secret once.
+              </p>
+            </div>
           </div>
-          <Button onClick={onDismiss} variant="outline" size="sm">
+          <Button onClick={onDismiss} variant="outline" size="sm" className="self-start">
             dismiss
           </Button>
         </div>
-        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+
+        <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto]">
           <Input
             readOnly
             value={apiKey.key}
@@ -131,14 +143,15 @@ export function ApiKeyReveal({ apiKey, onDismiss }: ApiKeyRevealProps) {
             onClick={(e) => e.currentTarget.select()}
           />
           <Button onClick={handleCopy} variant="outline" size="sm">
-            <Copy className="h-3.5 w-3.5 mr-1" />
-            copy
+            <Copy className="h-3.5 w-3.5" />
+            copy secret
           </Button>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-sm">
-          <InfoRow label="name" value={apiKey.name ?? "unnamed"} />
-          <InfoRow label="prefix" value={`${apiKey.prefix ?? "api_"}...`} mono />
-          <InfoRow label="created" value={new Date(apiKey.createdAt).toLocaleString()} />
+
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <InfoRow label="Name" value={apiKey.name ?? "unnamed"} />
+          <InfoRow label="Prefix" value={`${apiKey.prefix ?? "api_"}...`} mono />
+          <InfoRow label="Created" value={new Date(apiKey.createdAt).toLocaleString()} />
         </div>
       </CardContent>
     </Card>
@@ -147,9 +160,15 @@ export function ApiKeyReveal({ apiKey, onDismiss }: ApiKeyRevealProps) {
 
 function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="border border-border bg-muted/30 p-3 rounded-md grid gap-1 sm:grid-cols-[100px_1fr] sm:gap-4">
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={mono ? "text-xs font-mono break-all" : "text-sm break-all"}>{value}</div>
+    <div className="grid gap-1 rounded-md border border-border bg-muted px-3.5 py-3 sm:grid-cols-[80px_minmax(0,1fr)] sm:gap-3">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
+      <div
+        className={`min-w-0 break-all text-sm text-foreground ${mono ? "font-mono text-xs" : ""}`}
+      >
+        {value}
+      </div>
     </div>
   );
 }

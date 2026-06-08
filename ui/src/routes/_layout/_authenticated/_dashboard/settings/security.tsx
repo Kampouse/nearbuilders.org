@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { KeyRound, LogOut, RotateCcw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
-import { Button } from "@/components";
+import { Badge, Button } from "@/components";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_layout/_authenticated/_dashboard/settings/security")({
@@ -71,14 +72,29 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      <SecurityOverview hasPassword={!!user.email} isAnonymous={!!user.isAnonymous} />
       {user.email ? (
-        <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Change password
+        <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+                <KeyRound className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold leading-tight text-foreground">
+                  Change password
+                </h2>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Use at least 8 characters. Updating your password keeps the current session open.
+                </p>
+              </div>
+            </div>
+            <Badge variant="success">Available</Badge>
           </div>
+
           <div className="grid gap-4 md:grid-cols-3">
-            <Field label="current">
+            <Field label="Current password">
               <Input
                 type="password"
                 value={currentPassword}
@@ -86,7 +102,7 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
                 placeholder="Current password"
               />
             </Field>
-            <Field label="new">
+            <Field label="New password">
               <Input
                 type="password"
                 value={newPassword}
@@ -94,7 +110,7 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
                 placeholder="New password"
               />
             </Field>
-            <Field label="confirm">
+            <Field label="Confirm password">
               <Input
                 type="password"
                 value={confirmPassword}
@@ -103,41 +119,94 @@ function SecurityTab({ user }: { user: { email?: string; isAnonymous?: boolean |
               />
             </Field>
           </div>
-          <Button
-            onClick={() => changePasswordMutation.mutate()}
-            disabled={
-              changePasswordMutation.isPending ||
-              !currentPassword ||
-              !newPassword ||
-              !confirmPassword
-            }
-            variant="outline"
-            size="sm"
-          >
-            {changePasswordMutation.isPending ? "changing..." : "change password"}
-          </Button>
+          <div className="mt-4 flex justify-end">
+            <Button
+              onClick={() => changePasswordMutation.mutate()}
+              disabled={
+                changePasswordMutation.isPending ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword
+              }
+              variant="outline"
+              size="sm"
+            >
+              {changePasswordMutation.isPending ? "changing..." : "change password"}
+            </Button>
+          </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-          Password management appears once an email-based login is attached to this account.
+        <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+          <div className="flex gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+              <KeyRound className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <div className="font-semibold text-foreground">Password unavailable</div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Password management appears once an email-based login is attached to this account.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <ActionCard
-          title="revoke other sessions"
+          icon={RotateCcw}
+          title="Revoke other sessions"
           body="End every other active session while keeping this one open."
           actionLabel={revokeSessionsMutation.isPending ? "revoking..." : "revoke sessions"}
           onClick={() => revokeSessionsMutation.mutate()}
           disabled={revokeSessionsMutation.isPending}
         />
         <ActionCard
-          title="sign out"
+          icon={LogOut}
+          title="Sign out"
           body="Disconnect this session and return to the public landing page."
           actionLabel={signOutMutation.isPending ? "signing out..." : "sign out"}
           onClick={() => signOutMutation.mutate()}
           disabled={signOutMutation.isPending}
+          danger
         />
+      </div>
+    </div>
+  );
+}
+
+function SecurityOverview({
+  hasPassword,
+  isAnonymous,
+}: {
+  hasPassword: boolean;
+  isAnonymous: boolean;
+}) {
+  const Icon = isAnonymous ? ShieldAlert : ShieldCheck;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+            <Icon className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold leading-tight text-foreground">
+              Account security
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Manage password access, active sessions, and sign-out behavior for this account.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant={hasPassword ? "success" : "secondary"}>
+            {hasPassword ? "Password enabled" : "No password"}
+          </Badge>
+          <Badge variant={isAnonymous ? "destructive" : "success"}>
+            {isAnonymous ? "Temporary account" : "Recoverable"}
+          </Badge>
+        </div>
       </div>
     </div>
   );
@@ -155,27 +224,52 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ActionCard({
+  icon: Icon,
   title,
   body,
   actionLabel,
   onClick,
   disabled,
+  danger = false,
 }: {
+  icon: typeof RotateCcw;
   title: string;
   body: string;
   actionLabel: string;
   onClick: () => void;
   disabled: boolean;
+  danger?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-      <div className="space-y-1">
-        <div className="font-medium text-foreground">{title}</div>
-        <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+    <div
+      className={`rounded-xl border bg-card p-5 ${
+        danger ? "border-brand-pink-soft" : "border-border"
+      }`}
+    >
+      <div className="flex h-full flex-col gap-4">
+        <div className="flex gap-3">
+          <div
+            className={`flex size-9 shrink-0 items-center justify-center rounded-lg border ${
+              danger ? "border-brand-pink-soft bg-brand-pink-light" : "border-border bg-muted"
+            }`}
+          >
+            <Icon className={`h-4 w-4 ${danger ? "text-destructive" : "text-muted-foreground"}`} />
+          </div>
+          <div className="space-y-1">
+            <div className="font-semibold text-foreground">{title}</div>
+            <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
+          </div>
+        </div>
+        <Button
+          onClick={onClick}
+          disabled={disabled}
+          variant="outline"
+          size="sm"
+          className={`self-start ${danger ? "text-destructive hover:text-destructive" : ""}`}
+        >
+          {actionLabel}
+        </Button>
       </div>
-      <Button onClick={onClick} disabled={disabled} variant="outline" size="sm">
-        {actionLabel}
-      </Button>
     </div>
   );
 }

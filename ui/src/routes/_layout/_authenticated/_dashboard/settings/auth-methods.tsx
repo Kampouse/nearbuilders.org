@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { KeyRound, Mail, Smartphone, Wallet } from "lucide-react";
+import { Check, KeyRound, Mail, Smartphone, Wallet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
-import { Button, ConfirmDialog } from "@/components";
+import { Badge, Button, ConfirmDialog } from "@/components";
 import { useUserPasskeys } from "@/components/settings-sections";
 import { Input } from "@/components/ui/input";
 
@@ -31,34 +31,66 @@ function AuthMethodsSettings() {
 
   if (!user) return null;
 
+  const linkedMethodCount =
+    Number(!!user.email) + Number(!!nearAccountId) + Number(!!user.phoneNumber) + passkeys.length;
+
   return (
-    <div className="space-y-4">
-      <EmailMethod user={user} />
-      <NearMethod nearAccountId={nearAccountId} />
-      <PhoneMethod user={user} />
+    <div className="space-y-5">
+      <AuthOverview linkedMethodCount={linkedMethodCount} passkeyCount={passkeys.length} />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <EmailMethod user={user} />
+        <NearMethod nearAccountId={nearAccountId} />
+        <div className="lg:col-span-2">
+          <PhoneMethod user={user} />
+        </div>
+      </div>
       <PasskeysMethod passkeys={passkeys} />
+    </div>
+  );
+}
+
+function AuthOverview({
+  linkedMethodCount,
+  passkeyCount,
+}: {
+  linkedMethodCount: number;
+  passkeyCount: number;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold leading-tight text-foreground">Sign-in methods</h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Add at least one recoverable method so this account remains accessible after sign out.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant={linkedMethodCount > 0 ? "success" : "destructive"}>
+            {linkedMethodCount} linked
+          </Badge>
+          <Badge variant={passkeyCount > 0 ? "success" : "secondary"}>
+            {passkeyCount} passkeys
+          </Badge>
+        </div>
+      </div>
     </div>
   );
 }
 
 function EmailMethod({ user }: { user: { email?: string; isAnonymous?: boolean | null } }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
-          <Mail className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-base font-semibold text-foreground">Email</span>
-            <StatusChip linked={!!user.email} />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {user.email ?? "Email login has not been linked for this account yet."}
-          </p>
-        </div>
-      </div>
-    </div>
+    <MethodCard
+      icon={Mail}
+      title="Email"
+      description="Password and recovery access."
+      status={user.email ? "Linked" : "Not linked"}
+      linked={!!user.email}
+    >
+      <p className={`text-sm text-muted-foreground${user.email ? " break-all" : ""}`}>
+        {user.email ?? "Email login has not been linked for this account yet."}
+      </p>
+    </MethodCard>
   );
 }
 
@@ -88,36 +120,29 @@ function NearMethod({ nearAccountId }: { nearAccountId: string | null }) {
   });
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
-          <Wallet className="h-4 w-4 text-muted-foreground" />
+    <MethodCard
+      icon={Wallet}
+      title="NEAR Wallet"
+      description="Recoverable wallet sign-in."
+      status={nearAccountId ? "Linked" : "Not linked"}
+      linked={!!nearAccountId}
+    >
+      {nearAccountId ? (
+        <div className="rounded-md border border-border bg-muted px-3.5 py-3 font-mono text-xs break-all text-foreground">
+          {nearAccountId}
         </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-base font-semibold text-foreground">NEAR Wallet</span>
-            <StatusChip linked={!!nearAccountId} />
-          </div>
-          {nearAccountId ? (
-            <div className="rounded-md border border-border bg-muted px-3 py-2 font-mono text-xs break-all text-foreground">
-              {nearAccountId}
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 pt-1">
-              <Button
-                type="button"
-                onClick={() => linkNearMutation.mutate()}
-                disabled={linkNearMutation.isPending}
-                variant="outline"
-                size="sm"
-              >
-                {linkNearMutation.isPending ? "connecting..." : "connect NEAR wallet"}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      ) : (
+        <Button
+          type="button"
+          onClick={() => linkNearMutation.mutate()}
+          disabled={linkNearMutation.isPending}
+          variant="outline"
+          size="sm"
+        >
+          {linkNearMutation.isPending ? "connecting..." : "connect NEAR wallet"}
+        </Button>
+      )}
+    </MethodCard>
   );
 }
 
@@ -129,25 +154,17 @@ function PhoneMethod({
   const phoneNumber = user.phoneNumber ?? null;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
-          <Smartphone className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-base font-semibold text-foreground">Phone</span>
-            <StatusChip
-              linked={!!phoneNumber}
-              label={phoneNumber && !user.phoneNumberVerified ? "unverified" : undefined}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {phoneNumber ?? "Phone OTP sign-in is available from the login screen."}
-          </p>
-        </div>
-      </div>
-    </div>
+    <MethodCard
+      icon={Smartphone}
+      title="Phone"
+      description="OTP access when attached."
+      status={phoneNumber ? (user.phoneNumberVerified ? "Verified" : "Unverified") : "Available"}
+      linked={!!phoneNumber && user.phoneNumberVerified !== false}
+    >
+      <p className="text-sm text-muted-foreground">
+        {phoneNumber ?? "Phone OTP sign-in is available from the login screen."}
+      </p>
+    </MethodCard>
   );
 }
 
@@ -191,63 +208,61 @@ function PasskeysMethod({ passkeys }: { passkeys: Array<{ id: string; name?: str
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center shrink-0">
-            <KeyRound className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="min-w-0 flex-1 space-y-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-base font-semibold text-foreground">Passkeys</span>
-              <StatusChip
-                linked={passkeys.length > 0}
-                label={passkeys.length > 0 ? `${passkeys.length} registered` : undefined}
-              />
-            </div>
-
-            {passkeys.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {passkeys.map((passkey) => (
-                  <div
-                    key={passkey.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted px-3.5 py-2.5"
+      <MethodCard
+        icon={KeyRound}
+        title="Passkeys"
+        description="Register device-based sign-in for faster and safer access."
+        status={passkeys.length > 0 ? `${passkeys.length} registered` : "None"}
+        linked={passkeys.length > 0}
+      >
+        <div className="space-y-3">
+          {passkeys.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {passkeys.map((passkey) => (
+                <div
+                  key={passkey.id}
+                  className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted px-3.5 py-2.5"
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                    {passkey.name || "Passkey"}
+                  </span>
+                  <Button
+                    onClick={() => setPasskeyToDelete(passkey)}
+                    disabled={removePasskeyMutation.isPending}
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
                   >
-                    <span className="text-sm text-foreground truncate min-w-0 flex-1">
-                      {passkey.name || "Passkey"}
-                    </span>
-                    <Button
-                      onClick={() => setPasskeyToDelete(passkey)}
-                      disabled={removePasskeyMutation.isPending}
-                      variant="outline"
-                      size="sm"
-                    >
-                      remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                value={passkeyName}
-                onChange={(e) => setPasskeyName(e.target.value)}
-                placeholder="Passkey name, e.g. Work laptop"
-                className="max-w-xs"
-              />
-              <Button
-                onClick={() => addPasskeyMutation.mutate()}
-                disabled={addPasskeyMutation.isPending}
-                variant="outline"
-                size="sm"
-              >
-                {addPasskeyMutation.isPending ? "adding..." : "add passkey"}
-              </Button>
+                    remove
+                  </Button>
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="rounded-md border border-border bg-muted px-3.5 py-3 text-sm text-muted-foreground">
+              No passkeys registered yet.
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Input
+              type="text"
+              value={passkeyName}
+              onChange={(e) => setPasskeyName(e.target.value)}
+              placeholder="Passkey name, e.g. Work laptop"
+              className="max-w-sm"
+            />
+            <Button
+              onClick={() => addPasskeyMutation.mutate()}
+              disabled={addPasskeyMutation.isPending}
+              variant="outline"
+              size="sm"
+            >
+              {addPasskeyMutation.isPending ? "adding..." : "add passkey"}
+            </Button>
           </div>
         </div>
-      </div>
+      </MethodCard>
 
       <ConfirmDialog
         open={!!passkeyToDelete}
@@ -267,16 +282,39 @@ function PasskeysMethod({ passkeys }: { passkeys: Array<{ id: string; name?: str
   );
 }
 
-function StatusChip({ linked, label }: { linked: boolean; label?: string }) {
+function MethodCard({
+  icon: Icon,
+  title,
+  description,
+  status,
+  linked,
+  children,
+}: {
+  icon: typeof Mail;
+  title: string;
+  description: string;
+  status: string;
+  linked: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-semibold border ${
-        linked
-          ? "bg-secondary border-border text-foreground"
-          : "bg-muted border-border text-muted-foreground"
-      }`}
-    >
-      {label ?? (linked ? "linked" : "not linked")}
-    </span>
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex h-full flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+            <Icon className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <h3 className="text-base font-semibold leading-tight text-foreground">{title}</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+          </div>
+          <Badge variant={linked ? "success" : "secondary"} className="mt-0.5">
+            {linked && <Check className="h-3 w-3" />}
+            {status}
+          </Badge>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }

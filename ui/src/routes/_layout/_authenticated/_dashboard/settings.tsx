@@ -31,23 +31,28 @@ function SettingsLayout() {
     tabs.find((t) => pathname === t.to || pathname.startsWith(`${t.to}/`))?.value ?? "profile";
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
-        <h1 className="text-xl font-semibold text-foreground">Settings</h1>
-      </div>
+    <div className="w-full px-4 py-6 pb-10 sm:px-6 sm:py-8 sm:pb-12">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Manage your identity, sign-in methods, API keys, and account security.
+          </p>
+        </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <Tabs value={activeTab} className="w-full min-w-0">
-            <TabsList className="w-full justify-start overflow-x-auto">
+        <Tabs value={activeTab} className="w-full min-w-0">
+          <div className="overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="w-max min-w-full justify-start overflow-visible">
               {tabs.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value} asChild className="shrink-0">
                   <Link to={tab.to}>{tab.label}</Link>
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
+          </div>
+        </Tabs>
 
+        <div key={activeTab} className="motion-safe:animate-settings-panel-in">
           <Outlet />
         </div>
       </div>
