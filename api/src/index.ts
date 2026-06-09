@@ -6,6 +6,11 @@ import type { ProposalSchema } from "../../plugins/proposals/src/contract";
 import { contract } from "./contract";
 import { createAuthMiddleware } from "./lib/auth";
 import type { PluginsClient } from "./lib/plugins-types.gen";
+import {
+  assertProjectProposalOwner,
+  createProjectProposalOwnerContext,
+  resolveProjectProposalOwner,
+} from "./lib/project-proposal-owner";
 
 type ApiContext = {
   userId?: string;
@@ -99,27 +104,27 @@ const createCallbacks: Record<string, CreateCallback> = {
   },
   projects: async (plugins, proposal, context) => {
     const payload = requireObjectPayload(proposal.payload);
+    const ownerId = resolveProjectProposalOwner(payload, proposal.createdBy);
     const projectsClient = plugins.projects(pluginContext(context));
     const visibility =
       payload.visibility === "private" || payload.visibility === "unlisted"
         ? payload.visibility
         : "public";
 
-    // Site-submitted proposals reference an existing (private) project owned by
-    // the proposer; approval only changes its visibility, never its ownership.
     try {
       const updated = await projectsClient.updateProject({
         id: proposal.entityId,
         visibility,
+        expectedOwnerId: ownerId,
       });
+      assertProjectProposalOwner(updated.ownerId, ownerId);
       return updated.id;
     } catch (error) {
       if (!isNotFoundError(error)) throw error;
     }
 
-    // External proposals (e.g. API-key sources) may propose projects that don't
-    // exist yet; create them attributed to the original proposer.
-    const result = await projectsClient.createProject({
+    const proposalOwnerContext = createProjectProposalOwnerContext(context, ownerId);
+    const result = await plugins.projects(pluginContext(proposalOwnerContext)).createProject({
       id: proposal.entityId,
       kind: payload.kind === "idea" ? "idea" : "project",
       title: readString(payload.title) ?? proposal.entityId,
@@ -129,9 +134,9 @@ const createCallbacks: Record<string, CreateCallback> = {
       visibility,
       repository: readString(payload.repository),
       organizationId: readString(payload.organizationId),
-      ownerId: readString(payload.ownerId) ?? proposal.createdBy,
       domain: readString(payload.domain),
     });
+    assertProjectProposalOwner(result.ownerId, ownerId);
     return result.id;
   },
 };
