@@ -10,7 +10,8 @@ function normalizeRows<T>(result: unknown): T[] {
   return [];
 }
 
-const IDEMPOTENT_ERRORS = /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
+const IDEMPOTENT_ERRORS =
+  /already exists|duplicate.*(table|key|object)|does not exist|cannot drop|duplicate_column|duplicate_table/i;
 
 export async function migrate(db: VotesDatabase, migrations: Migration[]): Promise<void> {
   await db.execute(sql`

@@ -8,7 +8,7 @@ import {
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { Profile } from "better-near-auth";
 import { AnimatePresence, motion, Reorder } from "framer-motion";
-import { ArrowRight, MapPin, Search, ThumbsUp } from "lucide-react";
+import { ArrowRight, CheckCircle, MapPin, Search, Sparkles, ThumbsUp, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Proposal, ProposalPayload } from "@/app";
 import {
@@ -35,6 +35,8 @@ interface BuilderLike {
   location: string | null;
 }
 
+type BuilderCategory = "all" | "approved" | "nominated";
+
 type BuilderCardData =
   | { kind: "builder"; builder: BuilderLike; proposal: Proposal | null }
   | { kind: "nominated"; proposal: Proposal; payload: ProposalPayload };
@@ -45,11 +47,26 @@ function getCardId(card: BuilderCardData): string {
 
 export const Route = createFileRoute("/_layout/builders/")({
   loader: async ({ context }) => {
-    const { queryClient, apiClient } = context;
-    await Promise.allSettled([
-      queryClient.prefetchInfiniteQuery(buildersInfiniteOptions(apiClient, "")),
-      queryClient.prefetchQuery(pendingProposalsOptions(apiClient)),
-    ]);
+    const { queryClient, apiClient, session } = context;
+    const isAuthenticated = Boolean(session?.user && !session.user.isAnonymous);
+
+    await queryClient.prefetchInfiniteQuery(buildersInfiniteOptions(apiClient, ""));
+    await queryClient.prefetchQuery(pendingProposalsOptions(apiClient));
+
+    const proposalsData = queryClient.getQueryData(["proposals", "builders", "pending"]) as
+      | { data?: { id: string }[] }
+      | undefined;
+    const proposalIds = proposalsData?.data?.map((p) => p.id) ?? [];
+
+    if (proposalIds.length > 0) {
+      await Promise.allSettled(
+        [
+          queryClient.prefetchQuery(upvoteCountsOptions(apiClient, proposalIds)),
+          isAuthenticated &&
+            queryClient.prefetchQuery(userVotesOptions(apiClient, proposalIds, true)),
+        ].filter(Boolean),
+      );
+    }
   },
   head: () => ({
     meta: [
@@ -72,6 +89,7 @@ function BuildersPage() {
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [category, setCategory] = useState<BuilderCategory>("all");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -167,7 +185,19 @@ function BuildersPage() {
     });
   }, [mergedCards, getNominationCount]);
 
-  const sortedIds = useMemo(() => sortedCards.map(getCardId), [sortedCards]);
+  const filteredCards = useMemo(() => {
+    if (category === "all") return sortedCards;
+    if (category === "approved") return sortedCards.filter((c) => c.kind === "builder");
+    return sortedCards.filter((c) => c.kind === "nominated");
+  }, [sortedCards, category]);
+
+  const categoryCounts = useMemo(() => {
+    const approved = sortedCards.filter((c) => c.kind === "builder").length;
+    const nominated = sortedCards.filter((c) => c.kind === "nominated").length;
+    return { all: sortedCards.length, approved, nominated };
+  }, [sortedCards]);
+
+  const sortedIds = useMemo(() => filteredCards.map(getCardId), [filteredCards]);
 
   const orpc = useOrpc();
   const queryClient = useQueryClient();
@@ -287,16 +317,53 @@ function BuildersPage() {
             className="pl-9 rounded-full bg-secondary"
           />
         </div>
+
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {(
+            [
+              { value: "all" as const, label: "All", icon: Users },
+              { value: "approved" as const, label: "Approved", icon: CheckCircle },
+              { value: "nominated" as const, label: "Nominated", icon: Sparkles },
+            ] as const
+          ).map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setCategory(value)}
+              className={cn(
+                "inline-flex items-center gap-1.5 h-8 rounded-full border px-3 text-sm font-semibold transition-all duration-150",
+                category === value
+                  ? "border-brand-accent bg-brand-accent-light text-foreground"
+                  : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Icon size={14} />
+              {label}
+              <span
+                className={cn(
+                  "text-xs tabular-nums ml-0.5",
+                  category === value ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                {categoryCounts[value]}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {sortedCards.length === 0 ? (
+      {filteredCards.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="text-4xl mb-4">🔭</div>
           <p className="text-lg font-semibold text-foreground mb-1">No builders found</p>
           <p className="text-sm text-muted-foreground">
             {debouncedQuery
               ? "Try a different search — more builders join every day."
-              : "Be the first to register as a builder on NEAR."}
+              : category === "approved"
+                ? "No approved builders yet."
+                : category === "nominated"
+                  ? "No pending nominations."
+                  : "Be the first to register as a builder on NEAR."}
           </p>
         </div>
       ) : (
@@ -308,7 +375,7 @@ function BuildersPage() {
             onReorder={() => {}}
             className="flex flex-col gap-3"
           >
-            {sortedCards.map((card) => {
+            {filteredCards.map((card) => {
               const proposal = card.kind === "builder" ? card.proposal : card.proposal;
               const nominationCount = proposal
                 ? proposal.submissionCount + (counts[proposal.id]?.totalCount ?? 0)
@@ -503,9 +570,14 @@ function BuilderCard({
               }}
             />
           ) : (
-            <span className="text-sm font-black text-muted-foreground">
-              {getInitials(resolvedName)}
-            </span>
+            <div
+              className={cn(
+                "size-10 sm:size-12 flex items-center justify-center bg-gradient-to-br text-white font-bold",
+                getAvatarGradient(resolvedName),
+              )}
+            >
+              <span className="text-sm sm:text-base">{getInitials(resolvedName)}</span>
+            </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -614,7 +686,10 @@ function BuilderCard({
             </motion.div>
           </div>
         )}
-        <ArrowRight size={14} className="text-brand-cyan group-hover:translate-x-0.5 transition-transform" />
+        <ArrowRight
+          size={14}
+          className="text-brand-cyan group-hover:translate-x-0.5 transition-transform"
+        />
       </div>
     </Link>
   );
@@ -627,4 +702,19 @@ function getInitials(name: string): string {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+}
+
+function getAvatarGradient(name: string): string {
+  const gradients = [
+    "from-brand-cyan to-brand-green",
+    "from-brand-accent to-brand-cyan",
+    "from-brand-green to-brand-accent",
+    "from-purple-400 to-brand-cyan",
+    "from-brand-cyan to-blue-500",
+    "from-brand-green to-emerald-500",
+    "from-brand-accent to-purple-500",
+    "from-blue-400 to-brand-green",
+  ];
+  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return gradients[hash % gradients.length];
 }

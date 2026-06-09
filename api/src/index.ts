@@ -2,7 +2,7 @@ import { createPlugin } from "every-plugin";
 import { Effect } from "every-plugin/effect";
 import { ORPCError } from "every-plugin/orpc";
 import { z } from "every-plugin/zod";
-import { ProposalSchema } from "../../plugins/proposals/src/contract";
+import type { ProposalSchema } from "../../plugins/proposals/src/contract";
 import { contract } from "./contract";
 import { createAuthMiddleware } from "./lib/auth";
 import type { PluginsClient } from "./lib/plugins-types.gen";
