@@ -44,6 +44,7 @@
   --color-brand-pink-soft: var(--brand-pink-soft);
   --color-brand-mint-soft: var(--brand-mint-soft);
   --color-brand-mint-bright: var(--brand-mint-bright);
+  --color-brand-mint-foreground: var(--brand-mint-foreground);
   --color-brand-chartreuse: var(--brand-chartreuse);
   --color-brand-cobalt: var(--brand-cobalt);
 
@@ -57,6 +58,7 @@
   --animate-fade-in: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
   --animate-fade-in-up: fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
   --animate-slide-in-up: slide-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-settings-panel-in: settings-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes progress-bar {
@@ -77,6 +79,11 @@
 
 @keyframes slide-in-up {
   0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes settings-panel-in {
+  0% { opacity: 0; transform: translateY(6px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
@@ -109,6 +116,7 @@
   --brand-cobalt: #0072ce;
   --brand-mint-soft: #ccfbea;
   --brand-mint-bright: #99f7d5;
+  --brand-mint-foreground: #063c31;
   --brand-pink-soft: #fd9aae;
   --brand-pink-light: #ffe3e2;
   --brand-accent: #00d9a3;
@@ -154,6 +162,7 @@
   --brand-cobalt: #4da6f5;
   --brand-mint-soft: #ccfbea;
   --brand-mint-bright: #99f7d5;
+  --brand-mint-foreground: #063c31;
   --brand-pink-soft: #fd9aae;
   --brand-pink-light: #ffe3e2;
   --brand-accent: #00d9a3;

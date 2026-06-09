@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Clock, KeyRound, Server, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { type Passkey, useAuthClient } from "@/app";
@@ -280,68 +281,64 @@ export function UserApiKeysPanel() {
     setConfirmOpen(true);
   };
 
+  const enabledKeys = apiKeys.filter((key) => key.enabled !== false).length;
+  const disabledKeys = apiKeys.length - enabledKeys;
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
+    <div className="space-y-5">
+      <ApiKeysSummary total={apiKeys.length} enabled={enabledKeys} disabled={disabledKeys} />
+
+      <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+        <div className="mb-5 space-y-1">
+          <h2 className="text-base font-semibold leading-tight text-foreground">
+            Create personal API key
+          </h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Create a key for a specific trusted tool, then store the secret somewhere safe.
+          </p>
+        </div>
+        <div className="max-w-2xl">
           <ApiKeyForm
             onCreate={(values: ApiKeyFormValues) => createMutation.mutate(values)}
             isPending={createMutation.isPending}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {createdApiKey && (
         <ApiKeyReveal apiKey={createdApiKey} onDismiss={() => setCreatedApiKey(null)} />
       )}
 
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-8 text-center text-sm text-muted-foreground">
-            Loading API keys...
-          </CardContent>
-        </Card>
-      ) : apiKeys.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {apiKeys.map((key) => (
-            <Card key={key.id}>
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 min-w-0">
-                    <div className="font-medium break-all">{key.name ?? "unnamed"}</div>
-                    <div className="text-xs text-muted-foreground font-mono break-all">
-                      {key.prefix ?? "api_"}...{key.start ?? ""}
-                    </div>
-                  </div>
-                  {key.enabled === false && <Badge variant="outline">disabled</Badge>}
-                </div>
-                <div className="grid gap-1 text-xs text-muted-foreground">
-                  <div>created {new Date(key.createdAt).toLocaleString()}</div>
-                  {key.expiresAt && <div>expires {new Date(key.expiresAt).toLocaleString()}</div>}
-                  {key.lastRequest && (
-                    <div>last used {new Date(key.lastRequest).toLocaleString()}</div>
-                  )}
-                </div>
-                <Button
-                  onClick={() => handleDelete(key.id, key.name)}
-                  disabled={deleteMutation.isPending}
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                >
-                  delete
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold leading-tight text-foreground">
+              Personal API keys
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Revoke keys that are no longer used. Full key secrets are only shown once.
+            </p>
+          </div>
+          <Badge variant={enabledKeys > 0 ? "success" : "secondary"}>{enabledKeys} active</Badge>
         </div>
-      ) : (
-        <Card>
-          <CardContent className="p-8 text-center text-sm text-muted-foreground">
-            No personal API keys
-          </CardContent>
-        </Card>
-      )}
+
+        {isLoading ? (
+          <ApiKeysLoadingState />
+        ) : apiKeys.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {apiKeys.map((key) => (
+              <ApiKeyListRow
+                key={key.id}
+                apiKey={key}
+                onDelete={() => handleDelete(key.id, key.name)}
+                disabled={deleteMutation.isPending}
+              />
+            ))}
+          </div>
+        ) : (
+          <ApiKeysEmptyState />
+        )}
+      </div>
 
       <ConfirmDialog
         open={confirmOpen}
@@ -354,6 +351,121 @@ export function UserApiKeysPanel() {
       />
     </div>
   );
+}
+
+function ApiKeysSummary({
+  total,
+  enabled,
+  disabled,
+}: {
+  total: number;
+  enabled: number;
+  disabled: number;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+            <KeyRound className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold leading-tight text-foreground">API access</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Personal keys let external tools call NEAR Builders APIs using your account.
+            </p>
+          </div>
+        </div>
+        {total > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            <Badge variant={enabled > 0 ? "success" : "secondary"}>{enabled} active</Badge>
+            <Badge variant={disabled > 0 ? "outline" : "secondary"}>{disabled} disabled</Badge>
+            <Badge variant="secondary">{total} total</Badge>
+          </div>
+        ) : (
+          <Badge variant="secondary">No keys</Badge>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ApiKeyListRow({
+  apiKey,
+  onDelete,
+  disabled,
+}: {
+  apiKey: ApiKeyItem;
+  onDelete: () => void;
+  disabled: boolean;
+}) {
+  const isEnabled = apiKey.enabled !== false;
+
+  return (
+    <div className="grid gap-4 rounded-lg border border-border bg-muted px-3.5 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <div className="min-w-0 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="min-w-0 truncate font-semibold text-foreground">
+            {apiKey.name ?? "Unnamed key"}
+          </div>
+          <Badge variant={isEnabled ? "success" : "outline"}>
+            {isEnabled ? "Active" : "Disabled"}
+          </Badge>
+        </div>
+        <div className="font-mono text-xs text-muted-foreground">
+          {apiKey.prefix ?? "api_"}...{apiKey.start ?? ""}
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Created {formatApiKeyDate(apiKey.createdAt)}
+          </span>
+          {apiKey.expiresAt && <span>Expires {formatApiKeyDate(apiKey.expiresAt)}</span>}
+          {apiKey.lastRequest && <span>Last used {formatApiKeyDate(apiKey.lastRequest)}</span>}
+        </div>
+      </div>
+      <Button
+        onClick={onDelete}
+        disabled={disabled}
+        variant="outline"
+        size="sm"
+        className="justify-self-start text-destructive hover:text-destructive sm:justify-self-auto"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+        delete
+      </Button>
+    </div>
+  );
+}
+
+function ApiKeysLoadingState() {
+  return (
+    <div className="rounded-lg border border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
+      Loading API keys...
+    </div>
+  );
+}
+
+function ApiKeysEmptyState() {
+  return (
+    <div className="rounded-lg border border-border bg-muted/60 px-4 py-6">
+      <div className="flex gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card">
+          <Server className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div className="space-y-1">
+          <div className="font-semibold text-foreground">No personal API keys</div>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Create a key when an integration or local tool needs API access.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatApiKeyDate(value: string | Date) {
+  return new Date(value).toLocaleString();
 }
 
 function MethodCard({
