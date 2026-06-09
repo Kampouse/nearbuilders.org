@@ -149,7 +149,16 @@ const removeCallbacks: Record<string, RemoveCallback> = {
   },
   projects: async (plugins, proposal, context) => {
     const projectId = proposal.appliedResourceId ?? proposal.entityId;
-    await plugins.projects(pluginContext(context)).deleteProject({ id: projectId });
+    // The project is the owner's personal project that predates the proposal,
+    // so removing the approval un-publishes it instead of deleting it.
+    try {
+      await plugins.projects(pluginContext(context)).updateProject({
+        id: projectId,
+        visibility: "private",
+      });
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error;
+    }
   },
 };
 

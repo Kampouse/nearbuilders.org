@@ -19,10 +19,19 @@ export interface ProjectProposalContext {
   getRawBody?: () => Promise<string>;
 }
 
+// NEAR account ids: 2-64 chars of lowercase alphanumeric segments separated by
+// . - _ with no leading/trailing/adjacent separators. Opaque auth user ids and
+// API key ids (mixed-case nanoids) don't match, so they can't become owners.
+const NEAR_ACCOUNT_RE = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
+
+function isNearAccountId(value: string): boolean {
+  return value.length >= 2 && value.length <= 64 && NEAR_ACCOUNT_RE.test(value);
+}
+
 function readOwnerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
-  if (!trimmed || trimmed === "unknown") return undefined;
+  if (!trimmed || trimmed === "unknown" || !isNearAccountId(trimmed)) return undefined;
   return trimmed;
 }
 

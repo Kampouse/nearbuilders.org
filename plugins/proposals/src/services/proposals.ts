@@ -237,28 +237,18 @@ export const ProposalServiceLive = Layer.effect(
               }),
             );
           } else {
-            if (existing.reviewStatus === "approved" || existing.applyStatus === "applied") {
-              return yield* Effect.fail(
-                new ORPCError("BAD_REQUEST", {
-                  message: "Proposal already approved; submit a new proposal instead",
-                }),
-              );
-            }
-
-            const nextReviewStatus =
-              existing.reviewStatus === "rejected" || existing.reviewStatus === "removed"
-                ? "pending"
-                : existing.reviewStatus;
-
+            // Re-proposing always returns the proposal to the review queue —
+            // including previously approved/applied ones, so an entity that
+            // was un-published can be submitted again. Prior decisions stay
+            // in the submissions history and audit log.
             yield* Effect.promise(() =>
               db
                 .update(proposals)
                 .set({
                   payload: serialize(input.payload),
-                  reviewStatus: nextReviewStatus,
-                  applyStatus:
-                    nextReviewStatus === "pending" ? "not_started" : existing.applyStatus,
-                  rejectionReason: nextReviewStatus === "pending" ? null : existing.rejectionReason,
+                  reviewStatus: "pending",
+                  applyStatus: "not_started",
+                  rejectionReason: null,
                   applyError: null,
                   updatedAt: now,
                 })

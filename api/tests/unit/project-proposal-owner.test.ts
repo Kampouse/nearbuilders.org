@@ -32,6 +32,32 @@ describe("project proposal owner hardening", () => {
     expectBadRequest(() => resolveProjectProposalOwner({ ownerId: " " }, " "));
   });
 
+  it("rejects owners that are not NEAR account ids", () => {
+    // opaque better-auth user id (mixed-case nanoid)
+    expectBadRequest(() => resolveProjectProposalOwner({}, "Wl7nWqXk3eZ9pT1mC5sB2dF8gH4jK6rA"));
+    // payload owner invalid and createdBy invalid
+    expectBadRequest(() =>
+      resolveProjectProposalOwner({ ownerId: "Not.A.Near.Account" }, "API_KEY_ID"),
+    );
+    expectBadRequest(() => resolveProjectProposalOwner({}, "a")); // too short
+    expectBadRequest(() => resolveProjectProposalOwner({}, "double..dot.near"));
+    expectBadRequest(() => resolveProjectProposalOwner({}, `${"a".repeat(65)}`)); // too long
+  });
+
+  it("falls back to createdBy when the payload owner is not a NEAR account id", () => {
+    expect(resolveProjectProposalOwner({ ownerId: "Opaque123ID" }, "creator.near")).toBe(
+      "creator.near",
+    );
+  });
+
+  it("accepts named and implicit NEAR accounts", () => {
+    expect(resolveProjectProposalOwner({ ownerId: "sub_acct-1.builder.near" }, "x")).toBe(
+      "sub_acct-1.builder.near",
+    );
+    const implicit = "f".repeat(64);
+    expect(resolveProjectProposalOwner({ ownerId: implicit }, "x")).toBe(implicit);
+  });
+
   it("runs fallback creation as the proposal owner, not the approving admin", () => {
     const context = createProjectProposalOwnerContext(
       {
