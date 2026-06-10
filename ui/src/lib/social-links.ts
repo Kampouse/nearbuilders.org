@@ -10,6 +10,10 @@ function linkConfig(key: string) {
   return SOCIAL_LINKS.find((l) => l.key === key);
 }
 
+export function linkLabel(key: string): string {
+  return linkConfig(key)?.label ?? key.charAt(0).toUpperCase() + key.slice(1);
+}
+
 export const validateHandle = (value?: string) => {
   const v = value?.trim();
   if (!v) return undefined;

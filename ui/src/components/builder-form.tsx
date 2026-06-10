@@ -1,10 +1,8 @@
 import { useStore } from "@tanstack/react-form";
-import { Globe } from "lucide-react";
-import type { ComponentType } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GithubIcon, LinkedinIcon, TelegramIcon, XIcon } from "@/components/ui/social-icons";
+import { socialIcon } from "@/components/ui/social-icons";
 import { Textarea } from "@/components/ui/textarea";
 import { SOCIAL_LINKS, validateHandle } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
@@ -16,14 +14,6 @@ export type BuilderFormValues = {
   skills: string;
   location: string;
   links: Record<string, string>;
-};
-
-const LINK_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  website: Globe,
-  github: GithubIcon,
-  twitter: XIcon,
-  telegram: TelegramIcon,
-  linkedin: LinkedinIcon,
 };
 
 export function parseSkills(raw: string): string[] {
@@ -184,7 +174,7 @@ export function BuilderFormFields({ form }: { form: any }) {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {SOCIAL_LINKS.map(({ key, label, placeholder }) => {
-            const Icon = LINK_ICONS[key];
+            const Icon = socialIcon(key);
             return (
               <form.Field
                 key={key}
