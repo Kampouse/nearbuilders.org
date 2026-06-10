@@ -6,14 +6,9 @@ import { ArrowLeft, Loader2, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
-import {
-  BuilderFormFields,
-  type BuilderFormValues,
-  composeLinks,
-  initialFormLinks,
-  parseSkills,
-} from "@/components/builder-form";
+import { BuilderFormFields, type BuilderFormValues, parseSkills } from "@/components/builder-form";
 import { Button } from "@/components/ui/button";
+import { composeLinks, initialFormLinks } from "@/lib/social-links";
 
 export const Route = createFileRoute("/_layout/builders/$account_/edit")({
   head: ({ params }) => ({
