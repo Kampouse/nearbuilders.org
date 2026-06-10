@@ -15,11 +15,35 @@ export type BuilderFormValues = {
 };
 
 export const SOCIAL_LINKS = [
-  { key: "website", label: "Website", placeholder: "https://example.com" },
-  { key: "github", label: "GitHub", placeholder: "https://github.com/username" },
-  { key: "twitter", label: "X (Twitter)", placeholder: "https://x.com/username" },
-  { key: "telegram", label: "Telegram", placeholder: "https://t.me/username" },
-  { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/username" },
+  {
+    key: "website",
+    label: "Website",
+    addon: "https://",
+    base: "https://",
+    placeholder: "example.com",
+  },
+  {
+    key: "github",
+    label: "GitHub",
+    addon: "github.com/",
+    base: "https://github.com/",
+    placeholder: "username",
+  },
+  { key: "twitter", label: "X", addon: "x.com/", base: "https://x.com/", placeholder: "username" },
+  {
+    key: "telegram",
+    label: "Telegram",
+    addon: "t.me/",
+    base: "https://t.me/",
+    placeholder: "username",
+  },
+  {
+    key: "linkedin",
+    label: "LinkedIn",
+    addon: "linkedin.com/in/",
+    base: "https://linkedin.com/in/",
+    placeholder: "username",
+  },
 ] as const;
 
 export function parseSkills(raw: string): string[] {
@@ -36,36 +60,34 @@ export const validateSkills = (value?: string) => {
   return undefined;
 };
 
-export const validateUrl = (value?: string) => {
+export const validateHandle = (value?: string) => {
   const v = value?.trim();
   if (!v) return undefined;
-  if (v.length > 200) return "Max 200 characters";
-  try {
-    const url = new URL(v);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return "Must start with http:// or https://";
-    }
-    return undefined;
-  } catch {
-    return "Enter a valid URL";
-  }
+  if (v.length > 100) return "Too long";
+  if (/\s/.test(v)) return "No spaces allowed";
+  return undefined;
 };
 
-const SOCIAL_URL_FROM_HANDLE: Record<string, (handle: string) => string> = {
-  github: (h) => `https://github.com/${h}`,
-  twitter: (h) => `https://x.com/${h}`,
-  telegram: (h) => `https://t.me/${h}`,
-  linkedin: (h) => `https://linkedin.com/in/${h}`,
-  website: (h) => `https://${h.replace(/^\/+/, "")}`,
-};
+function linkConfig(key: string) {
+  return SOCIAL_LINKS.find((l) => l.key === key);
+}
 
-export function socialToUrl(key: string, raw?: string): string {
-  const value = raw?.trim();
+export function handleToUrl(key: string, raw?: string): string {
+  const value = raw?.trim().replace(/^@/, "").replace(/^\/+/, "");
   if (!value) return "";
   if (/^https?:\/\//i.test(value)) return value;
-  const handle = value.replace(/^@/, "");
-  const build = SOCIAL_URL_FROM_HANDLE[key];
-  return build ? build(handle) : value;
+  return `${linkConfig(key)?.base ?? "https://"}${value}`;
+}
+
+export function urlToHandle(key: string, raw?: string): string {
+  const value = raw?.trim();
+  if (!value) return "";
+  const host = (linkConfig(key)?.base ?? "https://").replace(/^https?:\/\//i, "");
+  const stripped = value.replace(/^https?:\/\//i, "");
+  if (host && stripped.toLowerCase().startsWith(host.toLowerCase())) {
+    return stripped.slice(host.length).replace(/^@/, "");
+  }
+  return stripped.replace(/^@/, "");
 }
 
 export function initialFormLinks(
@@ -75,9 +97,9 @@ export function initialFormLinks(
   return Object.fromEntries(
     SOCIAL_LINKS.map(({ key }) => {
       const saved = links?.[key];
-      if (saved) return [key, saved];
+      if (saved) return [key, urlToHandle(key, saved)];
       const fromSocial = typeof social?.[key] === "string" ? (social[key] as string) : undefined;
-      return [key, socialToUrl(key, fromSocial)];
+      return [key, urlToHandle(key, fromSocial)];
     }),
   );
 }
@@ -92,8 +114,8 @@ export function composeLinks(
     if (!known.has(k) && v) result[k] = v;
   }
   for (const { key } of SOCIAL_LINKS) {
-    const value = formLinks[key]?.trim();
-    if (value) result[key] = value;
+    const url = handleToUrl(key, formLinks[key]);
+    if (url) result[key] = url;
   }
   return result;
 }
@@ -241,13 +263,13 @@ export function BuilderFormFields({ form }: { form: any }) {
           </HelperText>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {SOCIAL_LINKS.map(({ key, label, placeholder }) => (
+          {SOCIAL_LINKS.map(({ key, label, addon, placeholder }) => (
             <form.Field
               key={key}
               name={`links.${key}`}
               validators={{
-                onChange: ({ value }: any) => validateUrl(value),
-                onSubmit: ({ value }: any) => validateUrl(value),
+                onChange: ({ value }: any) => validateHandle(value),
+                onSubmit: ({ value }: any) => validateHandle(value),
               }}
             >
               {(field: any) => {
@@ -257,14 +279,25 @@ export function BuilderFormFields({ form }: { form: any }) {
                     <Label htmlFor={`link-${key}`} className="text-xs text-muted-foreground">
                       {label}
                     </Label>
-                    <Input
-                      id={`link-${key}`}
-                      type="url"
-                      value={field.state.value ?? ""}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder={placeholder}
-                      className={cn("font-mono text-sm", err ? "!border-destructive" : "")}
-                    />
+                    <div
+                      className={cn(
+                        "flex h-10 w-full items-center overflow-hidden rounded-md border bg-input font-mono text-sm transition-[border-color,box-shadow] focus-within:ring-[3px] focus-within:ring-ring/20",
+                        err
+                          ? "border-destructive focus-within:border-destructive"
+                          : "border-border focus-within:border-ring",
+                      )}
+                    >
+                      <span className="select-none whitespace-nowrap pl-3 pr-0.5 text-muted-foreground">
+                        {addon}
+                      </span>
+                      <input
+                        id={`link-${key}`}
+                        value={field.state.value ?? ""}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder={placeholder}
+                        className="h-full w-full bg-transparent pr-3 text-foreground outline-none placeholder:text-muted-foreground"
+                      />
+                    </div>
                     {err && <ErrorText>{err}</ErrorText>}
                   </div>
                 );
