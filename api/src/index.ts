@@ -65,7 +65,7 @@ function readStringArray(value: unknown): string[] | undefined {
   return value.filter((item): item is string => typeof item === "string");
 }
 
-const IMPLICIT_ACCOUNT_ID_RE = /^(?:[0-9a-f]{64}|0x[0-9a-f]{40}|0s[0-9a-f]{40})$/;
+const IMPLICIT_ACCOUNT_ID_RE = /^[0-9a-f]{64}$/;
 
 function assertValidBuilderProposalAccount(input: { pluginId: string; entityId: string }) {
   if (input.pluginId !== "builders") return;
