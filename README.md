@@ -140,7 +140,7 @@ nearbuilders.org sits within a broader ecosystem building a verifiable internet 
 - **[NameSky](https://namesky.app)** — Named accounts as tradeable on-chain assets
 - **[OutLayer](https://outlayer.fastnear.com)** — TEE-attested verifiable off-chain computation
 - **[NEAR Intents](https://intents.near.org)** — Intent-based cross-chain settlement ($15B+ volume)
-- **[NEAR Catalog](https://nearcatalog.app)** — NEAR ecosystem app catalog
+- **[NEAR Catalog](https://nearcatalog.xyz)** — NEAR ecosystem app catalog
 - **[NEAR AI](https://near.ai)** — AI agents and infrastructure on NEAR
 
 ## License
