@@ -55,10 +55,12 @@ function EditEventPage() {
   const auth = useAuthClient();
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));
   const nearAccountId = auth.near.getAccountId();
+  const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
 
   const eventQuery = useQuery({
-    queryKey: ["event", id],
+    queryKey: ["event", id, viewerKey],
     queryFn: () => apiClient.getEvent({ id }),
+    retry: false,
   });
 
   const event = eventQuery.data?.data;

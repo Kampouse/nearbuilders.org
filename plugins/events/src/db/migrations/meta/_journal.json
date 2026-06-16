@@ -8,6 +8,13 @@
       "when": 1781606587375,
       "tag": "0000_unknown_nighthawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781636888966,
+      "tag": "0001_jittery_terrax",
+      "breakpoints": true
     }
   ]
 }

@@ -88,6 +88,18 @@ const EventOutput = z.object({
   startAt: z.iso.datetime(),
   endAt: z.iso.datetime().nullable(),
   location: z.string().nullable(),
+  participantCount: z.number().int().nonnegative(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+const EventParticipantOutput = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  userId: z.string(),
+  walletAddress: z.string().nullable(),
+  displayName: z.string().nullable(),
+  role: z.enum(["participant", "organizer"]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -549,6 +561,24 @@ export const contract = oc.router({
     .input(z.object({ id: z.string() }))
     .output(z.object({ data: EventOutput }))
     .errors({ NOT_FOUND }),
+
+  listEventParticipants: oc
+    .route({ method: "GET", path: "/v1/events/{eventId}/participants" })
+    .input(z.object({ eventId: z.string() }))
+    .output(z.object({ data: z.array(EventParticipantOutput) }))
+    .errors({ NOT_FOUND }),
+
+  joinEvent: oc
+    .route({ method: "POST", path: "/v1/events/{eventId}/participants" })
+    .input(z.object({ eventId: z.string() }))
+    .output(z.object({ data: EventParticipantOutput }))
+    .errors({ UNAUTHORIZED, NOT_FOUND, BAD_REQUEST }),
+
+  leaveEvent: oc
+    .route({ method: "DELETE", path: "/v1/events/{eventId}/participants/me" })
+    .input(z.object({ eventId: z.string() }))
+    .output(z.object({ deleted: z.boolean() }))
+    .errors({ UNAUTHORIZED, NOT_FOUND }),
 
   updateEvent: oc
     .route({ method: "PATCH", path: "/v1/events/{id}" })

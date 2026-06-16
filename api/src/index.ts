@@ -577,6 +577,18 @@ export default createPlugin.withPlugins<PluginsClient>()({
         return await services.plugins.events(pluginContext(context)).getEvent(input);
       }),
 
+      listEventParticipants: builder.listEventParticipants.handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).listEventParticipants(input);
+      }),
+
+      joinEvent: builder.joinEvent.use(requireAuth).handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).joinEvent(input);
+      }),
+
+      leaveEvent: builder.leaveEvent.use(requireAuth).handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).leaveEvent(input);
+      }),
+
       fetchLumaEvent: builder.fetchLumaEvent.handler(async ({ input }) => ({
         data: await fetchLumaEvent(input.url),
       })),

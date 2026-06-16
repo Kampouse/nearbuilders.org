@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, Clock, Lock, MapPin, Plus, Share2 } from "lucide-react";
+import { CalendarDays, Clock, Lock, MapPin, Plus, Share2, Users } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
@@ -12,6 +12,7 @@ type EventRecord = Awaited<
 >["data"][number];
 
 type EventTab = "upcoming" | "past";
+type EventProposalStatus = "pending" | "approved" | "rejected" | "removed";
 
 export const Route = createFileRoute("/_layout/events/")({
   head: () => ({
@@ -20,12 +21,6 @@ export const Route = createFileRoute("/_layout/events/")({
       { name: "description", content: "Browse NEAR builder events." },
     ],
   }),
-  loader: ({ context }) => {
-    void context.queryClient.prefetchQuery({
-      queryKey: ["events"],
-      queryFn: () => context.apiClient.listEvents({ limit: 100 }),
-    });
-  },
   component: EventsPage,
 });
 
@@ -33,16 +28,30 @@ function EventsPage() {
   const apiClient = useApiClient();
   const auth = useAuthClient();
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));
+  const nearAccountId = auth.near.getAccountId();
+  const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
   const canCreate = Boolean(session?.user && !session.user.isAnonymous);
   const [copied, setCopied] = useState<string | null>(null);
   const [tab, setTab] = useState<EventTab>("upcoming");
 
   const eventsQuery = useQuery({
-    queryKey: ["events"],
+    queryKey: ["events", viewerKey],
     queryFn: () => apiClient.listEvents({ limit: 100 }),
   });
 
   const events = eventsQuery.data?.data ?? [];
+  const eventProposalsQuery = useQuery({
+    queryKey: ["event-proposals", viewerKey],
+    queryFn: () => apiClient.getProposals({ pluginId: "events", limit: 100 }),
+    enabled: canCreate,
+  });
+  const eventProposalStatuses = useMemo(() => {
+    const statuses = new Map<string, EventProposalStatus>();
+    for (const proposal of eventProposalsQuery.data?.data ?? []) {
+      statuses.set(proposal.entityId, proposal.reviewStatus as EventProposalStatus);
+    }
+    return statuses;
+  }, [eventProposalsQuery.data?.data]);
 
   const { upcoming, past } = useMemo(() => {
     const now = Date.now();
@@ -143,6 +152,7 @@ function EventsPage() {
                     <div className="pb-4">
                       <EventCard
                         event={event}
+                        proposalStatus={eventProposalStatuses.get(event.id)}
                         copied={copied === event.id}
                         onShare={copyEventLink}
                       />
@@ -176,14 +186,17 @@ function Spine({ isPast, withDot }: { isPast?: boolean; withDot?: boolean }) {
 
 function EventCard({
   event,
+  proposalStatus,
   copied,
   onShare,
 }: {
   event: EventRecord;
+  proposalStatus?: EventProposalStatus;
   copied: boolean;
   onShare: (event: EventRecord) => void;
 }) {
   const isCancelled = event.status === "cancelled";
+  const status = getEventCardStatus(event, proposalStatus);
   return (
     <Link
       to="/events/$id"
@@ -192,23 +205,33 @@ function EventCard({
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span
+                className={cn(
+                  "truncate text-base font-semibold text-foreground",
+                  isCancelled && "text-muted-foreground line-through",
+                )}
+              >
+                {event.title}
+              </span>
+              {event.visibility === "private" && (
+                <Lock size={12} className="shrink-0 text-muted-foreground" />
+              )}
+              {isCancelled && (
+                <span className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-destructive">
+                  Cancelled
+                </span>
+              )}
+            </div>
             <span
               className={cn(
-                "truncate text-base font-semibold text-foreground",
-                isCancelled && "text-muted-foreground line-through",
+                "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                status.className,
               )}
             >
-              {event.title}
+              {status.label}
             </span>
-            {event.visibility === "private" && (
-              <Lock size={12} className="shrink-0 text-muted-foreground" />
-            )}
-            {isCancelled && (
-              <span className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-destructive">
-                Cancelled
-              </span>
-            )}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -221,6 +244,10 @@ function EventCard({
                 <span className="truncate">{event.location}</span>
               </span>
             )}
+            <span className="flex items-center gap-1">
+              <Users size={12} className="shrink-0" />
+              {event.participantCount}
+            </span>
           </div>
           {event.description && (
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -246,6 +273,43 @@ function EventCard({
       </div>
     </Link>
   );
+}
+
+function getEventCardStatus(event: EventRecord, proposalStatus?: EventProposalStatus) {
+  if (event.status === "cancelled") {
+    return {
+      label: "Cancelled",
+      className: "border-destructive/30 bg-destructive/10 text-destructive",
+    };
+  }
+  if (proposalStatus === "pending") {
+    return {
+      label: "Pending",
+      className: "border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300",
+    };
+  }
+  if (proposalStatus === "rejected") {
+    return {
+      label: "Rejected",
+      className: "border-destructive/30 bg-destructive/10 text-destructive",
+    };
+  }
+  if (proposalStatus === "approved") {
+    return {
+      label: "Approved",
+      className: "border-brand-green/30 bg-brand-green/10 text-brand-green",
+    };
+  }
+  if (event.visibility === "private") {
+    return {
+      label: "Private",
+      className: "border-border bg-secondary text-secondary-foreground",
+    };
+  }
+  return {
+    label: "Public",
+    className: "border-brand-accent/30 bg-brand-accent/10 text-brand-accent",
+  };
 }
 
 function EmptyState({ tab }: { tab: EventTab }) {

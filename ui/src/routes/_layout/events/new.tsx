@@ -114,7 +114,7 @@ function NewEventPage() {
         startAt: toIso(startAt),
         endAt: endAt ? toIso(endAt) : undefined,
         location: location.trim() || undefined,
-        visibility,
+        visibility: submitForReview ? "private" : visibility,
       });
 
       if (submitForReview) {

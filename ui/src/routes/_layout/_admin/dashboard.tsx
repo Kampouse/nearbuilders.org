@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, Check, FileText, Hammer, Loader2, MapPin, X } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Clock,
+  ExternalLink,
+  FileText,
+  Hammer,
+  Loader2,
+  MapPin,
+  X,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useApiClient } from "@/app";
@@ -23,6 +33,7 @@ interface ProposalRecord {
   pluginId: "builders" | "projects" | "events";
   entityId: string;
   payload: unknown;
+  createdBy: string;
   reviewStatus: ProposalStatus;
   rejectionReason: string | null;
   submissionCount: number;
@@ -46,6 +57,29 @@ function readStringArray(value: unknown): string[] {
     : [];
 }
 
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatTimeRange(startAt: string, endAt: string | null) {
+  const start = new Date(startAt);
+  const startLabel = start.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  if (!endAt) return startLabel;
+  const endLabel = new Date(endAt).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${startLabel} - ${endLabel}`;
+}
+
 function AdminDashboard() {
   const [pluginTab, setPluginTab] = useState<"builders" | "projects" | "events">("builders");
   const apiClient = useApiClient();
@@ -66,7 +100,7 @@ function AdminDashboard() {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="mb-1 text-3xl font-black tracking-tight text-foreground">Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Review builder and project proposals.</p>
+        <p className="text-sm text-muted-foreground">Review builder, project, and event proposals.</p>
       </div>
 
       <div className="mb-6 flex gap-1">
@@ -128,6 +162,10 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
     proposal.pluginId === "builders"
       ? (readString(payload.name) ?? proposal.entityId)
       : (readString(payload.title) ?? proposal.entityId);
+  const eventStartAt = readString(payload.startAt);
+  const eventEndAt = readString(payload.endAt);
+  const eventDetails = readString(payload.content) ?? readString(payload.description);
+  const lumaUrl = readString(payload.lumaUrl);
 
   const approveMutation = useMutation({
     mutationFn: () =>
@@ -193,11 +231,6 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
                 /{readString(payload.slug)}
               </div>
             )}
-            {proposal.pluginId === "events" && readString(payload.startAt) && (
-              <div className="mt-0.5 text-xs text-muted-foreground">
-                {new Date(readString(payload.startAt)!).toLocaleDateString()}
-              </div>
-            )}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -250,10 +283,57 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
           </>
         ) : proposal.pluginId === "events" ? (
           <>
-            {readString(payload.description) && (
-              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                {readString(payload.description)}
-              </p>
+            <div className="mt-3 grid gap-2 rounded-xl border border-border/70 bg-background/40 p-3 text-xs sm:grid-cols-2">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  Created by
+                </div>
+                <div className="mt-1 font-mono text-foreground">{proposal.createdBy}</div>
+              </div>
+              {eventStartAt && (
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    Date
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-foreground">
+                    <CalendarDays size={12} className="text-muted-foreground" />
+                    {formatDate(eventStartAt)}
+                  </div>
+                </div>
+              )}
+              {eventStartAt && (
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    Time
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-foreground">
+                    <Clock size={12} className="text-muted-foreground" />
+                    {formatTimeRange(eventStartAt, eventEndAt)}
+                  </div>
+                </div>
+              )}
+              {readString(payload.location) && (
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    Location
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-foreground">
+                    <MapPin size={12} className="text-muted-foreground" />
+                    {readString(payload.location)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {eventDetails && (
+              <div className="mt-3 rounded-xl border border-border/70 bg-background/40 p-3">
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  Details
+                </div>
+                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {eventDetails}
+                </p>
+              </div>
             )}
             <div className="mt-2 flex flex-wrap gap-1">
               {readString(payload.visibility) && (
@@ -266,10 +346,16 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
                   {readString(payload.location)}
                 </Badge>
               )}
-              {readString(payload.lumaUrl) && (
-                <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs">
+              {lumaUrl && (
+                <a
+                  href={lumaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80"
+                >
                   Luma
-                </Badge>
+                  <ExternalLink size={10} />
+                </a>
               )}
             </div>
           </>
@@ -296,7 +382,11 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
         )}
 
         <div className="mt-3 text-[10px] text-muted-foreground/60">
-          {proposal.submissionCount} nomination{proposal.submissionCount !== 1 ? "s" : ""} ·
+          {proposal.pluginId !== "events" && (
+            <>
+              Created by <span className="font-mono text-muted-foreground">{proposal.createdBy}</span> ·{" "}
+            </>
+          )}
           Submitted {new Date(proposal.createdAt).toLocaleDateString()}
         </div>
 

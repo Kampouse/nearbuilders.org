@@ -7,10 +7,13 @@ import {
   Clock,
   ExternalLink,
   Lock,
+  Loader2,
   MapPin,
   Pencil,
   Share2,
   Trash2,
+  Users,
+  X,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -34,17 +37,65 @@ function EventDetailPage() {
   const [copied, setCopied] = useState(false);
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));
   const nearAccountId = auth.near.getAccountId();
+  const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
 
   const eventQuery = useQuery({
-    queryKey: ["event", id],
+    queryKey: ["event", id, viewerKey],
     queryFn: () => apiClient.getEvent({ id }),
+    retry: false,
   });
 
   const event = eventQuery.data?.data;
+  const participantsQuery = useQuery({
+    queryKey: ["event-participants", id, viewerKey],
+    queryFn: () => apiClient.listEventParticipants({ eventId: id }),
+    enabled: !!event,
+    retry: false,
+  });
+  const participants = participantsQuery.data?.data ?? [];
+  const currentParticipant = participants.find(
+    (participant) =>
+      participant.userId === session?.user?.id ||
+      (nearAccountId ? participant.userId === nearAccountId || participant.walletAddress === nearAccountId : false),
+  );
   const canManage =
     event &&
     (session?.user?.role === "admin" ||
       [nearAccountId, session?.user?.id].some((candidate) => candidate === event.ownerId));
+  const canParticipate = Boolean(session?.user && !session.user.isAnonymous && event?.status !== "cancelled");
+  const proposalQuery = useQuery({
+    queryKey: ["event-proposal", id, viewerKey],
+    queryFn: () =>
+      apiClient.getProposals({
+        pluginId: "events",
+        entityId: id,
+        limit: 1,
+      }),
+    enabled: Boolean(canManage),
+  });
+  const eventProposal = proposalQuery.data?.data[0];
+
+  const joinMutation = useMutation({
+    mutationFn: () => apiClient.joinEvent({ eventId: id }),
+    onSuccess: () => {
+      toast.success("You're participating");
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["event-participants", id] });
+    },
+    onError: (err: Error) => toast.error(err.message || "Failed to join event"),
+  });
+
+  const leaveMutation = useMutation({
+    mutationFn: () => apiClient.leaveEvent({ eventId: id }),
+    onSuccess: () => {
+      toast.success("Left event");
+      queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["event-participants", id] });
+    },
+    onError: (err: Error) => toast.error(err.message || "Failed to leave event"),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => apiClient.deleteEvent({ id }),
@@ -153,7 +204,31 @@ function EventDetailPage() {
             {event.visibility}
           </Badge>
           {isCancelled && <Badge variant="destructive">Cancelled</Badge>}
+          {canManage && eventProposal?.reviewStatus === "pending" && (
+            <Badge variant="secondary">Pending admin review</Badge>
+          )}
+          {canManage && eventProposal?.reviewStatus === "rejected" && (
+            <Badge variant="destructive">Rejected by admin</Badge>
+          )}
         </div>
+
+        {canManage && eventProposal?.reviewStatus === "pending" && (
+          <div className="mt-4 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            This event is private while it waits for admin approval to become public.
+          </div>
+        )}
+
+        {canManage && eventProposal?.reviewStatus === "rejected" && (
+          <div className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm">
+            <div className="flex items-center gap-2 font-semibold text-destructive">
+              <X size={14} />
+              Rejected by admin
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              {eventProposal.rejectionReason ?? "This event was not approved."}
+            </p>
+          </div>
+        )}
 
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <h1 className="text-3xl font-black leading-tight tracking-tight text-foreground sm:text-4xl">
@@ -167,11 +242,35 @@ function EventDetailPage() {
               </a>
             </Button>
           )}
+          {canParticipate && (
+            <Button
+              type="button"
+              size="sm"
+              variant={currentParticipant ? "outline" : "default"}
+              className="w-full shrink-0 sm:w-auto"
+              disabled={joinMutation.isPending || leaveMutation.isPending}
+              onClick={() => {
+                if (currentParticipant) leaveMutation.mutate();
+                else joinMutation.mutate();
+              }}
+            >
+              {joinMutation.isPending || leaveMutation.isPending ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <Users size={13} />
+              )}
+              {currentParticipant ? "Leave event" : "Join event"}
+            </Button>
+          )}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Fact icon={<CalendarDays size={14} />} text={formatEventDate(event)} />
           <Fact icon={<Clock size={14} />} text={formatEventTime(event)} />
+          <Fact
+            icon={<Users size={14} />}
+            text={`${event.participantCount} participant${event.participantCount === 1 ? "" : "s"}`}
+          />
           {event.location && <Fact icon={<MapPin size={14} />} text={event.location} />}
         </div>
 
@@ -195,6 +294,31 @@ function EventDetailPage() {
             )}
           </div>
         </div>
+
+        <div className="mt-8 border-t border-border pt-6">
+          <h2 className="text-lg font-bold text-foreground">Participants</h2>
+          <div className="mt-3">
+            {participantsQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading participants...</p>
+            ) : participants.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {participants.map((participant) => (
+                  <span
+                    key={participant.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-foreground"
+                  >
+                    <Users size={12} className="text-muted-foreground" />
+                    {formatParticipantLabel(participant)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center text-sm text-muted-foreground">
+                No participants yet.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -214,6 +338,14 @@ function shortenId(id: string): string {
   // 64-char hex accounts get truncated since they're not human-readable.
   if (/^[0-9a-f]{64}$/i.test(id)) return `${id.slice(0, 6)}...${id.slice(-4)}`;
   return id;
+}
+
+function formatParticipantLabel(participant: {
+  displayName: string | null;
+  walletAddress: string | null;
+  userId: string;
+}) {
+  return participant.displayName ?? participant.walletAddress ?? shortenId(participant.userId);
 }
 
 function formatEventDate(event: { startAt: string }) {
