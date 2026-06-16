@@ -61,6 +61,15 @@
         "ui/src/routes/_layout/builders/**"
       ]
     },
+    "events": {
+      "development": "local:plugins/events",
+      "secrets": [
+        "EVENTS_DATABASE_URL"
+      ],
+      "routes": [
+        "ui/src/routes/_layout/events/**"
+      ]
+    },
     "proposals": {
       "development": "local:plugins/proposals",
       "secrets": [
