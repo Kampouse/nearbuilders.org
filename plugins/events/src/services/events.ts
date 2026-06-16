@@ -338,7 +338,9 @@ export const EventServiceLive = Layer.effect(
           }
           if (event.status === "cancelled") {
             return yield* Effect.fail(
-              new ORPCError("BAD_REQUEST", { message: "Cancelled events cannot accept participants" }),
+              new ORPCError("BAD_REQUEST", {
+                message: "Cancelled events cannot accept participants",
+              }),
             );
           }
 
@@ -366,7 +368,10 @@ export const EventServiceLive = Layer.effect(
               eventId,
               userId,
               walletAddress: normalizeOptionalText(walletAddress),
-              displayName: normalizeOptionalText(displayName) ?? normalizeOptionalText(walletAddress) ?? userId,
+              displayName:
+                normalizeOptionalText(displayName) ??
+                normalizeOptionalText(walletAddress) ??
+                userId,
               role: isOwner(event.ownerId, userId, alternateUserId) ? "organizer" : "participant",
               createdAt: now,
               updatedAt: now,

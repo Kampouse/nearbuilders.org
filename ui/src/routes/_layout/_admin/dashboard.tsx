@@ -100,7 +100,9 @@ function AdminDashboard() {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="mb-1 text-3xl font-black tracking-tight text-foreground">Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Review builder, project, and event proposals.</p>
+        <p className="text-sm text-muted-foreground">
+          Review builder, project, and event proposals.
+        </p>
       </div>
 
       <div className="mb-6 flex gap-1">
@@ -384,7 +386,8 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
         <div className="mt-3 text-[10px] text-muted-foreground/60">
           {proposal.pluginId !== "events" && (
             <>
-              Created by <span className="font-mono text-muted-foreground">{proposal.createdBy}</span> ·{" "}
+              Created by{" "}
+              <span className="font-mono text-muted-foreground">{proposal.createdBy}</span> ·{" "}
             </>
           )}
           Submitted {new Date(proposal.createdAt).toLocaleDateString()}

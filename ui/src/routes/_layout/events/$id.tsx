@@ -6,8 +6,8 @@ import {
   Check,
   Clock,
   ExternalLink,
-  Lock,
   Loader2,
+  Lock,
   MapPin,
   Pencil,
   Share2,
@@ -56,13 +56,17 @@ function EventDetailPage() {
   const currentParticipant = participants.find(
     (participant) =>
       participant.userId === session?.user?.id ||
-      (nearAccountId ? participant.userId === nearAccountId || participant.walletAddress === nearAccountId : false),
+      (nearAccountId
+        ? participant.userId === nearAccountId || participant.walletAddress === nearAccountId
+        : false),
   );
   const canManage =
     event &&
     (session?.user?.role === "admin" ||
       [nearAccountId, session?.user?.id].some((candidate) => candidate === event.ownerId));
-  const canParticipate = Boolean(session?.user && !session.user.isAnonymous && event?.status !== "cancelled");
+  const canParticipate = Boolean(
+    session?.user && !session.user.isAnonymous && event?.status !== "cancelled",
+  );
   const proposalQuery = useQuery({
     queryKey: ["event-proposal", id, viewerKey],
     queryFn: () =>

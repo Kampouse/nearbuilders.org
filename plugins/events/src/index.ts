@@ -112,27 +112,29 @@ export default createPlugin({
         return { data: result };
       }),
 
-      listEventParticipants: builder.listEventParticipants.handler(async ({ input, errors, context }) => {
-        try {
-          return {
-            data: await runEffect(
-              services.event.listEventParticipants(
-                input.eventId,
-                context.walletAddress ?? context.userId,
-                getAlternateOwnerId(context),
+      listEventParticipants: builder.listEventParticipants.handler(
+        async ({ input, errors, context }) => {
+          try {
+            return {
+              data: await runEffect(
+                services.event.listEventParticipants(
+                  input.eventId,
+                  context.walletAddress ?? context.userId,
+                  getAlternateOwnerId(context),
+                ),
               ),
-            ),
-          };
-        } catch (error) {
-          if (error instanceof ORPCError && error.code === "NOT_FOUND") {
-            throw errors.NOT_FOUND({
-              message: "Event not found",
-              data: { resource: "event", resourceId: input.eventId },
-            });
+            };
+          } catch (error) {
+            if (error instanceof ORPCError && error.code === "NOT_FOUND") {
+              throw errors.NOT_FOUND({
+                message: "Event not found",
+                data: { resource: "event", resourceId: input.eventId },
+              });
+            }
+            throw error;
           }
-          throw error;
-        }
-      }),
+        },
+      ),
 
       joinEvent: builder.joinEvent.use(requireAuth).handler(async ({ input, context, errors }) => {
         try {
@@ -158,25 +160,27 @@ export default createPlugin({
         }
       }),
 
-      leaveEvent: builder.leaveEvent.use(requireAuth).handler(async ({ input, context, errors }) => {
-        try {
-          return await runEffect(
-            services.event.leaveEvent(
-              input.eventId,
-              context.walletAddress ?? context.userId,
-              getAlternateOwnerId(context),
-            ),
-          );
-        } catch (error) {
-          if (error instanceof ORPCError && error.code === "NOT_FOUND") {
-            throw errors.NOT_FOUND({
-              message: "Event not found",
-              data: { resource: "event", resourceId: input.eventId },
-            });
+      leaveEvent: builder.leaveEvent
+        .use(requireAuth)
+        .handler(async ({ input, context, errors }) => {
+          try {
+            return await runEffect(
+              services.event.leaveEvent(
+                input.eventId,
+                context.walletAddress ?? context.userId,
+                getAlternateOwnerId(context),
+              ),
+            );
+          } catch (error) {
+            if (error instanceof ORPCError && error.code === "NOT_FOUND") {
+              throw errors.NOT_FOUND({
+                message: "Event not found",
+                data: { resource: "event", resourceId: input.eventId },
+              });
+            }
+            throw error;
           }
-          throw error;
-        }
-      }),
+        }),
 
       createEvent: builder.createEvent.use(requireAuth).handler(async ({ input, context }) => {
         return await runEffect(
