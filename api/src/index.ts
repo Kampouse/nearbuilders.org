@@ -65,6 +65,80 @@ function readStringArray(value: unknown): string[] | undefined {
   return value.filter((item): item is string => typeof item === "string");
 }
 
+function htmlDecode(value: string) {
+  return value
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#34;", '"')
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
+}
+
+function asIso(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? new Date(time).toISOString() : undefined;
+}
+
+function readLumaLocation(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  const location = value as { name?: unknown; address?: unknown };
+  return readString(location.name) ?? readString(location.address);
+}
+
+async function fetchLumaEvent(url: string) {
+  const parsed = new URL(url);
+  const hostname = parsed.hostname.replace(/^www\./, "");
+  if (parsed.protocol !== "https:" || (hostname !== "luma.com" && hostname !== "lu.ma")) {
+    throw new ORPCError("BAD_REQUEST", { message: "Enter a valid Luma URL" });
+  }
+
+  const response = await fetch(parsed.toString(), {
+    headers: { accept: "text/html" },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) {
+    throw new ORPCError("BAD_REQUEST", { message: "Could not fetch Luma event" });
+  }
+
+  const html = await response.text();
+  const match = html.match(
+    /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i,
+  );
+  if (!match?.[1]) {
+    throw new ORPCError("BAD_REQUEST", { message: "Could not find event details on Luma page" });
+  }
+
+  let data: {
+    "@type"?: unknown;
+    name?: unknown;
+    description?: unknown;
+    url?: unknown;
+    startDate?: unknown;
+    endDate?: unknown;
+    location?: unknown;
+  };
+  try {
+    data = JSON.parse(htmlDecode(match[1]));
+  } catch {
+    throw new ORPCError("BAD_REQUEST", { message: "Could not read event details on Luma page" });
+  }
+
+  if (data["@type"] !== "Event") {
+    throw new ORPCError("BAD_REQUEST", { message: "Luma URL is not an event" });
+  }
+
+  const description = readString(data.description);
+  return {
+    title: readString(data.name),
+    description,
+    lumaUrl: readString(data.url) ?? parsed.toString(),
+    startAt: asIso(data.startDate),
+    endAt: asIso(data.endDate),
+    location: readLumaLocation(data.location),
+  };
+}
+
 const IMPLICIT_ACCOUNT_ID_RE = /^[0-9a-f]{64}$/;
 
 function assertValidBuilderProposalAccount(input: { pluginId: string; entityId: string }) {
@@ -157,6 +231,43 @@ const createCallbacks: Record<string, CreateCallback> = {
     assertProjectProposalOwner(result.ownerId, ownerId);
     return result.id;
   },
+  events: async (plugins, proposal, context) => {
+    const payload = requireObjectPayload(proposal.payload);
+    const ownerId = readString(payload.ownerId) ?? proposal.createdBy;
+    const eventsClient = plugins.events(pluginContext(context));
+    const visibility =
+      payload.visibility === "private" || payload.visibility === "unlisted"
+        ? payload.visibility
+        : "public";
+
+    try {
+      const updated = await eventsClient.updateEvent({
+        id: proposal.entityId,
+        visibility,
+      });
+      if (updated.ownerId !== ownerId) {
+        throw new ORPCError("FORBIDDEN", { message: "Event proposal owner mismatch" });
+      }
+      return updated.id;
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error;
+    }
+
+    const result = await plugins.events(pluginContext(context)).createEvent({
+      id: proposal.entityId,
+      title: readString(payload.title) ?? proposal.entityId,
+      slug: readString(payload.slug) ?? proposal.entityId,
+      description: readString(payload.description),
+      content: readString(payload.content),
+      visibility,
+      lumaUrl: readString(payload.lumaUrl),
+      startAt: readString(payload.startAt) ?? new Date().toISOString(),
+      endAt: readString(payload.endAt),
+      location: readString(payload.location),
+      ownerId,
+    });
+    return result.id;
+  },
 };
 
 const removeCallbacks: Record<string, RemoveCallback> = {
@@ -172,6 +283,17 @@ const removeCallbacks: Record<string, RemoveCallback> = {
     try {
       await plugins.projects(pluginContext(context)).updateProject({
         id: projectId,
+        visibility: "private",
+      });
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error;
+    }
+  },
+  events: async (plugins, proposal, context) => {
+    const eventId = proposal.appliedResourceId ?? proposal.entityId;
+    try {
+      await plugins.events(pluginContext(context)).updateEvent({
+        id: eventId,
         visibility: "private",
       });
     } catch (error) {
@@ -445,6 +567,41 @@ export default createPlugin.withPlugins<PluginsClient>()({
 
       listProjectsForApp: builder.listProjectsForApp.handler(async ({ input, context }) => {
         return await services.plugins.projects(pluginContext(context)).listProjectsForApp(input);
+      }),
+
+      listEvents: builder.listEvents.handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).listEvents(input);
+      }),
+
+      getEvent: builder.getEvent.handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).getEvent(input);
+      }),
+
+      fetchLumaEvent: builder.fetchLumaEvent.handler(async ({ input }) => ({
+        data: await fetchLumaEvent(input.url),
+      })),
+
+      createEvent: builder.createEvent.use(requireAuth).handler(async ({ input, context }) => {
+        const isAdmin = context.user?.role === "admin";
+        if (!isAdmin && !context.walletAddress) {
+          throw new ORPCError("FORBIDDEN", {
+            message: "Link a NEAR account to create events",
+          });
+        }
+        const visibility =
+          !isAdmin && input.visibility === "public" ? "private" : (input.visibility ?? "private");
+        return await services.plugins.events(pluginContext(context)).createEvent({
+          ...input,
+          visibility,
+        });
+      }),
+
+      updateEvent: builder.updateEvent.use(requireAuth).handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).updateEvent(input);
+      }),
+
+      deleteEvent: builder.deleteEvent.use(requireAuth).handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).deleteEvent(input);
       }),
 
       listBuilders: builder.listBuilders.handler(async ({ input, context }) => {

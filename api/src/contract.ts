@@ -75,6 +75,32 @@ const ProjectOutput = z.object({
   updatedAt: z.iso.datetime(),
 });
 
+const EventOutput = z.object({
+  id: z.string(),
+  ownerId: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  content: z.string().nullable(),
+  status: z.enum(["active", "cancelled"]),
+  visibility: z.enum(["private", "unlisted", "public"]),
+  lumaUrl: z.string().nullable(),
+  startAt: z.iso.datetime(),
+  endAt: z.iso.datetime().nullable(),
+  location: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+const LumaEventOutput = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  lumaUrl: z.string().url(),
+  startAt: z.iso.datetime().optional(),
+  endAt: z.iso.datetime().optional(),
+  location: z.string().optional(),
+});
+
 const BuilderOutput = z.object({
   id: z.string(),
   nearAccount: z.string(),
@@ -464,6 +490,91 @@ export const contract = oc.router({
       }),
     )
     .errors({ BAD_REQUEST }),
+
+  listEvents: oc
+    .route({ method: "GET", path: "/v1/events" })
+    .input(
+      z.object({
+        ownerId: z.string().optional(),
+        visibility: z.enum(["private", "unlisted", "public"]).optional(),
+        status: z.enum(["active", "cancelled"]).optional(),
+        limit: z.number().int().min(1).max(100).optional(),
+        cursor: z.string().optional(),
+      }),
+    )
+    .output(
+      z.object({
+        data: z.array(EventOutput),
+        meta: z.object({
+          total: z.number().int().nonnegative(),
+          hasMore: z.boolean(),
+          nextCursor: z.string().nullable(),
+        }),
+      }),
+    )
+    .errors({ BAD_REQUEST }),
+
+  fetchLumaEvent: oc
+    .route({ method: "GET", path: "/v1/luma/event" })
+    .input(z.object({ url: z.string().url().max(500) }))
+    .output(z.object({ data: LumaEventOutput }))
+    .errors({ BAD_REQUEST }),
+
+  createEvent: oc
+    .route({ method: "POST", path: "/v1/events" })
+    .input(
+      z.object({
+        title: z.string().min(1).max(200),
+        slug: z
+          .string()
+          .min(1)
+          .max(100)
+          .regex(/^[a-z0-9-]+$/),
+        description: z.string().max(1000).optional(),
+        content: z.string().max(50000).optional(),
+        visibility: z.enum(["private", "unlisted", "public"]).optional(),
+        status: z.enum(["active", "cancelled"]).optional(),
+        lumaUrl: z.string().url().max(500).optional(),
+        startAt: z.iso.datetime(),
+        endAt: z.iso.datetime().optional(),
+        location: z.string().max(200).optional(),
+        ownerId: z.string().optional(),
+      }),
+    )
+    .output(EventOutput)
+    .errors({ UNAUTHORIZED, FORBIDDEN, BAD_REQUEST }),
+
+  getEvent: oc
+    .route({ method: "GET", path: "/v1/events/{id}" })
+    .input(z.object({ id: z.string() }))
+    .output(z.object({ data: EventOutput }))
+    .errors({ NOT_FOUND }),
+
+  updateEvent: oc
+    .route({ method: "PATCH", path: "/v1/events/{id}" })
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().min(1).max(200).optional(),
+        description: z.string().max(1000).optional(),
+        content: z.string().max(50000).optional(),
+        visibility: z.enum(["private", "unlisted", "public"]).optional(),
+        status: z.enum(["active", "cancelled"]).optional(),
+        lumaUrl: z.string().url().max(500).optional(),
+        startAt: z.iso.datetime().optional(),
+        endAt: z.iso.datetime().optional(),
+        location: z.string().max(200).optional(),
+        ownerId: z.string().optional(),
+      }),
+    )
+    .output(EventOutput)
+    .errors({ UNAUTHORIZED, NOT_FOUND, FORBIDDEN, BAD_REQUEST }),
+
+  deleteEvent: oc
+    .route({ method: "DELETE", path: "/v1/events/{id}" })
+    .input(z.object({ id: z.string() }))
+    .output(z.object({ deleted: z.boolean() }))
+    .errors({ UNAUTHORIZED, NOT_FOUND, FORBIDDEN }),
 
   listBuilders: oc
     .route({ method: "GET", path: "/v1/builders" })

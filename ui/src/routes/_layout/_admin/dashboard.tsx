@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, FileText, Hammer, Loader2, MapPin, X } from "lucide-react";
+import { CalendarDays, Check, FileText, Hammer, Loader2, MapPin, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useApiClient } from "@/app";
@@ -20,7 +20,7 @@ type ProposalStatus = "pending" | "approved" | "rejected" | "removed";
 
 interface ProposalRecord {
   id: string;
-  pluginId: "builders" | "projects";
+  pluginId: "builders" | "projects" | "events";
   entityId: string;
   payload: unknown;
   reviewStatus: ProposalStatus;
@@ -47,7 +47,7 @@ function readStringArray(value: unknown): string[] {
 }
 
 function AdminDashboard() {
-  const [pluginTab, setPluginTab] = useState<"builders" | "projects">("builders");
+  const [pluginTab, setPluginTab] = useState<"builders" | "projects" | "events">("builders");
   const apiClient = useApiClient();
 
   const { data, isLoading } = useQuery({
@@ -74,6 +74,7 @@ function AdminDashboard() {
           [
             ["builders", "Builders"],
             ["projects", "Projects"],
+            ["events", "Events"],
           ] as const
         ).map(([value, label]) => (
           <button
@@ -137,6 +138,7 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
       queryClient.invalidateQueries({ queryKey: ["my-builder-profile"] });
       queryClient.invalidateQueries({ queryKey: ["builder-proposals"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to approve"),
   });
@@ -153,6 +155,7 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
       setShowRejectForm(false);
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", proposal.pluginId] });
       queryClient.invalidateQueries({ queryKey: ["builder-proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to reject"),
   });
@@ -162,6 +165,8 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
       <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted">
         {proposal.pluginId === "builders" ? (
           <Hammer className="size-5 text-muted-foreground" />
+        ) : proposal.pluginId === "events" ? (
+          <CalendarDays className="size-5 text-muted-foreground" />
         ) : (
           <FileText className="size-5 text-muted-foreground" />
         )}
@@ -186,6 +191,11 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
             {proposal.pluginId === "projects" && readString(payload.slug) && (
               <div className="mt-0.5 text-xs text-muted-foreground">
                 /{readString(payload.slug)}
+              </div>
+            )}
+            {proposal.pluginId === "events" && readString(payload.startAt) && (
+              <div className="mt-0.5 text-xs text-muted-foreground">
+                {new Date(readString(payload.startAt)!).toLocaleDateString()}
               </div>
             )}
           </div>
@@ -237,6 +247,31 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
                 ))}
               </div>
             )}
+          </>
+        ) : proposal.pluginId === "events" ? (
+          <>
+            {readString(payload.description) && (
+              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                {readString(payload.description)}
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap gap-1">
+              {readString(payload.visibility) && (
+                <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs capitalize">
+                  {readString(payload.visibility)}
+                </Badge>
+              )}
+              {readString(payload.location) && (
+                <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs">
+                  {readString(payload.location)}
+                </Badge>
+              )}
+              {readString(payload.lumaUrl) && (
+                <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs">
+                  Luma
+                </Badge>
+              )}
+            </div>
           </>
         ) : (
           <>

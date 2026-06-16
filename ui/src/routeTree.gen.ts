@@ -14,16 +14,21 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSkillRouteImport } from './routes/_layout/skill'
 import { Route as LayoutLoginRouteImport } from './routes/_layout/login'
 import { Route as LayoutIronclawRouteImport } from './routes/_layout/ironclaw'
+import { Route as LayoutEventsRouteImport } from './routes/_layout/events'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as LayoutAuthenticatedRouteImport } from './routes/_layout/_authenticated'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/_admin'
+import { Route as LayoutEventsIndexRouteImport } from './routes/_layout/events/index'
 import { Route as LayoutBuildersIndexRouteImport } from './routes/_layout/builders/index'
 import { Route as LayoutAppsIndexRouteImport } from './routes/_layout/apps/index'
+import { Route as LayoutEventsNewRouteImport } from './routes/_layout/events/new'
+import { Route as LayoutEventsIdRouteImport } from './routes/_layout/events/$id'
 import { Route as LayoutBuildersAddRouteImport } from './routes/_layout/builders/add'
 import { Route as LayoutBuildersAccountRouteImport } from './routes/_layout/builders/$account'
 import { Route as LayoutAuthenticatedDashboardRouteImport } from './routes/_layout/_authenticated/_dashboard'
 import { Route as LayoutAdminDashboardRouteImport } from './routes/_layout/_admin/dashboard'
 import { Route as LayoutAppsAccountIdIndexRouteImport } from './routes/_layout/apps/$accountId/index'
+import { Route as LayoutEventsIdEditRouteImport } from './routes/_layout/events/$id_.edit'
 import { Route as LayoutBuildersAccountEditRouteImport } from './routes/_layout/builders/$account_.edit'
 import { Route as LayoutAppsAccountIdGatewayIdRouteImport } from './routes/_layout/apps/$accountId/$gatewayId'
 import { Route as LayoutAuthenticatedAcceptInvitationIdRouteImport } from './routes/_layout/_authenticated/accept-invitation.$id'
@@ -67,6 +72,11 @@ const LayoutIronclawRoute = LayoutIronclawRouteImport.update({
   path: '/ironclaw',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutEventsRoute = LayoutEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutAboutRoute = LayoutAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -80,6 +90,11 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutEventsIndexRoute = LayoutEventsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutEventsRoute,
+} as any)
 const LayoutBuildersIndexRoute = LayoutBuildersIndexRouteImport.update({
   id: '/builders/',
   path: '/builders/',
@@ -89,6 +104,16 @@ const LayoutAppsIndexRoute = LayoutAppsIndexRouteImport.update({
   id: '/apps/',
   path: '/apps/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutEventsNewRoute = LayoutEventsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => LayoutEventsRoute,
+} as any)
+const LayoutEventsIdRoute = LayoutEventsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => LayoutEventsRoute,
 } as any)
 const LayoutBuildersAddRoute = LayoutBuildersAddRouteImport.update({
   id: '/builders/add',
@@ -116,6 +141,11 @@ const LayoutAppsAccountIdIndexRoute =
     path: '/apps/$accountId/',
     getParentRoute: () => LayoutRoute,
   } as any)
+const LayoutEventsIdEditRoute = LayoutEventsIdEditRouteImport.update({
+  id: '/$id_/edit',
+  path: '/$id/edit',
+  getParentRoute: () => LayoutEventsRoute,
+} as any)
 const LayoutBuildersAccountEditRoute =
   LayoutBuildersAccountEditRouteImport.update({
     id: '/builders/$account_/edit',
@@ -228,20 +258,25 @@ const LayoutAuthenticatedDashboardProjectsIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/about': typeof LayoutAboutRoute
+  '/events': typeof LayoutEventsRouteWithChildren
   '/ironclaw': typeof LayoutIronclawRoute
   '/login': typeof LayoutLoginRoute
   '/skill': typeof LayoutSkillRoute
   '/dashboard': typeof LayoutAdminDashboardRoute
   '/builders/$account': typeof LayoutBuildersAccountRoute
   '/builders/add': typeof LayoutBuildersAddRoute
+  '/events/$id': typeof LayoutEventsIdRoute
+  '/events/new': typeof LayoutEventsNewRoute
   '/apps/': typeof LayoutAppsIndexRoute
   '/builders/': typeof LayoutBuildersIndexRoute
+  '/events/': typeof LayoutEventsIndexRoute
   '/home': typeof LayoutAuthenticatedDashboardHomeRoute
   '/projects': typeof LayoutAuthenticatedDashboardProjectsRouteWithChildren
   '/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
   '/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
   '/builders/$account/edit': typeof LayoutBuildersAccountEditRoute
+  '/events/$id/edit': typeof LayoutEventsIdEditRoute
   '/apps/$accountId/': typeof LayoutAppsAccountIdIndexRoute
   '/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
   '/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
@@ -265,12 +300,16 @@ export interface FileRoutesByTo {
   '/dashboard': typeof LayoutAdminDashboardRoute
   '/builders/$account': typeof LayoutBuildersAccountRoute
   '/builders/add': typeof LayoutBuildersAddRoute
+  '/events/$id': typeof LayoutEventsIdRoute
+  '/events/new': typeof LayoutEventsNewRoute
   '/apps': typeof LayoutAppsIndexRoute
   '/builders': typeof LayoutBuildersIndexRoute
+  '/events': typeof LayoutEventsIndexRoute
   '/home': typeof LayoutAuthenticatedDashboardHomeRoute
   '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
   '/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
   '/builders/$account/edit': typeof LayoutBuildersAccountEditRoute
+  '/events/$id/edit': typeof LayoutEventsIdEditRoute
   '/apps/$accountId': typeof LayoutAppsAccountIdIndexRoute
   '/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
   '/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
@@ -291,6 +330,7 @@ export interface FileRoutesById {
   '/_layout/_admin': typeof LayoutAdminRouteWithChildren
   '/_layout/_authenticated': typeof LayoutAuthenticatedRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/events': typeof LayoutEventsRouteWithChildren
   '/_layout/ironclaw': typeof LayoutIronclawRoute
   '/_layout/login': typeof LayoutLoginRoute
   '/_layout/skill': typeof LayoutSkillRoute
@@ -299,14 +339,18 @@ export interface FileRoutesById {
   '/_layout/_authenticated/_dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
   '/_layout/builders/$account': typeof LayoutBuildersAccountRoute
   '/_layout/builders/add': typeof LayoutBuildersAddRoute
+  '/_layout/events/$id': typeof LayoutEventsIdRoute
+  '/_layout/events/new': typeof LayoutEventsNewRoute
   '/_layout/apps/': typeof LayoutAppsIndexRoute
   '/_layout/builders/': typeof LayoutBuildersIndexRoute
+  '/_layout/events/': typeof LayoutEventsIndexRoute
   '/_layout/_authenticated/_dashboard/home': typeof LayoutAuthenticatedDashboardHomeRoute
   '/_layout/_authenticated/_dashboard/projects': typeof LayoutAuthenticatedDashboardProjectsRouteWithChildren
   '/_layout/_authenticated/_dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/_layout/_authenticated/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
   '/_layout/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
   '/_layout/builders/$account_/edit': typeof LayoutBuildersAccountEditRoute
+  '/_layout/events/$id_/edit': typeof LayoutEventsIdEditRoute
   '/_layout/apps/$accountId/': typeof LayoutAppsAccountIdIndexRoute
   '/_layout/_authenticated/_dashboard/organizations/$slug': typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
   '/_layout/_authenticated/_dashboard/organizations/new': typeof LayoutAuthenticatedDashboardOrganizationsNewRoute
@@ -326,20 +370,25 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/events'
     | '/ironclaw'
     | '/login'
     | '/skill'
     | '/dashboard'
     | '/builders/$account'
     | '/builders/add'
+    | '/events/$id'
+    | '/events/new'
     | '/apps/'
     | '/builders/'
+    | '/events/'
     | '/home'
     | '/projects'
     | '/settings'
     | '/accept-invitation/$id'
     | '/apps/$accountId/$gatewayId'
     | '/builders/$account/edit'
+    | '/events/$id/edit'
     | '/apps/$accountId/'
     | '/organizations/$slug'
     | '/organizations/new'
@@ -363,12 +412,16 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/builders/$account'
     | '/builders/add'
+    | '/events/$id'
+    | '/events/new'
     | '/apps'
     | '/builders'
+    | '/events'
     | '/home'
     | '/accept-invitation/$id'
     | '/apps/$accountId/$gatewayId'
     | '/builders/$account/edit'
+    | '/events/$id/edit'
     | '/apps/$accountId'
     | '/organizations/$slug'
     | '/organizations/new'
@@ -388,6 +441,7 @@ export interface FileRouteTypes {
     | '/_layout/_admin'
     | '/_layout/_authenticated'
     | '/_layout/about'
+    | '/_layout/events'
     | '/_layout/ironclaw'
     | '/_layout/login'
     | '/_layout/skill'
@@ -396,14 +450,18 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/_dashboard'
     | '/_layout/builders/$account'
     | '/_layout/builders/add'
+    | '/_layout/events/$id'
+    | '/_layout/events/new'
     | '/_layout/apps/'
     | '/_layout/builders/'
+    | '/_layout/events/'
     | '/_layout/_authenticated/_dashboard/home'
     | '/_layout/_authenticated/_dashboard/projects'
     | '/_layout/_authenticated/_dashboard/settings'
     | '/_layout/_authenticated/accept-invitation/$id'
     | '/_layout/apps/$accountId/$gatewayId'
     | '/_layout/builders/$account_/edit'
+    | '/_layout/events/$id_/edit'
     | '/_layout/apps/$accountId/'
     | '/_layout/_authenticated/_dashboard/organizations/$slug'
     | '/_layout/_authenticated/_dashboard/organizations/new'
@@ -460,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIronclawRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/events': {
+      id: '/_layout/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof LayoutEventsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/about': {
       id: '/_layout/about'
       path: '/about'
@@ -481,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/events/': {
+      id: '/_layout/events/'
+      path: '/'
+      fullPath: '/events/'
+      preLoaderRoute: typeof LayoutEventsIndexRouteImport
+      parentRoute: typeof LayoutEventsRoute
+    }
     '/_layout/builders/': {
       id: '/_layout/builders/'
       path: '/builders'
@@ -494,6 +566,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/apps/'
       preLoaderRoute: typeof LayoutAppsIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/_layout/events/new': {
+      id: '/_layout/events/new'
+      path: '/new'
+      fullPath: '/events/new'
+      preLoaderRoute: typeof LayoutEventsNewRouteImport
+      parentRoute: typeof LayoutEventsRoute
+    }
+    '/_layout/events/$id': {
+      id: '/_layout/events/$id'
+      path: '/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof LayoutEventsIdRouteImport
+      parentRoute: typeof LayoutEventsRoute
     }
     '/_layout/builders/add': {
       id: '/_layout/builders/add'
@@ -529,6 +615,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/apps/$accountId/'
       preLoaderRoute: typeof LayoutAppsAccountIdIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/_layout/events/$id_/edit': {
+      id: '/_layout/events/$id_/edit'
+      path: '/$id/edit'
+      fullPath: '/events/$id/edit'
+      preLoaderRoute: typeof LayoutEventsIdEditRouteImport
+      parentRoute: typeof LayoutEventsRoute
     }
     '/_layout/builders/$account_/edit': {
       id: '/_layout/builders/$account_/edit'
@@ -767,10 +860,29 @@ const LayoutAuthenticatedRouteChildren: LayoutAuthenticatedRouteChildren = {
 const LayoutAuthenticatedRouteWithChildren =
   LayoutAuthenticatedRoute._addFileChildren(LayoutAuthenticatedRouteChildren)
 
+interface LayoutEventsRouteChildren {
+  LayoutEventsIdRoute: typeof LayoutEventsIdRoute
+  LayoutEventsNewRoute: typeof LayoutEventsNewRoute
+  LayoutEventsIndexRoute: typeof LayoutEventsIndexRoute
+  LayoutEventsIdEditRoute: typeof LayoutEventsIdEditRoute
+}
+
+const LayoutEventsRouteChildren: LayoutEventsRouteChildren = {
+  LayoutEventsIdRoute: LayoutEventsIdRoute,
+  LayoutEventsNewRoute: LayoutEventsNewRoute,
+  LayoutEventsIndexRoute: LayoutEventsIndexRoute,
+  LayoutEventsIdEditRoute: LayoutEventsIdEditRoute,
+}
+
+const LayoutEventsRouteWithChildren = LayoutEventsRoute._addFileChildren(
+  LayoutEventsRouteChildren,
+)
+
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRouteWithChildren
   LayoutAuthenticatedRoute: typeof LayoutAuthenticatedRouteWithChildren
   LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutEventsRoute: typeof LayoutEventsRouteWithChildren
   LayoutIronclawRoute: typeof LayoutIronclawRoute
   LayoutLoginRoute: typeof LayoutLoginRoute
   LayoutSkillRoute: typeof LayoutSkillRoute
@@ -788,6 +900,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRouteWithChildren,
   LayoutAuthenticatedRoute: LayoutAuthenticatedRouteWithChildren,
   LayoutAboutRoute: LayoutAboutRoute,
+  LayoutEventsRoute: LayoutEventsRouteWithChildren,
   LayoutIronclawRoute: LayoutIronclawRoute,
   LayoutLoginRoute: LayoutLoginRoute,
   LayoutSkillRoute: LayoutSkillRoute,
