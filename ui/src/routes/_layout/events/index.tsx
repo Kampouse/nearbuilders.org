@@ -15,6 +15,24 @@ type EventTab = "upcoming" | "past";
 type EventProposalStatus = "pending" | "approved" | "rejected" | "removed";
 
 export const Route = createFileRoute("/_layout/events/")({
+  loader: async ({ context }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions(context.authClient, context.session),
+    );
+    const viewerKey = session?.user?.id ?? "anonymous";
+
+    await context.queryClient.prefetchQuery({
+      queryKey: ["events", viewerKey],
+      queryFn: () => context.apiClient.listEvents({ limit: 100 }),
+    });
+
+    if (session?.user && !session.user.isAnonymous) {
+      await context.queryClient.prefetchQuery({
+        queryKey: ["event-proposals", viewerKey],
+        queryFn: () => context.apiClient.getProposals({ pluginId: "events", limit: 100 }),
+      });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Events | NEAR Builders" },
@@ -28,8 +46,7 @@ function EventsPage() {
   const apiClient = useApiClient();
   const auth = useAuthClient();
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));
-  const nearAccountId = auth.near.getAccountId();
-  const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
+  const viewerKey = session?.user?.id ?? "anonymous";
   const canCreate = Boolean(session?.user && !session.user.isAnonymous);
   const [copied, setCopied] = useState<string | null>(null);
   const [tab, setTab] = useState<EventTab>("upcoming");
@@ -127,7 +144,7 @@ function EventsPage() {
         ) : visibleEvents.length === 0 ? (
           <EmptyState tab={tab} />
         ) : (
-          <div className="grid grid-cols-[2.5rem_1.25rem_1fr] sm:grid-cols-[3rem_1.5rem_1fr]">
+          <div className="grid grid-cols-[2.5rem_1.25rem_minmax(0,1fr)] sm:grid-cols-[3rem_1.5rem_minmax(0,1fr)]">
             {monthGroups.map((group, groupIndex) => (
               <Fragment key={group.key}>
                 <div aria-hidden />
@@ -201,19 +218,11 @@ function EventCard({
     <Link
       to="/events/$id"
       params={{ id: event.id }}
-      className="group relative block rounded-lg border border-border bg-card px-4 py-3.5 transition-all duration-200 hover:shadow-lg sm:px-5 sm:py-4"
+      className="group block min-w-0 rounded-lg border border-border bg-card px-4 py-3.5 transition-all duration-200 hover:shadow-lg sm:px-5 sm:py-4"
     >
-      <span
-        className={cn(
-          "absolute right-4 top-3 shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium leading-5 sm:right-5",
-          status.className,
-        )}
-      >
-        {status.label}
-      </span>
       <div className="flex items-start gap-2">
-        <div className="min-w-0 flex-1 pr-24">
-          <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span
                 className={cn(
@@ -227,6 +236,14 @@ function EventCard({
                 <Lock size={12} className="shrink-0 text-muted-foreground" />
               )}
             </div>
+            <span
+              className={cn(
+                "shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium leading-5",
+                status.className,
+              )}
+            >
+              {status.label}
+            </span>
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -245,7 +262,7 @@ function EventCard({
             </span>
           </div>
           {event.description && (
-            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 line-clamp-2 break-words text-sm leading-relaxed text-muted-foreground">
               {event.description}
             </p>
           )}
@@ -258,8 +275,8 @@ function EventCard({
             onShare(event);
           }}
           className={cn(
-            "shrink-0 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-secondary hover:text-foreground group-hover:opacity-100",
-            copied && "text-brand-accent opacity-100",
+            "shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+            copied && "text-brand-accent",
           )}
           aria-label="Copy event link"
         >
@@ -329,7 +346,7 @@ function EmptyState({ tab }: { tab: EventTab }) {
 
 function TimelineSkeleton() {
   return (
-    <div className="grid grid-cols-[2.5rem_1.25rem_1fr] sm:grid-cols-[3rem_1.5rem_1fr]">
+    <div className="grid grid-cols-[2.5rem_1.25rem_minmax(0,1fr)] sm:grid-cols-[3rem_1.5rem_minmax(0,1fr)]">
       <div aria-hidden />
       <Spine />
       <div className="pb-3">
