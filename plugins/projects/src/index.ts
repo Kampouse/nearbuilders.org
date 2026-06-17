@@ -121,6 +121,31 @@ export default createPlugin({
         return { data: exit.value };
       }),
 
+      getProjectBySlug: builder.getProjectBySlug.handler(async ({ input, errors, context }) => {
+        const ownerId = context.walletAddress ?? context.userId;
+        const exit = await Effect.runPromiseExit(
+          services.project.getProjectBySlug(input.slug, ownerId, getAlternateOwnerId(context)),
+        );
+
+        if (Exit.isFailure(exit)) {
+          const squashed = Cause.squash(exit.cause);
+          console.error("[Projects] getProjectBySlug failed:", squashed);
+          if (squashed instanceof ORPCError) throw squashed;
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: squashed instanceof Error ? squashed.message : String(squashed),
+          });
+        }
+
+        if (!exit.value) {
+          throw errors.NOT_FOUND({
+            message: "Project not found",
+            data: { resource: "project", resourceId: input.slug },
+          });
+        }
+
+        return { data: exit.value };
+      }),
+
       createProject: builder.createProject.use(requireAuth).handler(async ({ input, context }) => {
         const ownerId = context.walletAddress ?? context.userId;
         const exit = await Effect.runPromiseExit(

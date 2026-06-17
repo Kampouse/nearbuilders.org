@@ -118,6 +118,55 @@ export declare const contract: {
             }, z.core.$strip>;
         };
     }>>, Record<never, never>>;
+    getProjectBySlug: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+        slug: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        data: z.ZodObject<{
+            id: z.ZodString;
+            ownerId: z.ZodString;
+            organizationId: z.ZodNullable<z.ZodString>;
+            kind: z.ZodEnum<{
+                project: "project";
+                idea: "idea";
+                scope: "scope";
+                result: "result";
+            }>;
+            slug: z.ZodString;
+            title: z.ZodString;
+            description: z.ZodNullable<z.ZodString>;
+            content: z.ZodNullable<z.ZodString>;
+            status: z.ZodEnum<{
+                active: "active";
+                paused: "paused";
+                archived: "archived";
+            }>;
+            visibility: z.ZodEnum<{
+                private: "private";
+                unlisted: "unlisted";
+                public: "public";
+            }>;
+            repository: z.ZodNullable<z.ZodString>;
+            domain: z.ZodNullable<z.ZodString>;
+            createdAt: z.ZodISODateTime;
+            updatedAt: z.ZodISODateTime;
+            apps: z.ZodArray<z.ZodObject<{
+                id: z.ZodString;
+                projectId: z.ZodString;
+                accountId: z.ZodString;
+                domain: z.ZodString;
+                createdByUserId: z.ZodString;
+                createdAt: z.ZodISODateTime;
+            }, z.core.$strip>>;
+        }, z.core.$strip>;
+    }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
+        NOT_FOUND: {
+            readonly status: 404;
+            readonly data: z.ZodObject<{
+                resource: z.ZodOptional<z.ZodString>;
+                resourceId: z.ZodOptional<z.ZodString>;
+            }, z.core.$strip>;
+        };
+    }>>, Record<never, never>>;
     createProject: import("@orpc/contract").ContractProcedure<z.ZodObject<{
         id: z.ZodOptional<z.ZodString>;
         kind: z.ZodEnum<{

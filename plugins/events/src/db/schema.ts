@@ -21,7 +21,7 @@ export const events = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [uniqueIndex("events_owner_slug_unique").on(table.ownerId, table.slug)],
+  (table) => [uniqueIndex("events_slug_unique").on(table.slug)],
 );
 
 export const eventParticipants = pgTable(

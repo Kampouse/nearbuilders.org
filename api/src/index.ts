@@ -80,6 +80,29 @@ function asIso(value: unknown) {
   return Number.isFinite(time) ? new Date(time).toISOString() : undefined;
 }
 
+function eventCreateError(error: unknown) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : String(error);
+
+  if (error instanceof ORPCError && error.code !== "INTERNAL_SERVER_ERROR") {
+    return error;
+  }
+
+  if (/duplicate|unique|events_slug_unique|events_owner_slug_unique|slug/i.test(message)) {
+    return new ORPCError("BAD_REQUEST", { message: "An event with this slug already exists" });
+  }
+
+  if (/validation|too big|expected|invalid/i.test(message)) {
+    return new ORPCError("BAD_REQUEST", { message });
+  }
+
+  return new ORPCError("BAD_REQUEST", { message: message || "Could not create event" });
+}
+
 function readLumaLocation(value: unknown) {
   if (!value || typeof value !== "object") return undefined;
   const location = value as { name?: unknown; address?: unknown };
@@ -556,6 +579,18 @@ export default createPlugin.withPlugins<PluginsClient>()({
         }
       }),
 
+      getProjectBySlug: builder.getProjectBySlug.handler(async ({ input, context }) => {
+        try {
+          return await services.plugins.projects(pluginContext(context)).getProjectBySlug(input);
+        } catch (err) {
+          console.error(
+            "[API] getProjectBySlug failed:",
+            err instanceof Error ? err.message : String(err),
+          );
+          throw err;
+        }
+      }),
+
       createProject: builder.createProject.use(requireAuth).handler(async ({ input, context }) => {
         const isAdmin = context.user?.role === "admin";
         if (!isAdmin && !context.walletAddress) {
@@ -625,6 +660,10 @@ export default createPlugin.withPlugins<PluginsClient>()({
         return await services.plugins.events(pluginContext(context)).getEvent(input);
       }),
 
+      getEventBySlug: builder.getEventBySlug.handler(async ({ input, context }) => {
+        return await services.plugins.events(pluginContext(context)).getEventBySlug(input);
+      }),
+
       listEventParticipants: builder.listEventParticipants.handler(async ({ input, context }) => {
         return await services.plugins.events(pluginContext(context)).listEventParticipants(input);
       }),
@@ -650,10 +689,18 @@ export default createPlugin.withPlugins<PluginsClient>()({
         }
         const visibility =
           !isAdmin && input.visibility === "public" ? "private" : (input.visibility ?? "private");
-        return await services.plugins.events(pluginContext(context)).createEvent({
-          ...input,
-          visibility,
-        });
+        try {
+          return await services.plugins.events(pluginContext(context)).createEvent({
+            ...input,
+            visibility,
+          });
+        } catch (error) {
+          console.error(
+            "[API] createEvent failed:",
+            error instanceof Error ? error.message : String(error),
+          );
+          throw eventCreateError(error);
+        }
       }),
 
       updateEvent: builder.updateEvent.use(requireAuth).handler(async ({ input, context }) => {

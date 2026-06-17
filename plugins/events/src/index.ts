@@ -112,6 +112,23 @@ export default createPlugin({
         return { data: result };
       }),
 
+      getEventBySlug: builder.getEventBySlug.handler(async ({ input, errors, context }) => {
+        const result = await runEffect(
+          services.event.getEventBySlug(
+            input.slug,
+            context.walletAddress ?? context.userId,
+            getAlternateOwnerId(context),
+          ),
+        );
+        if (!result) {
+          throw errors.NOT_FOUND({
+            message: "Event not found",
+            data: { resource: "event", resourceId: input.slug },
+          });
+        }
+        return { data: result };
+      }),
+
       listEventParticipants: builder.listEventParticipants.handler(
         async ({ input, errors, context }) => {
           try {

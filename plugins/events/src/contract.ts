@@ -61,6 +61,12 @@ export const contract = oc.router({
     .output(z.object({ data: EventOutput }))
     .errors({ NOT_FOUND }),
 
+  getEventBySlug: oc
+    .route({ method: "GET", path: "/v1/events/slug/{slug}" })
+    .input(z.object({ slug: z.string().min(1).max(100) }))
+    .output(z.object({ data: EventOutput }))
+    .errors({ NOT_FOUND }),
+
   listEventParticipants: oc
     .route({ method: "GET", path: "/v1/events/{eventId}/participants" })
     .input(z.object({ eventId: z.string() }))

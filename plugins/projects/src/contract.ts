@@ -68,6 +68,27 @@ export const contract = oc.router({
     )
     .errors({ NOT_FOUND }),
 
+  getProjectBySlug: oc
+    .route({ method: "GET", path: "/v1/projects/slug/{slug}" })
+    .input(z.object({ slug: z.string().min(1).max(100) }))
+    .output(
+      z.object({
+        data: projectSchema.extend({
+          apps: z.array(
+            z.object({
+              id: z.string(),
+              projectId: z.string(),
+              accountId: z.string(),
+              domain: z.string(),
+              createdByUserId: z.string(),
+              createdAt: z.iso.datetime(),
+            }),
+          ),
+        }),
+      }),
+    )
+    .errors({ NOT_FOUND }),
+
   createProject: oc
     .route({ method: "POST", path: "/v1/projects" })
     .input(

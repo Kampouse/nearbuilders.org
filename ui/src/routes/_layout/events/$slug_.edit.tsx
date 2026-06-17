@@ -15,13 +15,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  getEventFormErrorMessage,
+  normalizeEventFormValues,
+  normalizeLumaEventDetails,
+} from "./-event-form-utils";
 
 type Visibility = "private" | "unlisted" | "public";
 type Status = "active" | "cancelled";
 
-type EventRecord = Awaited<ReturnType<ReturnType<typeof useApiClient>["getEvent"]>>["data"];
+type EventRecord = Awaited<ReturnType<ReturnType<typeof useApiClient>["getEventBySlug"]>>["data"];
 
-export const Route = createFileRoute("/_layout/events/$id_/edit")({
+export const Route = createFileRoute("/_layout/events/$slug_/edit")({
   beforeLoad: async ({ context, location }) => {
     const session = await context.queryClient.ensureQueryData(
       sessionQueryOptions(context.authClient, context.session),
@@ -50,7 +55,7 @@ function toIso(value: string) {
 }
 
 function EditEventPage() {
-  const { id } = Route.useParams();
+  const { slug } = Route.useParams();
   const apiClient = useApiClient();
   const auth = useAuthClient();
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));
@@ -58,8 +63,8 @@ function EditEventPage() {
   const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
 
   const eventQuery = useQuery({
-    queryKey: ["event", id, viewerKey],
-    queryFn: () => apiClient.getEvent({ id }),
+    queryKey: ["event", slug, viewerKey],
+    queryFn: () => apiClient.getEventBySlug({ slug }),
     retry: false,
   });
 
@@ -102,8 +107,8 @@ function EditEventPage() {
           You don't have permission to edit this event.
         </p>
         <Link
-          to="/events/$id"
-          params={{ id }}
+          to="/events/$slug"
+          params={{ slug }}
           className="text-sm font-bold text-brand-accent hover:underline"
         >
           Back to event
@@ -140,32 +145,43 @@ function EditEventForm({ event, isAdmin }: { event: EventRecord; isAdmin: boolea
       return await apiClient.fetchLumaEvent({ url: lumaUrl.trim() });
     },
     onSuccess: ({ data }) => {
-      setLumaUrl(data.lumaUrl);
-      if (data.title) setTitle(data.title);
-      if (data.description) setDescription(data.description);
-      if (data.location) setLocation(data.location);
+      const normalized = normalizeLumaEventDetails(data, lumaUrl);
+      if (normalized.lumaUrl) setLumaUrl(normalized.lumaUrl);
+      if (normalized.title) setTitle(normalized.title);
+      if (normalized.description) setDescription(normalized.description);
+      if (normalized.content && !content.trim()) setContent(normalized.content);
+      if (normalized.location) setLocation(normalized.location);
       if (data.startAt) setStartAt(toDateTimeLocalValue(new Date(data.startAt)));
       if (data.endAt) setEndAt(toDateTimeLocalValue(new Date(data.endAt)));
-      toast.success("Fetched Luma event details");
+      toast.success(
+        normalized.wasTrimmed
+          ? "Fetched Luma event details and shortened long fields"
+          : "Fetched Luma event details",
+      );
     },
-    onError: (err: Error) => toast.error(err.message || "Failed to fetch Luma event"),
+    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
   });
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      // Non-admins making an event public require review, so keep it private and
-      // submit a proposal — mirroring the create flow.
       const needsReview = !isAdmin && visibility === "public" && event.visibility !== "public";
+      const normalized = normalizeEventFormValues({
+        title,
+        description,
+        content,
+        lumaUrl,
+        location,
+      });
 
       const updated = await apiClient.updateEvent({
         id: event.id,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        content: content.trim() || undefined,
-        lumaUrl: lumaUrl.trim() || undefined,
+        title: normalized.title,
+        description: normalized.description,
+        content: normalized.content,
+        lumaUrl: normalized.lumaUrl,
         startAt: toIso(startAt),
         endAt: endAt ? toIso(endAt) : undefined,
-        location: location.trim() || undefined,
+        location: normalized.location,
         status,
         visibility: needsReview ? "private" : visibility,
       });
@@ -194,11 +210,12 @@ function EditEventForm({ event, isAdmin }: { event: EventRecord; isAdmin: boolea
     onSuccess: ({ updated, needsReview }) => {
       toast.success(needsReview ? "Submitted for review" : "Event updated");
       queryClient.invalidateQueries({ queryKey: ["events"] });
-      queryClient.invalidateQueries({ queryKey: ["event", updated.id] });
+      queryClient.invalidateQueries({ queryKey: ["event", updated.slug] });
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "events"] });
-      void navigate({ to: "/events/$id", params: { id: updated.id } });
+      void navigate({ to: "/events/$slug", params: { slug: updated.slug } });
     },
-    onError: (err: Error) => toast.error(err.message || "Failed to update event"),
+    onError: (err: Error) =>
+      toast.error(getEventFormErrorMessage(err, "Failed to update event")),
   });
 
   const onSubmit = (e: FormEvent) => {
@@ -222,7 +239,7 @@ function EditEventForm({ event, isAdmin }: { event: EventRecord; isAdmin: boolea
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex shrink-0 items-center gap-2 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
         <Button asChild variant="ghost" size="icon-sm" aria-label="Back to event">
-          <Link to="/events/$id" params={{ id: event.id }}>
+          <Link to="/events/$slug" params={{ slug: event.slug }}>
             <ArrowLeft size={15} />
           </Link>
         </Button>

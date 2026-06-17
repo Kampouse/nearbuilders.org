@@ -21,7 +21,7 @@ export const projects = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [uniqueIndex("projects_owner_slug_unique").on(table.ownerId, table.slug)],
+  (table) => [uniqueIndex("projects_slug_unique").on(table.slug)],
 );
 
 export const projectApps = pgTable(

@@ -16,6 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  getEventFormErrorMessage,
+  normalizeEventFormValues,
+  normalizeLumaEventDetails,
+} from "./-event-form-utils";
 
 type Visibility = "private" | "unlisted" | "public";
 
@@ -43,7 +48,9 @@ function generateSlug(value: string) {
   const base = value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 93)
+    .replace(/-+$/g, "");
   return `${base || "event"}-${slugId()}`;
 }
 
@@ -87,15 +94,21 @@ function NewEventPage() {
       return await apiClient.fetchLumaEvent({ url: lumaUrl.trim() });
     },
     onSuccess: ({ data }) => {
-      setLumaUrl(data.lumaUrl);
-      if (data.title) setTitle(data.title);
-      if (data.description) setDescription(data.description);
-      if (data.location) setLocation(data.location);
+      const normalized = normalizeLumaEventDetails(data, lumaUrl);
+      if (normalized.lumaUrl) setLumaUrl(normalized.lumaUrl);
+      if (normalized.title) setTitle(normalized.title);
+      if (normalized.description) setDescription(normalized.description);
+      if (normalized.content && !content.trim()) setContent(normalized.content);
+      if (normalized.location) setLocation(normalized.location);
       if (data.startAt) setStartAt(toDateTimeLocalValue(new Date(data.startAt)));
       if (data.endAt) setEndAt(toDateTimeLocalValue(new Date(data.endAt)));
-      toast.success("Fetched Luma event details");
+      toast.success(
+        normalized.wasTrimmed
+          ? "Fetched Luma event details and shortened long fields"
+          : "Fetched Luma event details",
+      );
     },
-    onError: (err: Error) => toast.error(err.message || "Failed to fetch Luma event"),
+    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
   });
 
   const createMutation = useMutation({
@@ -105,46 +118,65 @@ function NewEventPage() {
       }
 
       const submitForReview = visibility === "public" && !isAdmin;
+      const normalized = normalizeEventFormValues({
+        title,
+        description,
+        content,
+        lumaUrl,
+        location,
+      });
       const event = await apiClient.createEvent({
-        title: title.trim(),
-        slug: generateSlug(title),
-        description: description.trim() || undefined,
-        content: content.trim() || undefined,
-        lumaUrl: lumaUrl.trim() || undefined,
+        title: normalized.title,
+        slug: generateSlug(normalized.title),
+        description: normalized.description,
+        content: normalized.content,
+        lumaUrl: normalized.lumaUrl,
         startAt: toIso(startAt),
         endAt: endAt ? toIso(endAt) : undefined,
-        location: location.trim() || undefined,
+        location: normalized.location,
         visibility: submitForReview ? "private" : visibility,
       });
 
       if (submitForReview) {
-        await apiClient.propose({
-          pluginId: "events",
-          entityId: event.id,
-          payload: {
-            title: event.title,
-            slug: event.slug,
-            description: event.description ?? undefined,
-            content: event.content ?? undefined,
-            visibility: "public",
-            lumaUrl: event.lumaUrl ?? undefined,
-            startAt: event.startAt,
-            endAt: event.endAt ?? undefined,
-            location: event.location ?? undefined,
-            ownerId: event.ownerId,
-          },
-        });
+        try {
+          await apiClient.propose({
+            pluginId: "events",
+            entityId: event.id,
+            payload: {
+              title: event.title,
+              slug: event.slug,
+              description: event.description ?? undefined,
+              content: event.content ?? undefined,
+              visibility: "public",
+              lumaUrl: event.lumaUrl ?? undefined,
+              startAt: event.startAt,
+              endAt: event.endAt ?? undefined,
+              location: event.location ?? undefined,
+              ownerId: event.ownerId,
+            },
+          });
+        } catch (error) {
+          console.error("Failed to submit event for review", error);
+          return { event, submitForReview: false, reviewFailed: true };
+        }
       }
 
-      return { event, submitForReview };
+      return { event, submitForReview, reviewFailed: false };
     },
-    onSuccess: ({ event, submitForReview }) => {
-      toast.success(submitForReview ? "Event submitted for review" : "Event created");
+    onSuccess: ({ event, submitForReview, reviewFailed }) => {
+      toast.success(
+        reviewFailed
+          ? "Event created privately, but review submission failed"
+          : submitForReview
+            ? "Event submitted for review"
+            : "Event created",
+      );
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "events"] });
-      void navigate({ to: "/events/$id", params: { id: event.id } });
+      void navigate({ to: "/events/$slug", params: { slug: event.slug } });
     },
-    onError: (err: Error) => toast.error(err.message || "Failed to create event"),
+    onError: (err: Error) =>
+      toast.error(getEventFormErrorMessage(err, "Failed to create event")),
   });
 
   const onSubmit = (event: FormEvent) => {

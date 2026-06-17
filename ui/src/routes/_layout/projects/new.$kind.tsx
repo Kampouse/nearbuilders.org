@@ -158,8 +158,8 @@ function NewProjectPage() {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "projects"] });
       navigate({
-        to: "/projects/$kind/$id",
-        params: { kind: project.kind, id: project.id },
+        to: "/projects/$slug",
+        params: { slug: project.slug },
         search: {
           kind: search.kind,
           personal: search.personal,

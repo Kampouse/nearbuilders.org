@@ -106,6 +106,14 @@ function assertEventDates(startAt: Date, endAt?: Date | null) {
   }
 }
 
+function eventWriteError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  if (/duplicate|unique|events_slug_unique|events_owner_slug_unique/i.test(message)) {
+    return new ORPCError("BAD_REQUEST", { message: "An event with this slug already exists" });
+  }
+  return new ORPCError("BAD_REQUEST", { message: message || "Could not save event" });
+}
+
 export class EventService extends Context.Tag("events/EventService")<
   EventService,
   {
@@ -128,6 +136,11 @@ export class EventService extends Context.Tag("events/EventService")<
     >;
     getEvent: (
       id: string,
+      userId?: string,
+      alternateUserId?: string,
+    ) => Effect.Effect<EventRecord | null, ORPCError<string, unknown>>;
+    getEventBySlug: (
+      slug: string,
       userId?: string,
       alternateUserId?: string,
     ) => Effect.Effect<EventRecord | null, ORPCError<string, unknown>>;
@@ -198,6 +211,20 @@ const viewableEvent = (db: any, id: string, userId?: string, alternateUserId?: s
   Effect.gen(function* () {
     const results = (yield* Effect.promise(() =>
       db.select().from(events).where(eq(events.id, id)).limit(1),
+    )) as any[];
+    const event = results[0];
+
+    if (!event) return null;
+    if (event.visibility === "public" || event.visibility === "unlisted") return event;
+    if ((userId || alternateUserId) && isOwner(event.ownerId, userId, alternateUserId))
+      return event;
+    return null;
+  });
+
+const viewableEventBySlug = (db: any, slug: string, userId?: string, alternateUserId?: string) =>
+  Effect.gen(function* () {
+    const results = (yield* Effect.promise(() =>
+      db.select().from(events).where(eq(events.slug, slug)).limit(1),
     )) as any[];
     const event = results[0];
 
@@ -307,6 +334,14 @@ export const EventServiceLive = Layer.effect(
       getEvent: (id, userId, alternateUserId) =>
         Effect.gen(function* () {
           const event = yield* viewableEvent(db, id, userId, alternateUserId);
+          if (!event) return null;
+          const participantCount = yield* countParticipants(db, event.id);
+          return rowToEvent(event, participantCount);
+        }),
+
+      getEventBySlug: (slug, userId, alternateUserId) =>
+        Effect.gen(function* () {
+          const event = yield* viewableEventBySlug(db, slug, userId, alternateUserId);
           if (!event) return null;
           const participantCount = yield* countParticipants(db, event.id);
           return rowToEvent(event, participantCount);
@@ -422,24 +457,38 @@ export const EventServiceLive = Layer.effect(
           const endAt = input.endAt ? parseDate(input.endAt, "End date") : null;
           assertEventDates(startAt, endAt);
 
-          yield* Effect.promise(() =>
-            db.insert(events).values({
-              id,
-              ownerId,
-              slug: input.slug,
-              title: input.title.trim(),
-              description: normalizeOptionalText(input.description),
-              content: normalizeOptionalText(input.content),
-              status: input.status ?? "active",
-              visibility: input.visibility ?? "private",
-              lumaUrl: normalizeOptionalText(input.lumaUrl),
-              startAt,
-              endAt,
-              location: normalizeOptionalText(input.location),
-              createdAt: now,
-              updatedAt: now,
-            }),
+          const [existing] = yield* Effect.promise(() =>
+            db.select().from(events).where(eq(events.slug, input.slug)).limit(1),
           );
+
+          if (existing) {
+            return yield* Effect.fail(
+              new ORPCError("BAD_REQUEST", {
+                message: "An event with this slug already exists",
+              }),
+            );
+          }
+
+          yield* Effect.tryPromise({
+            try: () =>
+              db.insert(events).values({
+                id,
+                ownerId,
+                slug: input.slug,
+                title: input.title.trim(),
+                description: normalizeOptionalText(input.description),
+                content: normalizeOptionalText(input.content),
+                status: input.status ?? "active",
+                visibility: input.visibility ?? "private",
+                lumaUrl: normalizeOptionalText(input.lumaUrl),
+                startAt,
+                endAt,
+                location: normalizeOptionalText(input.location),
+                createdAt: now,
+                updatedAt: now,
+              }),
+            catch: eventWriteError,
+          });
 
           const [event] = yield* Effect.promise(() =>
             db.select().from(events).where(eq(events.id, id)).limit(1),

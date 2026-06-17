@@ -463,6 +463,27 @@ export const contract = oc.router({
     )
     .errors({ NOT_FOUND }),
 
+  getProjectBySlug: oc
+    .route({ method: "GET", path: "/v1/projects/slug/{slug}" })
+    .input(z.object({ slug: z.string().min(1).max(100) }))
+    .output(
+      z.object({
+        data: ProjectOutput.extend({
+          apps: z.array(
+            z.object({
+              id: z.string(),
+              projectId: z.string(),
+              accountId: z.string(),
+              domain: z.string(),
+              createdByUserId: z.string(),
+              createdAt: z.iso.datetime(),
+            }),
+          ),
+        }),
+      }),
+    )
+    .errors({ NOT_FOUND }),
+
   updateProject: oc
     .route({ method: "PATCH", path: "/v1/projects/{id}" })
     .input(
@@ -559,6 +580,12 @@ export const contract = oc.router({
   getEvent: oc
     .route({ method: "GET", path: "/v1/events/{id}" })
     .input(z.object({ id: z.string() }))
+    .output(z.object({ data: EventOutput }))
+    .errors({ NOT_FOUND }),
+
+  getEventBySlug: oc
+    .route({ method: "GET", path: "/v1/events/slug/{slug}" })
+    .input(z.object({ slug: z.string().min(1).max(100) }))
     .output(z.object({ data: EventOutput }))
     .errors({ NOT_FOUND }),
 

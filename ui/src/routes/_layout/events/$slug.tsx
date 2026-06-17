@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import {
   ArrowLeft,
   CalendarDays,
@@ -21,15 +22,47 @@ import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_layout/events/$id")({
-  head: () => ({
-    meta: [{ title: "Event | NEAR Builders" }, { name: "description", content: "Event details." }],
-  }),
+export const Route = createFileRoute("/_layout/events/$slug")({
+  loader: async ({ params, context }) => {
+    const event = await context.queryClient
+      .ensureQueryData({
+        queryKey: ["event", params.slug],
+        queryFn: () => context.apiClient.getEventBySlug({ slug: params.slug }),
+      })
+      .then((r) => r?.data ?? null)
+      .catch(() => null);
+
+    return { event, siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders" };
+  },
+  head: ({ loaderData }) => {
+    const event = loaderData?.event;
+    const siteName = loaderData?.siteName ?? "NEAR Builders";
+    const title = event ? `${event.title} | ${siteName}` : `Event | ${siteName}`;
+    const description = event
+      ? event.description?.trim() ||
+        [formatEventDate(event), event.location].filter(Boolean).join(" · ")
+      : "Event details on NEAR Builders.";
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        ...getSocialImageMeta({
+          imageUrl: "/metadata.png",
+          title: event?.title ?? "Event",
+          description,
+          siteName,
+          type: "article",
+          alt: description,
+        }),
+      ],
+    };
+  },
   component: EventDetailPage,
 });
 
 function EventDetailPage() {
-  const { id } = Route.useParams();
+  const { slug } = Route.useParams();
   const apiClient = useApiClient();
   const auth = useAuthClient();
   const navigate = useNavigate();
@@ -40,16 +73,17 @@ function EventDetailPage() {
   const viewerKey = nearAccountId ?? session?.user?.id ?? "anonymous";
 
   const eventQuery = useQuery({
-    queryKey: ["event", id, viewerKey],
-    queryFn: () => apiClient.getEvent({ id }),
+    queryKey: ["event", slug, viewerKey],
+    queryFn: () => apiClient.getEventBySlug({ slug }),
     retry: false,
   });
 
   const event = eventQuery.data?.data;
+  const eventId = event?.id;
   const participantsQuery = useQuery({
-    queryKey: ["event-participants", id, viewerKey],
-    queryFn: () => apiClient.listEventParticipants({ eventId: id }),
-    enabled: !!event,
+    queryKey: ["event-participants", eventId, viewerKey],
+    queryFn: () => apiClient.listEventParticipants({ eventId: eventId! }),
+    enabled: Boolean(eventId),
     retry: false,
   });
   const participants = participantsQuery.data?.data ?? [];
@@ -68,41 +102,41 @@ function EventDetailPage() {
     session?.user && !session.user.isAnonymous && event?.status !== "cancelled",
   );
   const proposalQuery = useQuery({
-    queryKey: ["event-proposal", id, viewerKey],
+    queryKey: ["event-proposal", eventId, viewerKey],
     queryFn: () =>
       apiClient.getProposals({
         pluginId: "events",
-        entityId: id,
+        entityId: eventId!,
         limit: 1,
       }),
-    enabled: Boolean(canManage),
+    enabled: Boolean(canManage && eventId),
   });
   const eventProposal = proposalQuery.data?.data[0];
 
   const joinMutation = useMutation({
-    mutationFn: () => apiClient.joinEvent({ eventId: id }),
+    mutationFn: () => apiClient.joinEvent({ eventId: eventId! }),
     onSuccess: () => {
       toast.success("You're participating");
-      queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["event", slug] });
       queryClient.invalidateQueries({ queryKey: ["events"] });
-      queryClient.invalidateQueries({ queryKey: ["event-participants", id] });
+      queryClient.invalidateQueries({ queryKey: ["event-participants", eventId] });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to join event"),
   });
 
   const leaveMutation = useMutation({
-    mutationFn: () => apiClient.leaveEvent({ eventId: id }),
+    mutationFn: () => apiClient.leaveEvent({ eventId: eventId! }),
     onSuccess: () => {
       toast.success("Left event");
-      queryClient.invalidateQueries({ queryKey: ["event", id] });
+      queryClient.invalidateQueries({ queryKey: ["event", slug] });
       queryClient.invalidateQueries({ queryKey: ["events"] });
-      queryClient.invalidateQueries({ queryKey: ["event-participants", id] });
+      queryClient.invalidateQueries({ queryKey: ["event-participants", eventId] });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to leave event"),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => apiClient.deleteEvent({ id }),
+    mutationFn: () => apiClient.deleteEvent({ id: eventId! }),
     onSuccess: () => {
       toast.success("Deleted");
       queryClient.invalidateQueries({ queryKey: ["events"] });
@@ -177,7 +211,7 @@ function EventDetailPage() {
           </Button>
           {canManage && (
             <Button asChild size="sm" variant="outline">
-              <Link to="/events/$id/edit" params={{ id }}>
+              <Link to="/events/$slug/edit" params={{ slug: event.slug }}>
                 <Pencil size={13} />
                 <span className="hidden sm:inline">Edit</span>
               </Link>

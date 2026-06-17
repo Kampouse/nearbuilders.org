@@ -92,6 +92,42 @@ export declare const contract: {
             }, z.core.$strip>;
         };
     }>>, Record<never, never>>;
+    getEventBySlug: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+        slug: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        data: z.ZodObject<{
+            id: z.ZodString;
+            ownerId: z.ZodString;
+            slug: z.ZodString;
+            title: z.ZodString;
+            description: z.ZodNullable<z.ZodString>;
+            content: z.ZodNullable<z.ZodString>;
+            status: z.ZodEnum<{
+                active: "active";
+                cancelled: "cancelled";
+            }>;
+            visibility: z.ZodEnum<{
+                private: "private";
+                unlisted: "unlisted";
+                public: "public";
+            }>;
+            lumaUrl: z.ZodNullable<z.ZodString>;
+            startAt: z.ZodISODateTime;
+            endAt: z.ZodNullable<z.ZodISODateTime>;
+            location: z.ZodNullable<z.ZodString>;
+            participantCount: z.ZodNumber;
+            createdAt: z.ZodISODateTime;
+            updatedAt: z.ZodISODateTime;
+        }, z.core.$strip>;
+    }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
+        NOT_FOUND: {
+            readonly status: 404;
+            readonly data: z.ZodObject<{
+                resource: z.ZodOptional<z.ZodString>;
+                resourceId: z.ZodOptional<z.ZodString>;
+            }, z.core.$strip>;
+        };
+    }>>, Record<never, never>>;
     listEventParticipants: import("@orpc/contract").ContractProcedure<z.ZodObject<{
         eventId: z.ZodString;
     }, z.core.$strip>, z.ZodObject<{
