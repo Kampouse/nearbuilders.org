@@ -236,21 +236,6 @@ const canViewProjectRecord = (project: any, userId?: string, alternateUserId?: s
   return isProjectOwner(project.ownerId, userId, alternateUserId);
 };
 
-const canViewProject = (db: any, projectId: string, userId?: string, alternateUserId?: string) =>
-  Effect.gen(function* () {
-    const results = (yield* Effect.promise(() =>
-      db.select().from(projects).where(eq(projects.id, projectId)).limit(1),
-    )) as any[];
-
-    const project = results[0];
-
-    if (!project) {
-      return false;
-    }
-
-    return canViewProjectRecord(project, userId, alternateUserId);
-  });
-
 const canEditProject = (
   db: any,
   projectId: string,
@@ -476,11 +461,7 @@ export const ProjectServiceLive = Layer.effect(
           }
 
           const [existing] = yield* Effect.promise(() =>
-            db
-              .select()
-              .from(projects)
-              .where(eq(projects.slug, input.slug))
-              .limit(1),
+            db.select().from(projects).where(eq(projects.slug, input.slug)).limit(1),
           );
 
           if (existing) {

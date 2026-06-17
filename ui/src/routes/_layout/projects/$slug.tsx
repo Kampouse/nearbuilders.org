@@ -493,7 +493,7 @@ function ProjectDetailPage() {
         </SheetContent>
       </Sheet>
     </div>
-  )
+  );
 }
 
 function PrivateIndicator() {

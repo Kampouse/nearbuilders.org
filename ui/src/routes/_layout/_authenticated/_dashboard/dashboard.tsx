@@ -1014,11 +1014,7 @@ interface Project {
 
 function ProjectRow({ project, voteCount }: { project: Project; voteCount?: number }) {
   return (
-    <Link
-      to="/projects/$slug"
-      params={{ slug: project.slug }}
-      className="block"
-    >
+    <Link to="/projects/$slug" params={{ slug: project.slug }} className="block">
       <Card className="transition-colors hover:bg-muted/40">
         <CardHeader className="px-5 py-4">
           <div className="flex items-start justify-between gap-3">

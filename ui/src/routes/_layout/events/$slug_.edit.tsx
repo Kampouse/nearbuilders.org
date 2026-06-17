@@ -159,7 +159,8 @@ function EditEventForm({ event, isAdmin }: { event: EventRecord; isAdmin: boolea
           : "Fetched Luma event details",
       );
     },
-    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
+    onError: (err: Error) =>
+      toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
   });
 
   const updateMutation = useMutation({
@@ -214,8 +215,7 @@ function EditEventForm({ event, isAdmin }: { event: EventRecord; isAdmin: boolea
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "events"] });
       void navigate({ to: "/events/$slug", params: { slug: updated.slug } });
     },
-    onError: (err: Error) =>
-      toast.error(getEventFormErrorMessage(err, "Failed to update event")),
+    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to update event")),
   });
 
   const onSubmit = (e: FormEvent) => {

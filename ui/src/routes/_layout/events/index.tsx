@@ -167,7 +167,9 @@ function EventsPage() {
                       <EventCard
                         event={event}
                         proposalStatus={eventProposalStatuses.get(event.id)}
-                        showStatus={isAdmin || isCurrentUserOwner(event.ownerId, session?.user, nearAccountId)}
+                        showStatus={
+                          isAdmin || isCurrentUserOwner(event.ownerId, session?.user, nearAccountId)
+                        }
                         copied={copied === event.id}
                         onShare={copyEventLink}
                       />

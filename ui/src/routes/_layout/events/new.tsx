@@ -108,7 +108,8 @@ function NewEventPage() {
           : "Fetched Luma event details",
       );
     },
-    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
+    onError: (err: Error) =>
+      toast.error(getEventFormErrorMessage(err, "Failed to fetch Luma event")),
   });
 
   const createMutation = useMutation({
@@ -175,8 +176,7 @@ function NewEventPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "events"] });
       void navigate({ to: "/events/$slug", params: { slug: event.slug } });
     },
-    onError: (err: Error) =>
-      toast.error(getEventFormErrorMessage(err, "Failed to create event")),
+    onError: (err: Error) => toast.error(getEventFormErrorMessage(err, "Failed to create event")),
   });
 
   const onSubmit = (event: FormEvent) => {
