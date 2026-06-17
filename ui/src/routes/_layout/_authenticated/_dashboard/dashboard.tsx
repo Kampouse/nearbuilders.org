@@ -1014,7 +1014,11 @@ interface Project {
 
 function ProjectRow({ project, voteCount }: { project: Project; voteCount?: number }) {
   return (
-    <Link to="/projects/$kind/$id" params={{ kind: project.kind, id: project.id }} className="block">
+    <Link
+      to="/projects/$kind/$id"
+      params={{ kind: project.kind, id: project.id }}
+      className="block"
+    >
       <Card className="transition-colors hover:bg-muted/40">
         <CardHeader className="px-5 py-4">
           <div className="flex items-start justify-between gap-3">
