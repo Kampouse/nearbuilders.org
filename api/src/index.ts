@@ -616,6 +616,14 @@ export default createPlugin.withPlugins<PluginsClient>()({
         return await services.plugins.events(pluginContext(context)).deleteEvent(input);
       }),
 
+      listMentions: builder.listMentions.handler(async ({ input, context }) => {
+        return await services.plugins.projects(pluginContext(context)).listMentions(input);
+      }),
+
+      listMentionedBy: builder.listMentionedBy.handler(async ({ input, context }) => {
+        return await services.plugins.projects(pluginContext(context)).listMentionedBy(input);
+      }),
+
       listBuilders: builder.listBuilders.handler(async ({ input, context }) => {
         return await services.plugins.builders(pluginContext(context)).listBuilders(input);
       }),

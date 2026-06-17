@@ -1,4 +1,4 @@
-export type ProjectKindFilter = "all" | "project" | "idea";
+export type ProjectKindFilter = "all" | "project" | "idea" | "scope" | "result";
 
 export type ProjectSort = "votes" | "newest" | "oldest";
 
@@ -10,8 +10,18 @@ export type ProjectListSearch = {
   sort?: ProjectSort;
 };
 
+export function isProjectKind(value: unknown): value is Exclude<ProjectKindFilter, "all"> {
+  return value === "project" || value === "idea" || value === "scope" || value === "result";
+}
+
 function isProjectKindFilter(value: unknown): value is ProjectKindFilter {
-  return value === "all" || value === "project" || value === "idea";
+  return (
+    value === "all" ||
+    value === "project" ||
+    value === "idea" ||
+    value === "scope" ||
+    value === "result"
+  );
 }
 
 function isProjectSort(value: unknown): value is ProjectSort {

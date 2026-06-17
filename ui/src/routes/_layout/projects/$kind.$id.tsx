@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import {
   ArrowLeft,
+  BarChart2,
   Check,
   ChevronDown,
   ChevronUp,
@@ -11,6 +12,7 @@ import {
   FileText,
   Globe,
   Info,
+  Layers,
   Lock,
   Pencil,
   Share2,
@@ -25,10 +27,13 @@ import { NewBadge } from "@/components/ui/new-badge";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
-import { parseProjectListSearch } from "./-search";
+import { isProjectKind, parseProjectListSearch } from "./-search";
 
-export const Route = createFileRoute("/_layout/projects/$id")({
+export const Route = createFileRoute("/_layout/projects/$kind/$id")({
   validateSearch: parseProjectListSearch,
+  beforeLoad: async ({ params }) => {
+    if (!isProjectKind(params.kind)) throw redirect({ to: "/projects" });
+  },
   loader: async ({ params, context }) => {
     const project = await context.queryClient
       .ensureQueryData({
@@ -218,7 +223,7 @@ function ProjectDetailPage() {
           }}
           className="text-sm font-bold text-brand-accent hover:underline"
         >
-          ← Back to projects
+          {"\u2190"} Back to projects
         </Link>
       </div>
     );
@@ -230,7 +235,9 @@ function ProjectDetailPage() {
   const voteDirection = userVoteQuery.data ?? null;
 
   const renderedContent =
-    project.kind === "idea" ? project.content : (readmeQuery.data ?? project.description ?? null);
+    project.kind === "idea" || project.kind === "scope" || project.kind === "result"
+      ? project.content
+      : (readmeQuery.data ?? project.description ?? null);
 
   const metaItems = (
     <div className="space-y-4">
@@ -253,7 +260,7 @@ function ProjectDetailPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* ── top bar ── */}
+      {/* top bar */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-2.5 sm:px-6 sm:py-3">
         {/* breadcrumb */}
         <div className="flex items-center gap-2">
@@ -301,7 +308,7 @@ function ProjectDetailPage() {
             />
           </div>
 
-          {/* repo link — hidden on very small screens */}
+          {/* repo link */}
           {project.repository && (
             <Button
               asChild
@@ -336,7 +343,7 @@ function ProjectDetailPage() {
             activeColor="text-brand-accent"
           />
 
-          {/* details sheet trigger — mobile only */}
+          {/* details sheet trigger */}
           <Button
             type="button"
             variant="secondary"
@@ -352,8 +359,8 @@ function ProjectDetailPage() {
             <>
               <Button asChild size="sm" variant="outline">
                 <Link
-                  to="/projects/$id/edit"
-                  params={{ id: projectId }}
+                  to="/projects/$kind/$id/edit"
+                  params={{ kind: project.kind, id: projectId }}
                   search={{
                     tab: "write",
                     kind: search.kind,
@@ -381,7 +388,7 @@ function ProjectDetailPage() {
           )}
         </div>
       </div>
-      {/* ── body ── */}
+      {/* body */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* main content */}
         <div className="min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-8 sm:py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
@@ -389,7 +396,9 @@ function ProjectDetailPage() {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <KindChip kind={project.kind} />
-                {project.status !== "active" && <StatusChip status={project.status as any} />}
+                {project.kind !== "result" && project.status !== "active" && (
+                  <StatusChip status={project.status as any} />
+                )}
                 <NewBadge createdAt={project.createdAt} />
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -423,15 +432,23 @@ function ProjectDetailPage() {
             <div className="h-px bg-border" />
 
             {project.kind === "project" && readmeQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading README…</p>
+              <p className="text-sm text-muted-foreground">Loading README\u2026</p>
             ) : renderedContent ? (
               <Markdown content={renderedContent} />
             ) : (
               <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center text-sm text-muted-foreground">
                 {project.kind === "project"
                   ? "No README available for this repository."
-                  : "This idea has no content yet."}
+                  : project.kind === "scope"
+                    ? "This scope has no content yet."
+                    : project.kind === "result"
+                      ? "This result has no content yet."
+                      : "This idea has no content yet."}
               </div>
+            )}
+
+            {(project.kind === "scope" || project.kind === "result") && (
+              <MentionsSection projectId={projectId} />
             )}
           </div>
         </div>
@@ -441,7 +458,7 @@ function ProjectDetailPage() {
           {metaItems}
         </div>
       </div>
-      {/* ── mobile details sheet ── */}
+      {/* mobile details sheet */}
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
         <SheetContent side="bottom" hideCloseButton={false}>
           <SheetHeader>
@@ -491,12 +508,90 @@ function PrivateIndicator() {
   );
 }
 
-function KindChip({ kind }: { kind: "project" | "idea" }) {
+function KindChip({ kind }: { kind: "project" | "idea" | "scope" | "result" }) {
+  const icons = {
+    idea: <FileText size={11} />,
+    project: <FileCode2 size={11} />,
+    scope: <Layers size={11} />,
+    result: <BarChart2 size={11} />,
+  };
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold border border-border bg-secondary text-foreground">
-      {kind === "idea" ? <FileText size={11} /> : <FileCode2 size={11} />}
+      {icons[kind]}
       {kind}
     </span>
+  );
+}
+
+function MentionsSection({ projectId }: { projectId: string }) {
+  const apiClient = useApiClient();
+
+  const mentionedByQuery = useQuery({
+    queryKey: ["mentionedBy", projectId],
+    queryFn: () => apiClient.listMentionedBy({ id: projectId }),
+  });
+
+  const mentionsQuery = useQuery({
+    queryKey: ["mentions", projectId],
+    queryFn: () => apiClient.listMentions({ id: projectId }),
+  });
+
+  const mentioned = mentionedByQuery.data?.data ?? [];
+  const mentioners = mentionsQuery.data?.data ?? [];
+
+  if (mentioned.length === 0 && mentioners.length === 0) return null;
+
+  return (
+    <div className="space-y-4 pt-2">
+      <div className="h-px bg-border" />
+      {mentioned.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+            Mentions
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {mentioned.map((item) => (
+              <MentionChip key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
+      {mentioners.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+            Referenced by
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {mentioners.map((item) => (
+              <MentionChip key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MentionChip({
+  item,
+}: {
+  item: { id: string; kind: string; title: string; slug: string };
+}) {
+  const kindIcons: Record<string, ReactNode> = {
+    idea: <FileText size={11} />,
+    project: <FileCode2 size={11} />,
+    scope: <Layers size={11} />,
+    result: <BarChart2 size={11} />,
+  };
+  return (
+    <Link
+      to="/projects/$kind/$id"
+      params={{ kind: item.kind, id: item.id }}
+      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+    >
+      <span className="text-muted-foreground">{kindIcons[item.kind]}</span>
+      {item.title}
+    </Link>
   );
 }
 
@@ -563,7 +658,7 @@ function MetaLinkItem({
 
 function shortenId(id: string): string {
   if (id.length <= 20) return id;
-  return `${id.slice(0, 8)}…${id.slice(-6)}`;
+  return `${id.slice(0, 8)}\u2026${id.slice(-6)}`;
 }
 
 function formatDate(iso: string): string {

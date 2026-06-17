@@ -4,11 +4,13 @@ import { Reorder } from "framer-motion";
 import {
   ArrowDownUp,
   ArrowUpRight,
+  BarChart2,
   Check,
   ChevronDown,
   ChevronUp,
   FileText,
   Globe,
+  Layers,
   Lock,
   Pencil,
   Plus,
@@ -36,7 +38,7 @@ import { type ProjectKindFilter, type ProjectSort, parseProjectListSearch } from
 
 type VoteDirection = "up" | "down" | null;
 
-type ProjectKind = "project" | "idea";
+type ProjectKind = "project" | "idea" | "scope" | "result";
 
 interface RankedProject {
   id: string;
@@ -74,7 +76,14 @@ export const Route = createFileRoute("/_layout/projects/")({
   loader: ({ context, deps }) => {
     const { queryClient, apiClient } = context;
     const { kind, personal } = deps;
-    const activeKind = kind === "project" || kind === "idea" || kind === "all" ? kind : "all";
+    const activeKind =
+      kind === "project" ||
+      kind === "idea" ||
+      kind === "scope" ||
+      kind === "result" ||
+      kind === "all"
+        ? kind
+        : "all";
 
     if (personal) return;
 
@@ -125,7 +134,11 @@ function ProjectsList() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const search = Route.useSearch();
   const activeKind =
-    search.kind === "project" || search.kind === "idea" || search.kind === "all"
+    search.kind === "project" ||
+    search.kind === "idea" ||
+    search.kind === "scope" ||
+    search.kind === "result" ||
+    search.kind === "all"
       ? search.kind
       : "all";
   const isPersonalOnly = search.personal === true;
@@ -154,9 +167,11 @@ function ProjectsList() {
     [activeKind, isPersonalOnly, isPrivateOnly, ownerFilterId],
   );
 
-  const handleShare = useCallback((projectId: string) => {
+  const handleShare = useCallback((projectId: string, projectKind: ProjectKind) => {
     const url =
-      typeof window !== "undefined" ? `${window.location.origin}/projects/${projectId}` : "";
+      typeof window !== "undefined"
+        ? `${window.location.origin}/projects/${projectKind}/${projectId}`
+        : "";
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       toast.success("Link copied");
@@ -332,10 +347,10 @@ function ProjectsList() {
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
-  const handleMobileRowTap = (projectId: string) => {
+  const handleMobileRowTap = (projectId: string, kind: ProjectKind) => {
     void navigate({
-      to: "/projects/$id",
-      params: { id: projectId },
+      to: "/projects/$kind/$id",
+      params: { kind, id: projectId },
       search: {
         kind: search.kind,
         personal: search.personal,
@@ -415,7 +430,9 @@ function ProjectsList() {
   };
 
   const previewContent =
-    selectedProject?.kind === "idea"
+    selectedProject?.kind === "idea" ||
+    selectedProject?.kind === "scope" ||
+    selectedProject?.kind === "result"
       ? selectedProject.content
       : (selectedReadmeQuery.data ?? selectedProject?.description ?? null);
 
@@ -428,8 +445,10 @@ function ProjectsList() {
         {(
           [
             { value: "all", label: "All" },
-            { value: "project", label: "Projects" },
             { value: "idea", label: "Ideas" },
+            { value: "project", label: "Projects" },
+            { value: "scope", label: "Scopes" },
+            { value: "result", label: "Results" },
           ] as const
         ).map((opt) => (
           <button
@@ -496,10 +515,12 @@ function ProjectsList() {
     </div>
   );
 
+  const defaultNewKind = activeKind !== "all" && activeKind !== undefined ? activeKind : "project";
   const newButton = canParticipate ? (
     <Button asChild size="sm">
       <Link
-        to="/projects/new"
+        to="/projects/new/$kind"
+        params={{ kind: defaultNewKind }}
         search={{
           tab: "write",
           kind: search.kind,
@@ -553,7 +574,8 @@ function ProjectsList() {
           {canParticipate && (
             <Button asChild size="sm" className="mt-1">
               <Link
-                to="/projects/new"
+                to="/projects/new/$kind"
+                params={{ kind: defaultNewKind }}
                 search={{
                   tab: "write",
                   kind: search.kind,
@@ -595,7 +617,7 @@ function ProjectsList() {
                   isDownvoting={
                     downvoteMutation.isPending && downvoteMutation.variables === project.id
                   }
-                  onMobileTap={() => handleMobileRowTap(project.id)}
+                  onMobileTap={() => handleMobileRowTap(project.id, project.kind)}
                   onDesktopSelect={() => handleDesktopRowSelect(project.id)}
                   onUpvote={() => runVote("up", project.id)}
                   onDownvote={() => runVote("down", project.id)}
@@ -739,7 +761,7 @@ function ProjectsList() {
                     type="button"
                     size="icon-sm"
                     variant="outline"
-                    onClick={() => handleShare(selectedProject.id)}
+                    onClick={() => handleShare(selectedProject.id, selectedProject.kind)}
                     title="Copy link"
                     className={copied ? "text-brand-accent" : ""}
                   >
@@ -748,8 +770,8 @@ function ProjectsList() {
 
                   <Button asChild size="sm">
                     <Link
-                      to="/projects/$id"
-                      params={{ id: selectedProject.id }}
+                      to="/projects/$kind/$id"
+                      params={{ kind: selectedProject.kind, id: selectedProject.id }}
                       search={{
                         kind: search.kind,
                         personal: search.personal,
@@ -764,8 +786,8 @@ function ProjectsList() {
                   {canManageSelected && (
                     <Button asChild size="sm" variant="outline">
                       <Link
-                        to="/projects/$id/edit"
-                        params={{ id: selectedProject.id }}
+                        to="/projects/$kind/$id/edit"
+                        params={{ kind: selectedProject.kind, id: selectedProject.id }}
                         search={{
                           tab: "write",
                           kind: search.kind,
@@ -958,12 +980,14 @@ function KindBadge({
   size?: "default" | "sidebar";
 }) {
   const isCompact = compact ?? size === "sidebar";
+  const KindIcon =
+    kind === "idea" ? FileText : kind === "scope" ? Layers : kind === "result" ? BarChart2 : null;
   return (
     <Badge
       variant="secondary"
       className={cn(
         "shrink-0 rounded-[4px] border-border text-foreground",
-        kind === "idea" ? "bg-muted" : "bg-secondary",
+        kind === "idea" || kind === "scope" || kind === "result" ? "bg-muted" : "bg-secondary",
         size === "sidebar"
           ? "gap-1 px-2 py-0.5 text-[11px] [&>svg]:size-2.5"
           : isCompact
@@ -971,7 +995,7 @@ function KindBadge({
             : "gap-1 px-2 py-0.5 text-[11px] [&>svg]:size-2.5",
       )}
     >
-      {kind === "idea" ? <FileText /> : null}
+      {KindIcon ? <KindIcon /> : null}
       {kind}
     </Badge>
   );
