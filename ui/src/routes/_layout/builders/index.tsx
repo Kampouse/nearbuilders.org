@@ -1,9 +1,8 @@
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { Profile } from "better-near-auth";
@@ -103,12 +102,15 @@ function BuildersPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useSuspenseInfiniteQuery(buildersInfiniteOptions(apiClient, debouncedQuery));
+    isLoading,
+    isError,
+  } = useInfiniteQuery(buildersInfiniteOptions(apiClient, debouncedQuery));
 
-  const builders = useMemo(() => infiniteData.pages.flatMap((p) => p.data), [infiniteData]);
+  const builders = useMemo(() => infiniteData?.pages.flatMap((p) => p.data) ?? [], [infiniteData]);
 
-  const { data: proposalsData } = useSuspenseQuery(pendingProposalsOptions(apiClient));
-  const proposals = proposalsData.data ?? [];
+  const { data: proposalsData, isLoading: proposalsLoading, isError: proposalsError } =
+    useQuery(pendingProposalsOptions(apiClient));
+  const proposals = proposalsData?.data ?? [];
 
   const builderAccountSet = useMemo(() => new Set(builders.map((b) => b.nearAccount)), [builders]);
 
@@ -349,7 +351,19 @@ function BuildersPage() {
         </div>
       </div>
 
-      {filteredCards.length === 0 ? (
+      {isLoading || proposalsLoading ? (
+        <div className="flex justify-center py-24">
+          <div className="size-5 animate-spin rounded-full border-2 border-border border-t-transparent" />
+        </div>
+      ) : isError || proposalsError ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-4xl mb-4">⚡</div>
+          <p className="text-lg font-semibold text-foreground mb-1">Unable to load builders</p>
+          <p className="text-sm text-muted-foreground">
+            The builder directory is temporarily unavailable. Please try again later.
+          </p>
+        </div>
+      ) : filteredCards.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="text-4xl mb-4">🔭</div>
           <p className="text-lg font-semibold text-foreground mb-1">No builders found</p>
