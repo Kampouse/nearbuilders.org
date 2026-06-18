@@ -167,9 +167,9 @@ function ProjectsList() {
     [activeKind, isPersonalOnly, isPrivateOnly, ownerFilterId],
   );
 
-  const handleShare = useCallback((projectSlug: string) => {
+  const handleShare = useCallback((projectSlug: string, projectKind: string) => {
     const url =
-      typeof window !== "undefined" ? `${window.location.origin}/projects/${projectSlug}` : "";
+      typeof window !== "undefined" ? `${window.location.origin}/projects/${projectKind}/${projectSlug}` : "";
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       toast.success("Link copied");
@@ -345,10 +345,10 @@ function ProjectsList() {
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
-  const handleMobileRowTap = (projectSlug: string) => {
+  const handleMobileRowTap = (projectSlug: string, projectKind: string) => {
     void navigate({
-      to: "/projects/$slug",
-      params: { slug: projectSlug },
+      to: "/projects/$kind/$slug",
+      params: { kind: projectKind, slug: projectSlug },
       search: {
         kind: search.kind,
         personal: search.personal,
@@ -615,7 +615,7 @@ function ProjectsList() {
                   isDownvoting={
                     downvoteMutation.isPending && downvoteMutation.variables === project.id
                   }
-                  onMobileTap={() => handleMobileRowTap(project.slug)}
+                  onMobileTap={() => handleMobileRowTap(project.slug, project.kind)}
                   onDesktopSelect={() => handleDesktopRowSelect(project.id)}
                   onUpvote={() => runVote("up", project.id)}
                   onDownvote={() => runVote("down", project.id)}
@@ -759,7 +759,7 @@ function ProjectsList() {
                     type="button"
                     size="icon-sm"
                     variant="outline"
-                    onClick={() => handleShare(selectedProject.slug)}
+                    onClick={() => handleShare(selectedProject.slug, selectedProject.kind)}
                     title="Copy link"
                     className={copied ? "text-brand-accent" : ""}
                   >
@@ -767,14 +767,14 @@ function ProjectsList() {
                   </Button>
 
                   <Button asChild size="sm">
-                    <Link
-                      to="/projects/$slug"
-                      params={{ slug: selectedProject.slug }}
-                      search={{
-                        kind: search.kind,
-                        personal: search.personal,
-                        private: search.private,
-                      }}
+                  <Link
+                    to="/projects/$kind/$slug"
+                    params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
+                    search={{
+                      kind: search.kind,
+                      personal: search.personal,
+                      private: search.private,
+                    }}
                     >
                       Open
                       <ArrowUpRight size={13} />
@@ -783,15 +783,15 @@ function ProjectsList() {
 
                   {canManageSelected && (
                     <Button asChild size="sm" variant="outline">
-                      <Link
-                        to="/projects/$slug/edit"
-                        params={{ slug: selectedProject.slug }}
-                        search={{
-                          tab: "write",
-                          kind: search.kind,
-                          personal: search.personal,
-                          private: search.private,
-                        }}
+                  <Link
+                    to="/projects/$kind/$slug/edit"
+                    params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
+                    search={{
+                      tab: "write",
+                      kind: search.kind,
+                      personal: search.personal,
+                      private: search.private,
+                    }}
                       >
                         <Pencil size={13} />
                         Edit

@@ -581,8 +581,8 @@ function AppDetailPage() {
                     {projectsQuery.data.data.map((project) => (
                       <Link
                         key={project.id}
-                        to="/projects/$slug"
-                        params={{ slug: project.slug }}
+                        to="/projects/$kind/$slug"
+                        params={{ kind: project.kind, slug: project.slug }}
                         className="flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors"
                       >
                         <div className="min-w-0 space-y-0.5">

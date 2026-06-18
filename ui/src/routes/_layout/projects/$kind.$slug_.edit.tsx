@@ -24,7 +24,7 @@ type SearchParams = ReturnType<typeof parseProjectListSearch> & {
   tab: "write" | "preview";
 };
 
-export const Route = createFileRoute("/_layout/projects/$slug_/edit")({
+export const Route = createFileRoute("/_layout/projects/$kind/$slug_/edit")({
   validateSearch: (search: Record<string, unknown>): SearchParams => ({
     ...parseProjectListSearch(search),
     tab: search.tab === "preview" ? "preview" : "write",
@@ -124,8 +124,8 @@ function EditProjectPage() {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-proposals", "projects"] });
       navigate({
-        to: "/projects/$slug",
-        params: { slug: project!.slug },
+        to: "/projects/$kind/$slug",
+        params: { kind: project!.kind, slug: project!.slug },
         search: {
           kind: search.kind,
           personal: search.personal,
@@ -194,8 +194,8 @@ function EditProjectPage() {
           You don't have permission to edit this project.
         </p>
         <Link
-          to="/projects/$slug"
-          params={{ slug: project.slug }}
+          to="/projects/$kind/$slug"
+          params={{ kind: project.kind, slug: project.slug }}
           search={{
             kind: search.kind,
             personal: search.personal,
@@ -266,8 +266,8 @@ function EditFormInner({
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="icon-sm" aria-label="Back to project">
             <Link
-              to="/projects/$slug"
-              params={{ slug: project.slug }}
+              to="/projects/$kind/$slug"
+              params={{ kind: project.kind, slug: project.slug }}
               search={{
                 kind: search.kind,
                 personal: search.personal,
@@ -310,8 +310,8 @@ function EditFormInner({
 
           <Button asChild size="sm" variant="outline">
             <Link
-              to="/projects/$slug"
-              params={{ slug: project.slug }}
+              to="/projects/$kind/$slug"
+              params={{ kind: project.kind, slug: project.slug }}
               search={{
                 kind: search.kind,
                 personal: search.personal,

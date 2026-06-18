@@ -29,7 +29,7 @@ import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
 import { parseProjectListSearch } from "./-search";
 
-export const Route = createFileRoute("/_layout/projects/$slug")({
+export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
   validateSearch: parseProjectListSearch,
   loader: async ({ params, context }) => {
     const project = await context.queryClient
@@ -358,8 +358,8 @@ function ProjectDetailPage() {
             <>
               <Button asChild size="sm" variant="outline">
                 <Link
-                  to="/projects/$slug/edit"
-                  params={{ slug: project.slug }}
+                  to="/projects/$kind/$slug/edit"
+                  params={{ kind: project.kind, slug: project.slug }}
                   search={{
                     tab: "write",
                     kind: search.kind,
@@ -584,8 +584,8 @@ function MentionChip({
   };
   return (
     <Link
-      to="/projects/$slug"
-      params={{ slug: item.slug }}
+      to="/projects/$kind/$slug"
+      params={{ kind: item.kind, slug: item.slug }}
       className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted transition-colors"
     >
       <span className="text-muted-foreground">{kindIcons[item.kind]}</span>
