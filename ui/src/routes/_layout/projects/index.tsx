@@ -350,7 +350,6 @@ function ProjectsList() {
       to: "/projects/$kind/$slug",
       params: { kind: projectKind, slug: projectSlug },
       search: {
-        kind: search.kind,
         personal: search.personal,
         private: search.private,
       },
@@ -771,7 +770,6 @@ function ProjectsList() {
                     to="/projects/$kind/$slug"
                     params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
                     search={{
-                      kind: search.kind,
                       personal: search.personal,
                       private: search.private,
                     }}
@@ -788,14 +786,13 @@ function ProjectsList() {
                     params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
                     search={{
                       tab: "write",
-                      kind: search.kind,
                       personal: search.personal,
                       private: search.private,
                     }}
-                      >
-                        <Pencil size={13} />
-                        Edit
-                      </Link>
+                  >
+                    <Pencil size={13} />
+                    Edit
+                  </Link>
                     </Button>
                   )}
                 </div>

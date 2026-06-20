@@ -362,7 +362,6 @@ function ProjectDetailPage() {
                   params={{ kind: project.kind, slug: project.slug }}
                   search={{
                     tab: "write",
-                    kind: search.kind,
                     personal: search.personal,
                     private: search.private,
                   }}

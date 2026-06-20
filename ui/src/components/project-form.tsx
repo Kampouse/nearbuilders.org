@@ -239,6 +239,7 @@ export function ProjectFormLayout({
                             params={{ kind: opt.value }}
                             search={(prev) => ({ ...prev, tab: tab === "preview" ? "write" : tab })}
                             replace
+                            onClick={() => field.handleChange(opt.value)}
                             className={pillClass}
                           >
                             <span className={cn(active ? "text-primary" : "text-muted-foreground")}>
@@ -341,10 +342,8 @@ export function ProjectFormLayout({
                 name="repository"
                 validators={{
                   onChangeListenTo: ["kind"],
-                  onChange: ({ value, fieldApi }: any) =>
-                    validateRepository(value, fieldApi.form.getFieldValue("kind")),
-                  onSubmit: ({ value, fieldApi }: any) =>
-                    validateRepository(value, fieldApi.form.getFieldValue("kind")),
+                  onChange: ({ value }: any) => validateRepository(value, kind),
+                  onSubmit: ({ value }: any) => validateRepository(value, kind),
                 }}
               >
                 {(field: any) => {
@@ -504,11 +503,9 @@ export function ProjectFormLayout({
           <form.Field
             name="content"
             validators={{
-              onChangeListenTo: ["kind"],
-              onChange: ({ value, fieldApi }: any) =>
-                validateContent(value, fieldApi.form.getFieldValue("kind")),
-              onSubmit: ({ value, fieldApi }: any) =>
-                validateContent(value, fieldApi.form.getFieldValue("kind")),
+                  onChangeListenTo: ["kind"],
+                  onChange: ({ value }: any) => validateContent(value, kind),
+                  onSubmit: ({ value }: any) => validateContent(value, kind),
             }}
           >
             {(field: any) => {

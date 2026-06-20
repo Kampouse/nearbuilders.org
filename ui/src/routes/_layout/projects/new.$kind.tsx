@@ -110,9 +110,9 @@ function NewProjectPage() {
   const createMutation = useMutation({
     mutationFn: async (values: ProjectFormValues) => {
       const submitForReview =
-        values.visibility === "public" && !isAdmin && values.kind !== "result";
+        values.visibility === "public" && !isAdmin && routeKind !== "result";
       const project = await apiClient.createProject({
-        kind: values.kind,
+        kind: routeKind as ProjectKind,
         title: values.title.trim(),
         slug: generateSlug(values.title),
         description: values.description?.trim() || undefined,
@@ -141,15 +141,15 @@ function NewProjectPage() {
       }
       return { project, submitForReview };
     },
-    onSuccess: ({ project, submitForReview }, values) => {
-      clearDraft(values.kind);
+    onSuccess: ({ project, submitForReview }, _values) => {
+      clearDraft(routeKind as ProjectKind);
       const kindLabels: Record<ProjectKind, string> = {
         project: "Project",
         idea: "Idea",
         scope: "Scope",
         result: "Result",
       };
-      const label = kindLabels[values.kind];
+      const label = kindLabels[routeKind as ProjectKind];
       toast.success(
         submitForReview
           ? `${label} created \u2014 submitted for review to go public`
@@ -161,7 +161,6 @@ function NewProjectPage() {
         to: "/projects/$kind/$slug",
         params: { kind: project.kind, slug: project.slug },
         search: {
-          kind: search.kind,
           personal: search.personal,
           private: search.private,
         },
@@ -184,13 +183,11 @@ function NewProjectPage() {
   const title = useStore(form.store, (s) => s.values.title);
   const slugPreview = generateSlug(title) || undefined;
 
-  const currentKind = useStore(form.store, (s) => s.values.kind);
-
   useEffect(() => {
     try {
-      localStorage.setItem(LAST_KIND_KEY, currentKind);
+      localStorage.setItem(LAST_KIND_KEY, routeKind);
     } catch {}
-  }, [currentKind]);
+  }, [routeKind]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
