@@ -503,9 +503,9 @@ export function ProjectFormLayout({
           <form.Field
             name="content"
             validators={{
-                  onChangeListenTo: ["kind"],
-                  onChange: ({ value }: any) => validateContent(value, kind),
-                  onSubmit: ({ value }: any) => validateContent(value, kind),
+              onChangeListenTo: ["kind"],
+              onChange: ({ value }: any) => validateContent(value, kind),
+              onSubmit: ({ value }: any) => validateContent(value, kind),
             }}
           >
             {(field: any) => {

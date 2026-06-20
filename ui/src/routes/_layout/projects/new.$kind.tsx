@@ -109,8 +109,7 @@ function NewProjectPage() {
 
   const createMutation = useMutation({
     mutationFn: async (values: ProjectFormValues) => {
-      const submitForReview =
-        values.visibility === "public" && !isAdmin && routeKind !== "result";
+      const submitForReview = values.visibility === "public" && !isAdmin && routeKind !== "result";
       const project = await apiClient.createProject({
         kind: routeKind as ProjectKind,
         title: values.title.trim(),

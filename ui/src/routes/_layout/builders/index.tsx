@@ -1,9 +1,4 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import type { Profile } from "better-near-auth";
 import { AnimatePresence, motion, Reorder } from "framer-motion";
@@ -108,8 +103,11 @@ function BuildersPage() {
 
   const builders = useMemo(() => infiniteData?.pages.flatMap((p) => p.data) ?? [], [infiniteData]);
 
-  const { data: proposalsData, isLoading: proposalsLoading, isError: proposalsError } =
-    useQuery(pendingProposalsOptions(apiClient));
+  const {
+    data: proposalsData,
+    isLoading: proposalsLoading,
+    isError: proposalsError,
+  } = useQuery(pendingProposalsOptions(apiClient));
   const proposals = proposalsData?.data ?? [];
 
   const builderAccountSet = useMemo(() => new Set(builders.map((b) => b.nearAccount)), [builders]);

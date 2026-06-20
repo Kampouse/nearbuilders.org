@@ -169,7 +169,9 @@ function ProjectsList() {
 
   const handleShare = useCallback((projectSlug: string, projectKind: string) => {
     const url =
-      typeof window !== "undefined" ? `${window.location.origin}/projects/${projectKind}/${projectSlug}` : "";
+      typeof window !== "undefined"
+        ? `${window.location.origin}/projects/${projectKind}/${projectSlug}`
+        : "";
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       toast.success("Link copied");
@@ -767,14 +769,14 @@ function ProjectsList() {
                   </Button>
 
                   <Button asChild size="sm">
-                  <Link
-                    to="/projects/$kind/$slug"
-                    params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
-                    search={{
-                      kind: search.kind,
-                      personal: search.personal,
-                      private: search.private,
-                    }}
+                    <Link
+                      to="/projects/$kind/$slug"
+                      params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
+                      search={{
+                        kind: search.kind,
+                        personal: search.personal,
+                        private: search.private,
+                      }}
                     >
                       Open
                       <ArrowUpRight size={13} />
@@ -783,19 +785,19 @@ function ProjectsList() {
 
                   {canManageSelected && (
                     <Button asChild size="sm" variant="outline">
-                  <Link
-                    to="/projects/$kind/$slug/edit"
-                    params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
-                    search={{
-                      tab: "write",
-                      kind: search.kind,
-                      personal: search.personal,
-                      private: search.private,
-                    }}
-                  >
-                    <Pencil size={13} />
-                    Edit
-                  </Link>
+                      <Link
+                        to="/projects/$kind/$slug/edit"
+                        params={{ kind: selectedProject.kind, slug: selectedProject.slug }}
+                        search={{
+                          tab: "write",
+                          kind: search.kind,
+                          personal: search.personal,
+                          private: search.private,
+                        }}
+                      >
+                        <Pencil size={13} />
+                        Edit
+                      </Link>
                     </Button>
                   )}
                 </div>
