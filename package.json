@@ -122,5 +122,8 @@
     "@opentelemetry/api": "catalog:",
     "every-plugin": "catalog:",
     "everything-dev": "catalog:"
+  },
+  "patchedDependencies": {
+    "better-near-auth@1.6.3": "patches/better-near-auth@1.6.3.patch"
   }
 }

@@ -1,0 +1,13 @@
+diff --git a/dist/index.js b/dist/index.js
+index 10d6461e22dc8ddc9932534b60d50f4a15bcb075..c6e4f7cb146adde0126f66bcd595d89c97b1b6bc 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -318,7 +318,7 @@ async function hashNonce(nonce) {
+ }
+ function deriveEmail(accountId) {
+ 	if (accountId.endsWith(".near")) return `${accountId.slice(0, -5)}@near.email`;
+-	return null;
++	return `${accountId}@near.email`;
+ }
+ function nearAccountKey(account) {
+ 	return `${account.accountId}:${account.network}`;

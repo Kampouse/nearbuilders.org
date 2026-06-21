@@ -28,7 +28,7 @@
         "dotenv": "^17.3.1",
         "tsx": "^4.21.0",
         "vite-tsconfig-paths": "^6.1.1",
-        "vitest": "^catalog:",
+        "vitest": "catalog:",
       },
     },
     "api": {
@@ -326,6 +326,9 @@
         "react-dom": "catalog:",
       },
     },
+  },
+  "patchedDependencies": {
+    "better-near-auth@1.6.3": "patches/better-near-auth@1.6.3.patch",
   },
   "catalog": {
     "@better-auth/api-key": "1.6.9",
