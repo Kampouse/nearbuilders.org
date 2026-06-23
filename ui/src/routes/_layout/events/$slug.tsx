@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import type { Profile } from "better-near-auth";
+import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import {
   ArrowLeft,
   CalendarDays,

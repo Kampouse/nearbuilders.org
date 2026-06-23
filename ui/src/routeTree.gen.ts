@@ -40,6 +40,7 @@ import { Route as LayoutAppsAccountIdGatewayIdRouteImport } from './routes/_layo
 import { Route as LayoutAuthenticatedAcceptInvitationIdRouteImport } from './routes/_layout/_authenticated/accept-invitation.$id'
 import { Route as LayoutAuthenticatedDashboardSettingsRouteImport } from './routes/_layout/_authenticated/_dashboard/settings'
 import { Route as LayoutAuthenticatedDashboardProfileRouteImport } from './routes/_layout/_authenticated/_dashboard/profile'
+import { Route as LayoutAuthenticatedDashboardNotificationsRouteImport } from './routes/_layout/_authenticated/_dashboard/notifications'
 import { Route as LayoutAuthenticatedDashboardDashboardRouteImport } from './routes/_layout/_authenticated/_dashboard/dashboard'
 import { Route as LayoutAdminAdminDashboardRouteImport } from './routes/_layout/_admin/admin/dashboard'
 import { Route as LayoutAuthenticatedDashboardSettingsIndexRouteImport } from './routes/_layout/_authenticated/_dashboard/settings/index'
@@ -213,6 +214,12 @@ const LayoutAuthenticatedDashboardProfileRoute =
     path: '/profile',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
   } as any)
+const LayoutAuthenticatedDashboardNotificationsRoute =
+  LayoutAuthenticatedDashboardNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => LayoutAuthenticatedDashboardRoute,
+  } as any)
 const LayoutAuthenticatedDashboardDashboardRoute =
   LayoutAuthenticatedDashboardDashboardRouteImport.update({
     id: '/dashboard',
@@ -317,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof LayoutProjectsIndexRoute
   '/admin/dashboard': typeof LayoutAdminAdminDashboardRoute
   '/dashboard': typeof LayoutAuthenticatedDashboardDashboardRoute
+  '/notifications': typeof LayoutAuthenticatedDashboardNotificationsRoute
   '/profile': typeof LayoutAuthenticatedDashboardProfileRoute
   '/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
@@ -357,6 +365,7 @@ export interface FileRoutesByTo {
   '/projects': typeof LayoutProjectsIndexRoute
   '/admin/dashboard': typeof LayoutAdminAdminDashboardRoute
   '/dashboard': typeof LayoutAuthenticatedDashboardDashboardRoute
+  '/notifications': typeof LayoutAuthenticatedDashboardNotificationsRoute
   '/profile': typeof LayoutAuthenticatedDashboardProfileRoute
   '/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
   '/apps/$accountId/$gatewayId': typeof LayoutAppsAccountIdGatewayIdRoute
@@ -404,6 +413,7 @@ export interface FileRoutesById {
   '/_layout/projects/': typeof LayoutProjectsIndexRoute
   '/_layout/_admin/admin/dashboard': typeof LayoutAdminAdminDashboardRoute
   '/_layout/_authenticated/_dashboard/dashboard': typeof LayoutAuthenticatedDashboardDashboardRoute
+  '/_layout/_authenticated/_dashboard/notifications': typeof LayoutAuthenticatedDashboardNotificationsRoute
   '/_layout/_authenticated/_dashboard/profile': typeof LayoutAuthenticatedDashboardProfileRoute
   '/_layout/_authenticated/_dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/_layout/_authenticated/accept-invitation/$id': typeof LayoutAuthenticatedAcceptInvitationIdRoute
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/admin/dashboard'
     | '/dashboard'
+    | '/notifications'
     | '/profile'
     | '/settings'
     | '/accept-invitation/$id'
@@ -489,6 +500,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/admin/dashboard'
     | '/dashboard'
+    | '/notifications'
     | '/profile'
     | '/accept-invitation/$id'
     | '/apps/$accountId/$gatewayId'
@@ -535,6 +547,7 @@ export interface FileRouteTypes {
     | '/_layout/projects/'
     | '/_layout/_admin/admin/dashboard'
     | '/_layout/_authenticated/_dashboard/dashboard'
+    | '/_layout/_authenticated/_dashboard/notifications'
     | '/_layout/_authenticated/_dashboard/profile'
     | '/_layout/_authenticated/_dashboard/settings'
     | '/_layout/_authenticated/accept-invitation/$id'
@@ -783,6 +796,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAuthenticatedDashboardProfileRouteImport
       parentRoute: typeof LayoutAuthenticatedDashboardRoute
     }
+    '/_layout/_authenticated/_dashboard/notifications': {
+      id: '/_layout/_authenticated/_dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardNotificationsRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
     '/_layout/_authenticated/_dashboard/dashboard': {
       id: '/_layout/_authenticated/_dashboard/dashboard'
       path: '/dashboard'
@@ -925,6 +945,7 @@ const LayoutAuthenticatedDashboardSettingsRouteWithChildren =
 
 interface LayoutAuthenticatedDashboardRouteChildren {
   LayoutAuthenticatedDashboardDashboardRoute: typeof LayoutAuthenticatedDashboardDashboardRoute
+  LayoutAuthenticatedDashboardNotificationsRoute: typeof LayoutAuthenticatedDashboardNotificationsRoute
   LayoutAuthenticatedDashboardProfileRoute: typeof LayoutAuthenticatedDashboardProfileRoute
   LayoutAuthenticatedDashboardSettingsRoute: typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   LayoutAuthenticatedDashboardOrganizationsSlugRoute: typeof LayoutAuthenticatedDashboardOrganizationsSlugRoute
@@ -939,6 +960,8 @@ const LayoutAuthenticatedDashboardRouteChildren: LayoutAuthenticatedDashboardRou
   {
     LayoutAuthenticatedDashboardDashboardRoute:
       LayoutAuthenticatedDashboardDashboardRoute,
+    LayoutAuthenticatedDashboardNotificationsRoute:
+      LayoutAuthenticatedDashboardNotificationsRoute,
     LayoutAuthenticatedDashboardProfileRoute:
       LayoutAuthenticatedDashboardProfileRoute,
     LayoutAuthenticatedDashboardSettingsRoute:

@@ -36,6 +36,14 @@ type ProposalData = Pick<
   z.infer<typeof ProposalSchema>,
   "pluginId" | "entityId" | "payload" | "appliedResourceId" | "createdBy"
 >;
+export type ApprovalNotificationInput = {
+  userId: string;
+  type: string;
+  source: string;
+  subject: string;
+  body?: string;
+  link: string;
+};
 
 function pluginContext(context: ApiContext) {
   return {
@@ -47,6 +55,13 @@ function pluginContext(context: ApiContext) {
     reqHeaders: context.reqHeaders,
     getRawBody: context.getRawBody,
   };
+}
+
+// Notifications are scoped to the NEAR account: recipients come from `proposal.createdBy`
+// (the wallet address), not the better-auth user id. Feed the plugin the wallet address as
+// its `userId` so reads/writes share one identity namespace.
+function notificationContext(context: ApiContext) {
+  return { ...pluginContext(context), userId: context.walletAddress };
 }
 
 function requireObjectPayload(payload: unknown) {
@@ -63,6 +78,70 @@ function readString(value: unknown): string | undefined {
 function readStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value.filter((item): item is string => typeof item === "string");
+}
+export function buildApprovalNotification(
+  proposal: ProposalData,
+): ApprovalNotificationInput | null {
+  const payload =
+    proposal.payload && typeof proposal.payload === "object" && !Array.isArray(proposal.payload)
+      ? (proposal.payload as Record<string, unknown>)
+      : {};
+
+  if (proposal.pluginId === "projects") {
+    const slug = readString(payload.slug) ?? proposal.entityId;
+    const title = readString(payload.title) ?? "Project";
+    return {
+      userId: proposal.createdBy,
+      type: "project_approved",
+      source: "projects",
+      subject: `${title} approved`,
+      body: "Your project was approved and is now public on NEAR Builders.",
+      link: `/projects/project/${slug}`,
+    };
+  }
+
+  if (proposal.pluginId === "events") {
+    const slug = readString(payload.slug) ?? proposal.entityId;
+    const title = readString(payload.title) ?? "Event";
+    return {
+      userId: proposal.createdBy,
+      type: "event_approved",
+      source: "events",
+      subject: `${title} approved`,
+      body: "Your event was approved and is now public on NEAR Builders.",
+      link: `/events/${slug}`,
+    };
+  }
+
+  if (proposal.pluginId === "builders") {
+    const account = proposal.entityId;
+    const name = readString(payload.name) ?? account;
+    return {
+      userId: proposal.createdBy,
+      type: "builder_approved",
+      source: "builders",
+      subject: `${name} approved`,
+      body: "Your builder profile was approved and is now public on NEAR Builders.",
+      link: `/builders/${account}`,
+    };
+  }
+
+  return null;
+}
+
+async function emitApprovalNotification(
+  plugins: Omit<PluginsClient, "auth">,
+  proposal: ProposalData,
+  context: ApiContext,
+) {
+  const notification = buildApprovalNotification(proposal);
+  if (!notification) return;
+  // Best-effort: a notification failure must not fail an already-applied approval.
+  try {
+    await plugins.notifications(notificationContext(context)).createNotification(notification);
+  } catch (error) {
+    console.error("[approve] failed to emit approval notification", error);
+  }
 }
 
 function htmlDecode(value: string) {
@@ -431,11 +510,13 @@ export default createPlugin.withPlugins<PluginsClient>()({
           throw error;
         }
 
-        return await proposalsClient.markApplied({
+        const applied = await proposalsClient.markApplied({
           pluginId: input.pluginId,
           entityId: input.entityId,
           appliedResourceId,
         });
+        await emitApprovalNotification(services.plugins, proposal, context);
+        return applied;
       }),
 
       reject: builder.reject.use(requireAdmin).handler(async ({ input, context }) => {
@@ -554,6 +635,38 @@ export default createPlugin.withPlugins<PluginsClient>()({
           yield event;
         }
       }),
+      getMyNotifications: builder.getMyNotifications
+        .use(requireAuth)
+        .handler(async ({ input, context }) => {
+          return await services.plugins
+            .notifications(notificationContext(context))
+            .getMyNotifications(input);
+        }),
+
+      markNotificationAsRead: builder.markNotificationAsRead
+        .use(requireAuth)
+        .handler(async ({ input, context }) => {
+          return await services.plugins
+            .notifications(notificationContext(context))
+            .markAsRead(input);
+        }),
+
+      markAllNotificationsAsRead: builder.markAllNotificationsAsRead
+        .use(requireAuth)
+        .handler(async ({ context }) => {
+          return await services.plugins.notifications(notificationContext(context)).markAllAsRead();
+        }),
+
+      subscribeNotifications: builder.subscribeNotifications
+        .use(requireAuth)
+        .handler(async function* ({ context, signal, lastEventId }) {
+          const iterator = await services.plugins
+            .notifications(notificationContext(context))
+            .subscribeNotifications(undefined, { signal, lastEventId });
+          for await (const event of iterator) {
+            yield event;
+          }
+        }),
 
       listProjects: builder.listProjects.handler(async ({ input, context }) => {
         try {

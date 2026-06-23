@@ -314,7 +314,6 @@ function EventCard({
             </p>
           )}
         </div>
-
       </div>
     </Link>
   );
