@@ -89,6 +89,17 @@ services:
     volumes:
       - work_efiz_near_postgres_votes_data:/var/lib/postgresql/data
 
+  postgres-notifications:
+    <<: *pg-common
+    container_name: work.efiz.near-postgres-notifications
+    environment:
+      <<: *pg-env
+      POSTGRES_DB: notifications_db
+    ports:
+      - "5439:5432"
+    volumes:
+      - work_efiz_near_postgres_notifications_data:/var/lib/postgresql/data
+
 volumes:
   work_efiz_near_postgres_api_data:
     name: work_efiz_near_postgres_api_data
@@ -104,3 +115,5 @@ volumes:
     name: work_efiz_near_postgres_proposals_data
   work_efiz_near_postgres_votes_data:
     name: work_efiz_near_postgres_votes_data
+  work_efiz_near_postgres_notifications_data:
+    name: work_efiz_near_postgres_notifications_data

@@ -81,6 +81,12 @@
       "secrets": [
         "VOTES_DATABASE_URL"
       ]
+    },
+    "notifications": {
+      "development": "local:plugins/notifications",
+      "secrets": [
+        "NOTIFICATIONS_DATABASE_URL"
+      ]
     }
   }
 }
