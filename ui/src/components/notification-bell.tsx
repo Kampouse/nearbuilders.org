@@ -14,7 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMarkNotificationRead, useNotificationStream, useOpenNotification } from "@/hooks";
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotificationStream,
+  useOpenNotification,
+} from "@/hooks";
 import {
   formatRelativeTime,
   notificationsQueryOptions,
@@ -27,6 +32,7 @@ export function NotificationBell() {
   const apiClient = useApiClient();
   const openNotification = useOpenNotification();
   const markAsRead = useMarkNotificationRead();
+  const markAllAsRead = useMarkAllNotificationsRead();
   const [open, setOpen] = useState(false);
   useNotificationStream();
 
@@ -57,7 +63,19 @@ export function NotificationBell() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex items-center justify-between gap-2">
+          <span>Notifications</span>
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
+              disabled={markAllAsRead.isPending}
+              onClick={() => markAllAsRead.mutate()}
+            >
+              Mark all as read
+            </button>
+          )}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {recentQuery.isLoading ? (
           <div className="space-y-2 p-2">
