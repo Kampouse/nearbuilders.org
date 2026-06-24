@@ -100,6 +100,17 @@ services:
     volumes:
       - work_efiz_near_postgres_votes_data:/var/lib/postgresql/data
 
+  postgres-activity:
+    <<: *pg-common
+    container_name: work.efiz.near-postgres-activity
+    environment:
+      <<: *pg-env
+      POSTGRES_DB: activity_db
+    ports:
+      - "5440:5432"
+    volumes:
+      - work_efiz_near_postgres_activity_data:/var/lib/postgresql/data
+
 volumes:
   work_efiz_near_postgres_api_data:
     name: work_efiz_near_postgres_api_data
@@ -117,3 +128,5 @@ volumes:
     name: work_efiz_near_postgres_proposals_data
   work_efiz_near_postgres_votes_data:
     name: work_efiz_near_postgres_votes_data
+  work_efiz_near_postgres_activity_data:
+    name: work_efiz_near_postgres_activity_data
