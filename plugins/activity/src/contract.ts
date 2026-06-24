@@ -34,29 +34,34 @@ export const ActivityFiltersSchema = z.object({
   actor: z.string().optional(),
 });
 
+export const EmitActivityInputSchema = z.object({
+  source: z.string().min(1),
+  type: z.string().min(1),
+  actor: z.string().min(1),
+  payload: z.unknown(),
+  verified: z.boolean().optional(),
+});
+
+export const ActivityFeedInputSchema = ActivityFiltersSchema.extend({
+  limit: z.number().int().min(1).max(100).optional(),
+  cursor: z.string().optional(),
+});
+
+export const ActivityLeaderboardInputSchema = z.object({
+  period: z.enum(["week", "month", "all-time"]),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
 export const contract = oc.router({
   emitActivity: oc
     .route({ method: "POST", path: "/v1/activity" })
-    .input(
-      z.object({
-        source: z.string().min(1),
-        type: z.string().min(1),
-        actor: z.string().min(1),
-        payload: z.unknown(),
-        verified: z.boolean().optional(),
-      }),
-    )
+    .input(EmitActivityInputSchema)
     .output(ActivityEventSchema)
     .errors({ UNAUTHORIZED }),
 
   getActivityFeed: oc
     .route({ method: "GET", path: "/v1/activity" })
-    .input(
-      ActivityFiltersSchema.extend({
-        limit: z.number().int().min(1).max(100).optional(),
-        cursor: z.string().optional(),
-      }),
-    )
+    .input(ActivityFeedInputSchema)
     .output(ActivityFeedSchema),
 
   subscribeActivity: oc
@@ -66,12 +71,7 @@ export const contract = oc.router({
 
   getLeaderboard: oc
     .route({ method: "GET", path: "/v1/activity/leaderboard" })
-    .input(
-      z.object({
-        period: z.enum(["week", "month", "all-time"]),
-        limit: z.number().int().min(1).max(100).optional(),
-      }),
-    )
+    .input(ActivityLeaderboardInputSchema)
     .output(z.array(LeaderboardEntrySchema)),
 });
 

@@ -1,47 +1,23 @@
 import { and, count, desc, eq, gte } from "drizzle-orm";
 import { Context, Effect, Layer } from "every-plugin/effect";
 import { ORPCError } from "every-plugin/orpc";
+import { z } from "every-plugin/zod";
+import type {
+  ActivityEventSchema,
+  ActivityFeedInputSchema,
+  ActivityLeaderboardInputSchema,
+  EmitActivityInputSchema,
+  LeaderboardEntrySchema,
+} from "../contract";
 import type { ActivityDatabase } from "../db";
 import { DatabaseTag } from "../db/layer";
 import { activityEvents } from "../db/schema";
 
-export interface ActivityEvent {
-  id: string;
-  source: string;
-  type: string;
-  actor: string;
-  payload: unknown;
-  verified: boolean;
-  createdAt: string;
-}
-
-export interface EmitActivityInput {
-  source: string;
-  type: string;
-  actor: string;
-  payload: unknown;
-  verified?: boolean;
-}
-
-export interface ActivityFeedInput {
-  source?: string;
-  type?: string;
-  actor?: string;
-  limit?: number;
-  cursor?: string;
-}
-
-export interface ActivityLeaderboardInput {
-  period: "week" | "month" | "all-time";
-  limit?: number;
-}
-
-export interface ActivityLeaderboardEntry {
-  actor: string;
-  eventCount: number;
-  endorsementScore: number;
-  topSources: string[];
-}
+export type ActivityEvent = z.infer<typeof ActivityEventSchema>;
+export type EmitActivityInput = z.infer<typeof EmitActivityInputSchema>;
+export type ActivityFeedInput = z.infer<typeof ActivityFeedInputSchema>;
+export type ActivityLeaderboardInput = z.infer<typeof ActivityLeaderboardInputSchema>;
+export type ActivityLeaderboardEntry = z.infer<typeof LeaderboardEntrySchema>;
 
 function generateId(): string {
   return `act_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
