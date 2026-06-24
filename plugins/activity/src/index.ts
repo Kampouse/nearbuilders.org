@@ -2,7 +2,7 @@ import { createPlugin } from "every-plugin";
 import { Cause, Effect, Exit, Layer } from "every-plugin/effect";
 import { MemoryPublisher, ORPCError } from "every-plugin/orpc";
 import { z } from "every-plugin/zod";
-import { contract, type ActivityEventSchema } from "./contract";
+import { type ActivityEventSchema, contract } from "./contract";
 import { DatabaseLive } from "./db/layer";
 import { ActivityService, ActivityServiceLive } from "./services/activity";
 

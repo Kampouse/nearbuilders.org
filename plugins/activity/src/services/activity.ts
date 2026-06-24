@@ -1,9 +1,9 @@
 import { and, count, desc, eq, gte } from "drizzle-orm";
 import { Context, Effect, Layer } from "every-plugin/effect";
 import { ORPCError } from "every-plugin/orpc";
+import type { ActivityDatabase } from "../db";
 import { DatabaseTag } from "../db/layer";
 import { activityEvents } from "../db/schema";
-import type { ActivityDatabase } from "../db";
 
 export interface ActivityEvent {
   id: string;
