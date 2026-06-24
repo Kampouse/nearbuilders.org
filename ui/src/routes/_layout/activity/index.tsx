@@ -133,7 +133,7 @@ function SegmentedFilter<T extends string>({
           className={cn(
             "h-7 px-3 rounded-md text-sm font-semibold cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
             value === opt.value
-              ? "bg-card text-foreground shadow-sm"
+              ? "bg-card dark:bg-accent text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
