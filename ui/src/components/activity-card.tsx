@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
-import { Link } from "@tanstack/react-router";
 import { NearProfile } from "@/components/near-profile";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
