@@ -3,13 +3,14 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { Profile } from "better-near-auth";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, MapPin, Pencil, ThumbsUp } from "lucide-react";
-import { type ReactNode, useMemo, useState } from "react";
+import { useState } from "react";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { ActivityFeed } from "@/components/activity-feed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { socialIcon } from "@/components/ui/social-icons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { activityFeedQueryOptions } from "@/lib/queries/activity";
 import type { ProposalPayload } from "@/lib/queries/builders";
 import {
@@ -67,6 +68,9 @@ export const Route = createFileRoute("/_layout/builders/$account")({
 type BuilderData = NonNullable<
   Awaited<ReturnType<ReturnType<typeof useApiClient>["builders"]["getBuilder"]>>["data"]
 >;
+type ProjectSummary = Awaited<
+  ReturnType<ReturnType<typeof useApiClient>["listProjects"]>
+>["data"][number];
 type BuilderProfileTab = "projects" | "activity";
 
 function BuilderProfilePage() {
@@ -203,7 +207,7 @@ function BuilderProfilePage() {
     );
   }
 
-  return <DiscoverableProfile account={account} />;
+  return <BuilderNotFound />;
 }
 
 function LoadedProfile({
@@ -252,7 +256,6 @@ function LoadedProfile({
   });
 
   const projects = projectsResult?.data ?? [];
-  const activityFilters = useMemo(() => ({ actor: account }), [account]);
 
   const displayName = builder.name || profile?.name || account;
   const bio = builder.bio || profile?.description || null;
@@ -467,69 +470,30 @@ function LoadedProfile({
         </div>
       </div>
 
-      <ProfileTabsSection
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        activityFilters={activityFilters}
-        activityEmptyHint={`${displayName} has no activity yet.`}
-        projectsContent={
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as BuilderProfileTab)}
+        className="w-full"
+      >
+        <TabsList>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+        </TabsList>
+        <TabsContent value="projects">
           <ProjectsTabContent
             projectsLoading={projectsLoading}
             projects={projects}
             hasMore={projectsResult?.meta.hasMore ?? false}
           />
-        }
-      />
+        </TabsContent>
+        <TabsContent value="activity">
+          <ActivityFeed
+            filters={{ actor: account }}
+            emptyHint={`${displayName} has no activity yet.`}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
-  );
-}
-
-type ProjectSummary = {
-  id: string;
-  kind: string;
-  slug: string;
-  title: string;
-  description: string | null;
-};
-
-function ProfileTabsSection({
-  activeTab,
-  onTabChange,
-  projectsContent,
-  activityFilters,
-  activityEmptyHint,
-}: {
-  activeTab: BuilderProfileTab;
-  onTabChange: (tab: BuilderProfileTab) => void;
-  projectsContent: ReactNode;
-  activityFilters: { actor: string };
-  activityEmptyHint: string;
-}) {
-  return (
-    <section>
-      <div className="mb-5 border-b border-border">
-        <div className="flex items-center gap-1" role="tablist" aria-label="Builder profile">
-          <ProfileTabButton
-            label="Projects"
-            value="projects"
-            activeTab={activeTab}
-            onSelect={onTabChange}
-          />
-          <ProfileTabButton
-            label="Activity"
-            value="activity"
-            activeTab={activeTab}
-            onSelect={onTabChange}
-          />
-        </div>
-      </div>
-
-      {activeTab === "projects" ? (
-        projectsContent
-      ) : (
-        <ActivityFeed filters={activityFilters} emptyHint={activityEmptyHint} readOnly />
-      )}
-    </section>
   );
 }
 
@@ -598,154 +562,6 @@ function ProjectsTabContent({
   );
 }
 
-function DiscoverableProfile({ account }: { account: string }) {
-  const auth = useAuthClient();
-  const apiClient = useApiClient();
-  const [activeTab, setActiveTab] = useState<BuilderProfileTab>("activity");
-  const activityFilters = useMemo(() => ({ actor: account }), [account]);
-
-  const { data: profile, isLoading: profileLoading } = useQuery<Profile | null>({
-    queryKey: ["near-profile", account],
-    queryFn: async () => {
-      const res = await auth.near.getProfile(account);
-      return res.data || null;
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: activityPeek, isLoading: activityLoading } = useQuery({
-    queryKey: ["activity", "peek", account],
-    queryFn: () => apiClient.getActivityFeed({ actor: account, limit: 1 }),
-  });
-
-  if (profileLoading || activityLoading) return <ProfileSkeleton account={account} />;
-
-  const hasActivity = (activityPeek?.data.length ?? 0) > 0;
-  const hasNearProfile = Boolean(
-    profile?.name?.trim() ||
-      profile?.description?.trim() ||
-      profile?.image?.url ||
-      profile?.image?.ipfs_cid,
-  );
-
-  if (!hasActivity && !hasNearProfile) return <BuilderNotFound />;
-
-  const displayName = profile?.name?.trim() || account;
-  const bio = profile?.description || null;
-  const avatarUrl =
-    profile?.image?.url ??
-    (profile?.image?.ipfs_cid ? `https://ipfs.near.social/ipfs/${profile.image.ipfs_cid}` : null);
-  const backgroundUrl =
-    profile?.backgroundImage?.url ??
-    (profile?.backgroundImage?.ipfs_cid
-      ? `https://ipfs.near.social/ipfs/${profile.backgroundImage.ipfs_cid}`
-      : null);
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <Link
-          to="/builders"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={14} />
-          All builders
-        </Link>
-      </div>
-
-      <div className="bg-card border border-border rounded-2xl overflow-hidden mb-8">
-        <div className="relative h-40 sm:h-48">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: backgroundUrl
-                ? undefined
-                : "radial-gradient(ellipse at top left, color-mix(in srgb, var(--brand-green) 25%, transparent), color-mix(in srgb, var(--brand-cyan) 15%, transparent))",
-            }}
-          />
-          {backgroundUrl && (
-            <img
-              src={backgroundUrl}
-              alt="Profile background"
-              className="absolute inset-0 h-full w-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          )}
-          <div className="absolute -bottom-10 left-6 sm:left-8">
-            <div className="size-20 rounded-full overflow-hidden bg-muted border-4 border-card flex items-center justify-center shadow-lg">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={displayName}
-                  className="size-20 object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              ) : (
-                <span className="text-2xl font-black text-muted-foreground">
-                  {getInitials(displayName)}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-14 px-6 sm:px-8 pb-8">
-          <h1 className="text-3xl font-black text-foreground leading-tight">{displayName}</h1>
-          <p className="text-sm font-mono text-brand-cyan mt-1">{account}</p>
-          {bio && (
-            <p className="mt-5 text-sm text-muted-foreground leading-relaxed max-w-2xl">{bio}</p>
-          )}
-        </div>
-      </div>
-
-      <ProfileTabsSection
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        activityFilters={activityFilters}
-        activityEmptyHint={`${displayName} has no activity yet.`}
-        projectsContent={
-          <ProjectsTabContent projectsLoading={false} projects={[]} hasMore={false} />
-        }
-      />
-    </div>
-  );
-}
-
-function ProfileTabButton({
-  label,
-  value,
-  activeTab,
-  onSelect,
-}: {
-  label: string;
-  value: BuilderProfileTab;
-  activeTab: BuilderProfileTab;
-  onSelect: (value: BuilderProfileTab) => void;
-}) {
-  const active = activeTab === value;
-
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={() => onSelect(value)}
-      className={cn(
-        "relative -mb-px px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        active
-          ? "border-b-2 border-brand-cyan text-foreground"
-          : "border-b-2 border-transparent text-muted-foreground hover:text-foreground",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
 function NominatedFallback({
   account,
   proposal,
@@ -779,8 +595,6 @@ function NominatedFallback({
   counts: Record<string, { entityId: string; totalCount: number }>;
 }) {
   const auth = useAuthClient();
-  const [activeTab, setActiveTab] = useState<BuilderProfileTab>("projects");
-  const activityFilters = useMemo(() => ({ actor: account }), [account]);
 
   const { data: profile, isLoading: profileLoading } = useQuery<Profile | null>({
     queryKey: ["near-profile", account],
@@ -966,16 +780,6 @@ function NominatedFallback({
           </div>
         </div>
       </div>
-
-      <ProfileTabsSection
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        activityFilters={activityFilters}
-        activityEmptyHint={`${displayName} has no activity yet.`}
-        projectsContent={
-          <ProjectsTabContent projectsLoading={false} projects={[]} hasMore={false} />
-        }
-      />
 
       {allProposals.length > 1 && (
         <section>
