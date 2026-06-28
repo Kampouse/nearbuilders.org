@@ -16,6 +16,14 @@ export interface ActivityPayload {
   tags?: string[];
 }
 
+export type LeaderboardEntry = Awaited<ReturnType<ApiClient["getLeaderboard"]>>[number];
+export type LeaderboardPeriod = NonNullable<Parameters<ApiClient["getLeaderboard"]>[0]>["period"];
+
+// The leaderboard endpoint only accepts `period` + `limit` (max 100), so we fetch
+// the cap once and paginate client-side at LEADERBOARD_PAGE_SIZE per page.
+export const LEADERBOARD_PAGE_SIZE = 50;
+const LEADERBOARD_FETCH_LIMIT = 100;
+
 export const activityKeys = {
   feed: (filters: ActivityFilters = {}) =>
     [
@@ -25,7 +33,16 @@ export const activityKeys = {
       filters.type ?? null,
       filters.actor ?? null,
     ] as const,
+  leaderboard: (period: LeaderboardPeriod) => ["activity", "leaderboard", period] as const,
 };
+
+export function leaderboardQueryOptions(apiClient: ApiClient, period: LeaderboardPeriod) {
+  return {
+    queryKey: activityKeys.leaderboard(period),
+    queryFn: () => apiClient.getLeaderboard({ period, limit: LEADERBOARD_FETCH_LIMIT }),
+    staleTime: 30_000,
+  };
+}
 
 export function readActivityPayload(payload: unknown): ActivityPayload {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};

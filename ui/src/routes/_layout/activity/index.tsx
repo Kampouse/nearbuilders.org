@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowDownUp, Plus } from "lucide-react";
+import { ArrowDownUp, Plus, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { sessionQueryOptions, useAuthClient } from "@/app";
 import { ActivityFeed, type ActivitySort } from "@/components/activity-feed";
 import { Button } from "@/components/ui/button";
+import { SegmentedFilter } from "@/components/ui/segmented-filter";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { activityFeedQueryOptions } from "@/lib/queries/activity";
-import { cn } from "@/lib/utils";
 
 type SourceFilter = "all" | "manual" | "nearcatalog";
 type TypeFilter = "all" | "upload" | "claim";
@@ -74,14 +74,22 @@ function ActivityPage() {
             value.
           </p>
         </div>
-        {isAuthenticated && (
-          <Button asChild size="sm" className="shrink-0">
-            <Link to="/profile/activity">
-              <Plus size={14} />
-              Add Activity
+        <div className="flex shrink-0 items-center gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link to="/activity/leaderboard">
+              <Trophy size={14} />
+              Leaderboard
             </Link>
           </Button>
-        )}
+          {isAuthenticated && (
+            <Button asChild size="sm">
+              <Link to="/profile/activity">
+                <Plus size={14} />
+                Add Activity
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
@@ -110,36 +118,6 @@ function ActivityPage() {
       </div>
 
       <ActivityFeed filters={filters} sort={sort} />
-    </div>
-  );
-}
-
-function SegmentedFilter<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (value: T) => void;
-}) {
-  return (
-    <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-secondary p-0.5">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            "h-7 px-3 rounded-md text-sm font-semibold cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-            value === opt.value
-              ? "bg-card dark:bg-accent text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {opt.label}
-        </button>
-      ))}
     </div>
   );
 }
