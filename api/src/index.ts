@@ -35,8 +35,10 @@ type ApiContext = {
 type ProposalData = Pick<
   z.infer<typeof ProposalSchema>,
   "pluginId" | "entityId" | "payload" | "appliedResourceId" | "createdBy"
->;
-export type ApprovalNotificationInput = {
+> & {
+  rejectionReason?: string | null;
+};
+export type ProposalNotificationInput = {
   userId: string;
   type: string;
   source: string;
@@ -44,6 +46,7 @@ export type ApprovalNotificationInput = {
   body?: string;
   link: string;
 };
+export type ApprovalNotificationInput = ProposalNotificationInput;
 
 function pluginContext(context: ApiContext) {
   return {
@@ -81,7 +84,7 @@ function readStringArray(value: unknown): string[] | undefined {
 }
 export function buildApprovalNotification(
   proposal: ProposalData,
-): ApprovalNotificationInput | null {
+): ProposalNotificationInput | null {
   const payload =
     proposal.payload && typeof proposal.payload === "object" && !Array.isArray(proposal.payload)
       ? (proposal.payload as Record<string, unknown>)
@@ -129,6 +132,59 @@ export function buildApprovalNotification(
   return null;
 }
 
+function buildRejectionBody(body: string, reason?: string) {
+  return reason ? `${body} Reason: ${reason}` : body;
+}
+
+export function buildRejectionNotification(
+  proposal: ProposalData,
+): ProposalNotificationInput | null {
+  const payload =
+    proposal.payload && typeof proposal.payload === "object" && !Array.isArray(proposal.payload)
+      ? (proposal.payload as Record<string, unknown>)
+      : {};
+  const reason = readString(proposal.rejectionReason);
+
+  if (proposal.pluginId === "projects") {
+    const title = readString(payload.title) ?? "Project";
+    return {
+      userId: proposal.createdBy,
+      type: "project_rejected",
+      source: "projects",
+      subject: `${title} rejected`,
+      body: buildRejectionBody("Your project was not approved by NEAR Builders.", reason),
+      link: "/dashboard",
+    };
+  }
+
+  if (proposal.pluginId === "events") {
+    const title = readString(payload.title) ?? "Event";
+    return {
+      userId: proposal.createdBy,
+      type: "event_rejected",
+      source: "events",
+      subject: `${title} rejected`,
+      body: buildRejectionBody("Your event was not approved by NEAR Builders.", reason),
+      link: "/dashboard",
+    };
+  }
+
+  if (proposal.pluginId === "builders") {
+    const account = proposal.entityId;
+    const name = readString(payload.name) ?? account;
+    return {
+      userId: proposal.createdBy,
+      type: "builder_rejected",
+      source: "builders",
+      subject: `${name} rejected`,
+      body: buildRejectionBody("Your builder profile was not approved by NEAR Builders.", reason),
+      link: "/dashboard",
+    };
+  }
+
+  return null;
+}
+
 async function emitApprovalNotification(
   plugins: Omit<PluginsClient, "auth">,
   proposal: ProposalData,
@@ -141,6 +197,20 @@ async function emitApprovalNotification(
     await plugins.notifications(notificationContext(context)).createNotification(notification);
   } catch (error) {
     console.error("[approve] failed to emit approval notification", error);
+  }
+}
+
+async function emitRejectionNotification(
+  plugins: Omit<PluginsClient, "auth">,
+  proposal: ProposalData,
+  context: ApiContext,
+) {
+  const notification = buildRejectionNotification(proposal);
+  if (!notification) return;
+  try {
+    await plugins.notifications(notificationContext(context)).createNotification(notification);
+  } catch (error) {
+    console.error("[reject] failed to emit rejection notification", error);
   }
 }
 
@@ -520,7 +590,18 @@ export default createPlugin.withPlugins<PluginsClient>()({
       }),
 
       reject: builder.reject.use(requireAdmin).handler(async ({ input, context }) => {
-        return await services.plugins.proposals(pluginContext(context)).reject(input);
+        const proposalsClient = services.plugins.proposals(pluginContext(context));
+        const rejected = await proposalsClient.reject(input);
+        const proposal: ProposalData = {
+          pluginId: rejected.data.pluginId,
+          entityId: rejected.data.entityId,
+          payload: rejected.data.payload,
+          appliedResourceId: rejected.data.appliedResourceId,
+          createdBy: rejected.data.createdBy,
+          rejectionReason: rejected.data.rejectionReason,
+        };
+        await emitRejectionNotification(services.plugins, proposal, context);
+        return rejected;
       }),
 
       remove: builder.remove.use(requireAdmin).handler(async ({ input, context }) => {
