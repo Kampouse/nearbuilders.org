@@ -29,6 +29,7 @@ import { Route as LayoutEventsNewRouteImport } from './routes/_layout/events/new
 import { Route as LayoutEventsSlugRouteImport } from './routes/_layout/events/$slug'
 import { Route as LayoutBuildersAddRouteImport } from './routes/_layout/builders/add'
 import { Route as LayoutBuildersAccountRouteImport } from './routes/_layout/builders/$account'
+import { Route as LayoutActivityLeaderboardRouteImport } from './routes/_layout/activity/leaderboard'
 import { Route as LayoutAuthenticatedDashboardRouteImport } from './routes/_layout/_authenticated/_dashboard'
 import { Route as LayoutProjectsNewIndexRouteImport } from './routes/_layout/projects/new.index'
 import { Route as LayoutProjectsKindIndexRouteImport } from './routes/_layout/projects/$kind.index'
@@ -155,6 +156,12 @@ const LayoutBuildersAccountRoute = LayoutBuildersAccountRouteImport.update({
   path: '/builders/$account',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutActivityLeaderboardRoute =
+  LayoutActivityLeaderboardRouteImport.update({
+    id: '/activity/leaderboard',
+    path: '/activity/leaderboard',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 const LayoutAuthenticatedDashboardRoute =
   LayoutAuthenticatedDashboardRouteImport.update({
     id: '/_dashboard',
@@ -326,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LayoutLoginRoute
   '/projects': typeof LayoutProjectsRouteWithChildren
   '/skill': typeof LayoutSkillRoute
+  '/activity/leaderboard': typeof LayoutActivityLeaderboardRoute
   '/builders/$account': typeof LayoutBuildersAccountRoute
   '/builders/add': typeof LayoutBuildersAddRoute
   '/events/$slug': typeof LayoutEventsSlugRoute
@@ -370,6 +378,7 @@ export interface FileRoutesByTo {
   '/ironclaw': typeof LayoutIronclawRoute
   '/login': typeof LayoutLoginRoute
   '/skill': typeof LayoutSkillRoute
+  '/activity/leaderboard': typeof LayoutActivityLeaderboardRoute
   '/builders/$account': typeof LayoutBuildersAccountRoute
   '/builders/add': typeof LayoutBuildersAddRoute
   '/events/$slug': typeof LayoutEventsSlugRoute
@@ -419,6 +428,7 @@ export interface FileRoutesById {
   '/_layout/skill': typeof LayoutSkillRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/_authenticated/_dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
+  '/_layout/activity/leaderboard': typeof LayoutActivityLeaderboardRoute
   '/_layout/builders/$account': typeof LayoutBuildersAccountRoute
   '/_layout/builders/add': typeof LayoutBuildersAddRoute
   '/_layout/events/$slug': typeof LayoutEventsSlugRoute
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/projects'
     | '/skill'
+    | '/activity/leaderboard'
     | '/builders/$account'
     | '/builders/add'
     | '/events/$slug'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/ironclaw'
     | '/login'
     | '/skill'
+    | '/activity/leaderboard'
     | '/builders/$account'
     | '/builders/add'
     | '/events/$slug'
@@ -559,6 +571,7 @@ export interface FileRouteTypes {
     | '/_layout/skill'
     | '/_layout/'
     | '/_layout/_authenticated/_dashboard'
+    | '/_layout/activity/leaderboard'
     | '/_layout/builders/$account'
     | '/_layout/builders/add'
     | '/_layout/events/$slug'
@@ -742,6 +755,13 @@ declare module '@tanstack/react-router' {
       path: '/builders/$account'
       fullPath: '/builders/$account'
       preLoaderRoute: typeof LayoutBuildersAccountRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/activity/leaderboard': {
+      id: '/_layout/activity/leaderboard'
+      path: '/activity/leaderboard'
+      fullPath: '/activity/leaderboard'
+      preLoaderRoute: typeof LayoutActivityLeaderboardRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/_authenticated/_dashboard': {
@@ -1103,6 +1123,7 @@ interface LayoutRouteChildren {
   LayoutProjectsRoute: typeof LayoutProjectsRouteWithChildren
   LayoutSkillRoute: typeof LayoutSkillRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutActivityLeaderboardRoute: typeof LayoutActivityLeaderboardRoute
   LayoutBuildersAccountRoute: typeof LayoutBuildersAccountRoute
   LayoutBuildersAddRoute: typeof LayoutBuildersAddRoute
   LayoutActivityIndexRoute: typeof LayoutActivityIndexRoute
@@ -1123,6 +1144,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutProjectsRoute: LayoutProjectsRouteWithChildren,
   LayoutSkillRoute: LayoutSkillRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutActivityLeaderboardRoute: LayoutActivityLeaderboardRoute,
   LayoutBuildersAccountRoute: LayoutBuildersAccountRoute,
   LayoutBuildersAddRoute: LayoutBuildersAddRoute,
   LayoutActivityIndexRoute: LayoutActivityIndexRoute,
