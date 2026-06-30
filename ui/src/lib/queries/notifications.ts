@@ -168,6 +168,7 @@ export function addNotificationToCache(queryClient: QueryClient, notification: N
     queryKey: notificationKeys.lists(),
   })) {
     if (!value || !matchesReadFilter(key[2], notification.read)) continue;
+    const exists = value.data.some((n) => n.id === notification.id);
     const limit = typeof key[3] === "number" ? key[3] : value.data.length;
     const data = [notification, ...value.data.filter((n) => n.id !== notification.id)].slice(
       0,
@@ -176,7 +177,7 @@ export function addNotificationToCache(queryClient: QueryClient, notification: N
     queryClient.setQueryData<NotificationPage>(key, {
       ...value,
       data,
-      meta: { ...value.meta, total: value.meta.total + 1 },
+      meta: { ...value.meta, total: value.meta.total + (exists ? 0 : 1) },
     });
   }
 
@@ -185,6 +186,7 @@ export function addNotificationToCache(queryClient: QueryClient, notification: N
   })) {
     if (!value || value.pages.length === 0 || !matchesReadFilter(key[2], notification.read))
       continue;
+    const exists = value.pages.some((page) => page.data.some((n) => n.id === notification.id));
     queryClient.setQueryData<InfiniteData<NotificationPage>>(key, {
       ...value,
       pages: value.pages.map((page, index) => {
@@ -193,7 +195,7 @@ export function addNotificationToCache(queryClient: QueryClient, notification: N
           ? {
               ...page,
               data: [notification, ...deduped],
-              meta: { ...page.meta, total: page.meta.total + 1 },
+              meta: { ...page.meta, total: page.meta.total + (exists ? 0 : 1) },
             }
           : { ...page, data: deduped };
       }),
@@ -206,7 +208,11 @@ export function addNotificationToCache(queryClient: QueryClient, notification: N
         ? {
             ...current,
             data: [notification],
-            meta: { ...current.meta, total: current.meta.total + 1 },
+            meta: {
+              ...current.meta,
+              total:
+                current.meta.total + (current.data.some((n) => n.id === notification.id) ? 0 : 1),
+            },
           }
         : current,
     );
