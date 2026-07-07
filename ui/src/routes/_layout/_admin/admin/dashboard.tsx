@@ -1,23 +1,39 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  BarChart2,
   CalendarDays,
   Check,
   Clock,
   ExternalLink,
+  Eye,
+  FileCode2,
   FileText,
+  Globe,
   Hammer,
+  Layers,
   Loader2,
+  Lock,
   MapPin,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useApiClient } from "@/app";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { fetchRepositoryReadme } from "@/lib/repository-content";
 
 export const Route = createFileRoute("/_layout/_admin/admin/dashboard")({
   head: () => ({
@@ -235,7 +251,10 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            {proposal.pluginId === "projects" && (
+              <ProposalDetailsDialog proposal={proposal} payload={payload} title={title} />
+            )}
             <Button
               size="sm"
               onClick={() => approveMutation.mutate()}
@@ -265,7 +284,7 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
         {proposal.pluginId === "builders" ? (
           <>
             {readString(payload.bio) && (
-              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                 {readString(payload.bio)}
               </p>
             )}
@@ -364,7 +383,7 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
         ) : (
           <>
             {readString(payload.description) && (
-              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                 {readString(payload.description)}
               </p>
             )}
@@ -428,6 +447,130 @@ function ProposalReviewCard({ proposal }: { proposal: ProposalRecord }) {
         )}
       </div>
     </div>
+  );
+}
+
+function ProposalDetailsDialog({
+  proposal,
+  payload,
+  title,
+}: {
+  proposal: ProposalRecord;
+  payload: Record<string, unknown>;
+  title: string;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Eye size={13} />
+          View details
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] overflow-y-auto sm:max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            Full {proposal.pluginId.slice(0, -1)} proposal submitted by {proposal.createdBy}.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="min-w-0 space-y-4 overflow-hidden">
+          <ProjectProposalPreview proposal={proposal} payload={payload} />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProjectProposalPreview({
+  proposal,
+  payload,
+}: {
+  proposal: ProposalRecord;
+  payload: Record<string, unknown>;
+}) {
+  const kind = readString(payload.kind) ?? "project";
+  const title = readString(payload.title) ?? proposal.entityId;
+  const visibility = readString(payload.visibility) ?? "private";
+  const description = readString(payload.description);
+  const content = readString(payload.content);
+  const repository = readString(payload.repository);
+  const readmeQuery = useQuery({
+    queryKey: ["admin-project-readme", proposal.entityId, repository],
+    queryFn: async () => {
+      if (!repository) return null;
+      return await fetchRepositoryReadme(repository);
+    },
+    enabled: kind === "project" && Boolean(repository),
+  });
+  const renderedContent = kind === "project" ? (readmeQuery.data ?? content) : content;
+
+  return (
+    <div className="max-w-full overflow-hidden rounded-2xl border border-border bg-background">
+      <div className="max-h-[60vh] min-w-0 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-8 sm:py-6">
+        <div className="min-w-0 space-y-4 [overflow-wrap:anywhere]">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <KindChip kind={kind} />
+              <Badge variant="secondary" className="capitalize">
+                {visibility === "private" && <Lock size={11} />}
+                {visibility}
+              </Badge>
+            </div>
+            <h2 className="text-[26px] font-semibold leading-tight text-foreground sm:text-[30px]">
+              {title}
+            </h2>
+            {description && (
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground">
+                {description}
+              </p>
+            )}
+            {repository && (
+              <Button asChild size="sm" variant="outline" className="w-fit max-w-full min-w-0">
+                <a href={repository} target="_blank" rel="noopener noreferrer">
+                  <Globe size={13} />
+                  <span className="min-w-0 truncate">
+                    {repository.replace(/^https?:\/\/(www\.)?/, "")}
+                  </span>
+                  <ExternalLink size={11} className="shrink-0 text-muted-foreground" />
+                </a>
+              </Button>
+            )}
+          </div>
+
+          {kind === "project" && readmeQuery.isLoading ? (
+            <>
+              <div className="h-px bg-border" />
+              <p className="text-sm text-muted-foreground">Loading README...</p>
+            </>
+          ) : renderedContent ? (
+            <>
+              <div className="h-px bg-border" />
+              <div className="min-w-0 max-w-full overflow-hidden">
+                <Markdown content={renderedContent} />
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KindChip({ kind }: { kind: string }) {
+  const icons: Record<string, ReactNode> = {
+    idea: <FileText size={11} />,
+    project: <FileCode2 size={11} />,
+    scope: <Layers size={11} />,
+    result: <BarChart2 size={11} />,
+  };
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded border border-border bg-secondary px-2.5 py-0.5 text-xs font-semibold text-foreground">
+      {icons[kind] ?? <FileText size={11} />}
+      {kind}
+    </span>
   );
 }
 
