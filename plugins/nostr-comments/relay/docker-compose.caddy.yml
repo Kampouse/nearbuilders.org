@@ -1,0 +1,39 @@
+# Full stack: strfry relay + Caddy TLS proxy
+# Usage:
+#   1. Point relay.nearbuilders.org A record to your server
+#   2. docker compose up -d
+#   3. Relay is live at wss://relay.nearbuilders.org
+
+services:
+  strfry:
+    image: docker.io/hoytech/strfry:latest
+    restart: unless-stopped
+    volumes:
+      - strfry-data:/app/strfry-db
+      - ./strfry.conf:/app/strfry.conf:ro
+    command: ["strfry", "relay"]
+    networks:
+      - relay-net
+
+  caddy:
+    image: docker.io/caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - strfry
+    networks:
+      - relay-net
+
+volumes:
+  strfry-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  relay-net:

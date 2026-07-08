@@ -1,0 +1,18 @@
+# Caddyfile — reverse proxy with automatic TLS for the NEAR Builders relay
+#
+# Setup:
+#   1. Point relay.nearbuilders.org DNS to this server
+#   2. docker compose -f docker-compose.caddy.yml up -d
+#
+# Caddy auto-provisions Let's Encrypt cert and upgrades WS → WSS
+
+relay.nearbuilders.org {
+    reverse_proxy strfry:7777
+
+    # WebSocket support
+    @websockets header Connection *Upgrade*
+    @websockets header Upgrade websocket
+    handle @websockets {
+        reverse_proxy strfry:7777
+    }
+}

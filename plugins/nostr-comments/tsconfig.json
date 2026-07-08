@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "paths": {
+      "every-plugin": ["../../node_modules/every-plugin"],
+      "every-plugin/effect": ["../../node_modules/every-plugin/effect"],
+      "every-plugin/orpc": ["../../node_modules/every-plugin/orpc"],
+      "every-plugin/zod": ["../../node_modules/every-plugin/zod"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
