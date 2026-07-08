@@ -25,49 +25,24 @@
       "development": "local:plugins/apps",
       "variables": {
         "registryNamespace": "dev.everything.near"
-      },
-      "routes": [
-        "ui/src/routes/_layout/apps/**"
-      ],
-      "sidebar": [
-        {
-          "icon": "Globe",
-          "label": "apps",
-          "roleRequired": "anon"
-        }
-      ]
+      }
     },
     "projects": {
       "development": "local:plugins/projects",
       "secrets": [
         "PROJECTS_DATABASE_URL"
-      ],
-      "routes": [
-        "ui/src/routes/_layout/_authenticated/projects/**"
-      ],
-      "sidebar": [
-        {
-          "icon": "FolderKanban",
-          "label": "projects"
-        }
       ]
     },
     "builders": {
       "development": "local:plugins/builders",
       "secrets": [
         "BUILDERS_DATABASE_URL"
-      ],
-      "routes": [
-        "ui/src/routes/_layout/builders/**"
       ]
     },
     "events": {
       "development": "local:plugins/events",
       "secrets": [
         "EVENTS_DATABASE_URL"
-      ],
-      "routes": [
-        "ui/src/routes/_layout/events/**"
       ]
     },
     "proposals": {
@@ -92,9 +67,6 @@
       "development": "local:plugins/activity",
       "secrets": [
         "ACTIVITY_DATABASE_URL"
-      ],
-      "routes": [
-        "ui/src/routes/_layout/activity/**"
       ]
     }
   }
