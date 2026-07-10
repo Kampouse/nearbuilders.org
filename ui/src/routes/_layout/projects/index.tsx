@@ -269,19 +269,19 @@ function ProjectsList() {
     if (!latestVote) return;
     const { entityId: latestEntityId, totalCount, type } = latestVote;
     queryClient.setQueryData(
-      ["upvoteCounts", projectIds],
+      ["upvoteCounts", projectIdList],
       (old: Record<string, number> | undefined) => ({ ...old, [latestEntityId]: totalCount }),
     );
     if (userId && latestVote.userId === userId) {
       queryClient.setQueryData(
-        ["userVoteStates", projectIds],
+        ["userVoteStates", projectIdList],
         (old: Record<string, VoteDirection> | undefined) => ({
           ...old,
           [latestEntityId]: type === "downvote" ? "down" : "up",
         }),
       );
     }
-  }, [latestVote, queryClient, projectIds, userId]);
+  }, [latestVote, queryClient, projectIdList, userId]);
 
   const selectedProjectId =
     rankedProjects.find((p) => p.id === search.preview)?.id ?? rankedProjects[0]?.id;
@@ -311,11 +311,11 @@ function ProjectsList() {
     mutationFn: (entityId: string) => apiClient.upvote({ entityId }),
     onSuccess: (data) => {
       queryClient.setQueryData(
-        ["upvoteCounts", projectIds],
+        ["upvoteCounts", projectIdList],
         (old: Record<string, number> | undefined) => ({ ...old, [data.entityId]: data.totalCount }),
       );
       queryClient.setQueryData(
-        ["userVoteStates", projectIds],
+        ["userVoteStates", projectIdList],
         (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.entityId]: "up" }),
       );
     },
@@ -326,11 +326,11 @@ function ProjectsList() {
     mutationFn: (entityId: string) => apiClient.downvote({ entityId }),
     onSuccess: (data) => {
       queryClient.setQueryData(
-        ["upvoteCounts", projectIds],
+        ["upvoteCounts", projectIdList],
         (old: Record<string, number> | undefined) => ({ ...old, [data.entityId]: data.totalCount }),
       );
       queryClient.setQueryData(
-        ["userVoteStates", projectIds],
+        ["userVoteStates", projectIdList],
         (old: Record<string, VoteDirection> | undefined) => ({ ...old, [data.entityId]: "down" }),
       );
     },
