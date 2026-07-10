@@ -3,39 +3,48 @@
   "version": "0.1.0",
   "description": "Lightweight Nostr-backed comments and news for NEAR Builders projects",
   "type": "module",
-  "scripts": {
-    "dev": "bun run plugin.dev.ts",
-    "build": "rspack build",
-    "test": "bun test",
-    "lint": "biome check src/",
-    "lint:fix": "biome check --write src/",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
-  },
-  "dependencies": {
-    "every-plugin": "workspace:*",
-    "nostr-tools": "^2.10.0",
-    "effect": "^3.0.0",
-    "@noble/hashes": "^1.5.0",
-    "@noble/curves": "^1.6.0",
-    "@scure/base": "^1.2.0",
-    "drizzle-orm": "^0.36.0",
-    "borsh": "^4.0.0"
-  },
-  "devDependencies": {
-    "@rspack/core": "^1.0.0",
-    "@tanstack/react-query": "^5.0.0",
-    "biome": "^1.9.0",
-    "bun-types": "^1.1.0",
-    "drizzle-kit": "^0.28.0",
-    "pglite": "^0.2.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "typescript": "^5.6.0"
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./contract": {
+      "types": "./src/contract.ts",
+      "default": "./src/contract.ts"
+    }
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@tanstack/react-query": "^5.0.0"
+    "typescript": "catalog:"
+  },
+  "scripts": {
+    "build": "bun run build:types && rspack build",
+    "build:types": "tsc -p tsconfig.contract.json",
+    "deploy": "bun run build:types && DEPLOY=true rspack build",
+    "dev": "bun run build:types && rspack serve",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "every-plugin": "catalog:",
+    "nostr-tools": "^2.10.0",
+    "effect": "catalog:",
+    "@noble/hashes": "^1.5.0",
+    "@noble/curves": "^1.6.0",
+    "@scure/base": "catalog:"
+  },
+  "devDependencies": {
+    "@module-federation/node": "catalog:",
+    "@rspack/cli": "catalog:",
+    "@rspack/core": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@types/node": "catalog:",
+    "everything-dev": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "catalog:",
+    "zephyr-rspack-plugin": "catalog:"
   }
 }

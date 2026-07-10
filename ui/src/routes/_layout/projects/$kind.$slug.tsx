@@ -24,6 +24,7 @@ import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { NewBadge } from "@/components/ui/new-badge";
+import { ProjectComments } from "@/components/project-comments";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VoteButton } from "@/components/ui/vote-button";
@@ -464,6 +465,8 @@ function ProjectDetailPage() {
               {(project.kind === "scope" || project.kind === "result") && (
                 <MentionsSection projectId={project.id} />
               )}
+
+              <ProjectComments projectId={project.id} />
             </div>
           </div>
 

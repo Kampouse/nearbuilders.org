@@ -108,6 +108,12 @@
       "production": "https://elliot-braem-5152-everything-dev-notifications-pl-0b8106f07-ze.zephyrcloud.app",
       "integrity": "sha384-TbsQibpxhSluBlaaRc4IdHdIB3a8saJv9lLGlPOL8jdw0luqfqdij0zQoLFZNUnn"
     },
+    "nostr-comments": {
+      "development": "local:plugins/nostr-comments",
+      "routes": [
+        "ui/src/routes/_layout/projects/$kind.$slug"
+      ]
+    },
     "activity": {
       "development": "local:plugins/activity",
       "secrets": [

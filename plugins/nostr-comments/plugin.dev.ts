@@ -24,6 +24,6 @@ export default defineDevConfig({
     backgroundIntervalMs: "5000",
   },
   secrets: {
-    NOSTR_COMMENTS_DATABASE_URL: "pglite:.bos/nostr-comments/:memory:",
+    NOSTR_SYSTEM_SECRET: "",
   },
 });

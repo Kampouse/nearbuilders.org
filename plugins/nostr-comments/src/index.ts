@@ -1,42 +1,25 @@
 import { createPlugin } from "every-plugin";
-import { Cause, Effect, Exit, Layer } from "every-plugin/effect";
-import { getEventMeta, MemoryPublisher, ORPCError } from "every-plugin/orpc";
-import { verifyEvent, type NostrEvent } from "nostr-tools/pure";
-import { bech32 } from "@scure/base";
-import { hexToBytes } from "@noble/hashes/utils";
+import { Cause, Effect, Exit } from "every-plugin/effect";
+import { MemoryPublisher, ORPCError } from "every-plugin/orpc";
 import { z } from "every-plugin/zod";
+import type { NostrEvent } from "nostr-tools/pure";
 import { contract } from "./contract";
-import { DatabaseLive } from "./db/layer";
-import {
-  NostrCommentService,
-  NostrCommentServiceLive,
-} from "./services/nostr-comments";
-import { verifyAttestation } from "./attestation";
+import { NostrCommentService, NostrCommentServiceLive } from "./services/nostr-comments";
 
-// Background events for SSE streaming
 type BackgroundEvents = {
   "new-comment": { id: string; projectId: string; timestamp: number };
   "new-news": { id: string; projectId: string; timestamp: number };
 };
 
-export default createPlugin.withPlugins<PluginsClient>()({
+export default createPlugin({
   variables: z.object({
-    relays: z
-      .string()
-      .describe("Comma-separated list of primary Nostr relay URLs")
-      .optional(),
-    fallbackRelays: z
-      .string()
-      .describe("Comma-separated list of fallback relay URLs")
-      .optional(),
+    relays: z.string().describe("Comma-separated list of primary Nostr relay URLs").optional(),
+    fallbackRelays: z.string().describe("Comma-separated list of fallback relay URLs").optional(),
     backgroundEnabled: z.boolean().default(false),
     backgroundIntervalMs: z.number().min(1000).max(60000).default(5000),
   }),
 
   secrets: z.object({
-    NOSTR_COMMENTS_DATABASE_URL: z
-      .string()
-      .default("pglite:.bos/nostr-comments/:memory:"),
     NOSTR_SYSTEM_SECRET: z.string().optional(),
   }),
 
@@ -64,10 +47,7 @@ export default createPlugin.withPlugins<PluginsClient>()({
           })
           .nullable()
           .optional(),
-        member: z
-          .object({ id: z.string(), role: z.string() })
-          .nullable()
-          .optional(),
+        member: z.object({ id: z.string(), role: z.string() }).nullable().optional(),
         isPersonal: z.boolean(),
         hasOrganization: z.boolean(),
       })
@@ -102,31 +82,25 @@ export default createPlugin.withPlugins<PluginsClient>()({
 
   initialize: (config) =>
     Effect.gen(function* () {
-      // Database
-      const Database = DatabaseLive(config.secrets.NOSTR_COMMENTS_DATABASE_URL);
-
-      // Services
       const NostrServices = NostrCommentServiceLive({
         variables: {
           relays: config.variables.relays,
           fallbackRelays: config.variables.fallbackRelays,
         },
-      }).pipe(Layer.provide(Database));
+        systemSecret: config.secrets.NOSTR_SYSTEM_SECRET,
+      });
       const nostr = yield* Effect.provide(NostrCommentService, NostrServices);
 
-      // Background publisher for real-time comment streaming
       const publisher = new MemoryPublisher<BackgroundEvents>({
         resumeRetentionSeconds: 120,
       });
 
       console.log("[NostrComments] Services Initialized");
 
-      // Optional: poll relays for new comments and publish to SSE subscribers
       if (config.variables.backgroundEnabled) {
         yield* Effect.forkScoped(
           Effect.gen(function* () {
             while (true) {
-              // In production: subscribe to relay updates and publish events
               yield* Effect.sleep(`${config.variables.backgroundIntervalMs} millis`);
             }
           }),
@@ -141,7 +115,6 @@ export default createPlugin.withPlugins<PluginsClient>()({
   createRouter: (services, builder) => {
     const { nostr, publisher } = services;
 
-    // ── Auth middleware (matches projects plugin) ────────────────────────
     const requireAuth = builder.middleware(async ({ context, next }) => {
       if (!context.user || !context.userId) {
         throw new ORPCError("UNAUTHORIZED", {
@@ -157,220 +130,105 @@ export default createPlugin.withPlugins<PluginsClient>()({
           userId: context.userId,
           walletAddress: context.walletAddress,
           user: context.user,
+          near: context.near,
           reqHeaders: context.reqHeaders,
         },
       });
     });
 
+    async function runEffect<A>(effect: Effect.Effect<A, ORPCError<string, unknown>>) {
+      const exit = await Effect.runPromiseExit(effect);
+      if (Exit.isFailure(exit)) {
+        const squashed = Cause.squash(exit.cause);
+        if (squashed instanceof ORPCError) throw squashed;
+        throw new ORPCError("INTERNAL_SERVER_ERROR", {
+          message: squashed instanceof Error ? squashed.message : String(squashed),
+        });
+      }
+      return exit.value;
+    }
+
     return {
-      // ── listComments ──────────────────────────────────────────────────
       listComments: builder.listComments.handler(async ({ input }) => {
-        const exit = await Effect.runPromiseExit(
-          nostr.listComments(input.projectId, input.limit, input.cursor),
-        );
-
-        if (Exit.isFailure(exit)) {
-          const squashed = Cause.squash(exit.cause);
-          if (squashed instanceof ORPCError) throw squashed;
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: squashed instanceof Error ? squashed.message : String(squashed),
-          });
-        }
-
-        return exit.value;
+        return runEffect(nostr.listComments(input.projectId, input.limit, input.cursor));
       }),
 
-      // ── createComment ─────────────────────────────────────────────────
-      createComment: builder.createComment
-        .use(requireAuth)
-        .handler(async ({ input, context }) => {
-          // Verify the Nostr event signature
-          if (!verifyEvent(input.event as NostrEvent)) {
-            throw new ORPCError("BAD_REQUEST", {
-              message: "Invalid Nostr event signature",
-            });
-          }
-
-          const exit = await Effect.runPromiseExit(
-            nostr.publishComment(input.projectId, input.event as NostrEvent),
-          );
-
-          if (Exit.isFailure(exit)) {
-            const squashed = Cause.squash(exit.cause);
-            if (squashed instanceof ORPCError) throw squashed;
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: squashed instanceof Error ? squashed.message : String(squashed),
-            });
-          }
-
-          // Broadcast to SSE subscribers
-          await Effect.runPromise(
-            publisher.publish("new-comment", {
-              id: exit.value.id,
-              projectId: input.projectId,
-              timestamp: Date.now(),
-            }),
-          );
-
-          return exit.value;
-        }),
-
-      // ── listNews ──────────────────────────────────────────────────────
-      listNews: builder.listNews.handler(async ({ input }) => {
-        const exit = await Effect.runPromiseExit(
-          nostr.listNews(input.projectId, input.type, input.limit),
-        );
-
-        if (Exit.isFailure(exit)) {
-          const squashed = Cause.squash(exit.cause);
-          if (squashed instanceof ORPCError) throw squashed;
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: squashed instanceof Error ? squashed.message : String(squashed),
-          });
-        }
-
-        return exit.value;
-      }),
-
-      // ── publishNews ───────────────────────────────────────────────────
-      publishNews: builder.publishNews
-        .use(requireAuth)
-        .handler(async ({ input, context }) => {
-          if (context.user?.role && context.user.role !== "admin" && context.user.role !== "owner") {
-            throw new ORPCError("FORBIDDEN", {
-              message: "Only project owners or admins can publish news",
-            });
-          }
-
-          if (!verifyEvent(input.event as NostrEvent)) {
-            throw new ORPCError("BAD_REQUEST", {
-              message: "Invalid Nostr event signature",
-            });
-          }
-
-          const exit = await Effect.runPromiseExit(
-            nostr.publishNews(input.projectId, input.event as NostrEvent),
-          );
-
-          if (Exit.isFailure(exit)) {
-            const squashed = Cause.squash(exit.cause);
-            if (squashed instanceof ORPCError) throw squashed;
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: squashed instanceof Error ? squashed.message : String(squashed),
-            });
-          }
-
-          await Effect.runPromise(
-            publisher.publish("new-news", {
-              id: exit.value.id,
-              projectId: input.projectId,
-              timestamp: Date.now(),
-            }),
-          );
-
-          return exit.value;
-        }),
-
-      // ── attestNostr ───────────────────────────────────────────────────
-      attestNostr: builder.attestNostr
-        .use(requireAuth)
-        .handler(async ({ input, context }) => {
-          const authedAccount = context.walletAddress ?? context.user?.name;
-          if (authedAccount && authedAccount !== input.accountId) {
-            throw new ORPCError("FORBIDDEN", {
-              message: `Cannot attest for ${input.accountId} while logged in as ${authedAccount}`,
-            });
-          }
-
-          const result = verifyAttestation({
-            accountId: input.accountId,
-            publicKey: input.publicKey,
-            signature: input.signature,
-            message: input.message,
-            nonce: input.nonce,
-            recipient: input.recipient,
-            nostrPubkey: input.nostrPubkey,
-            createdAt: input.createdAt,
-          });
-
-          if (!result.valid) {
-            throw new ORPCError("BAD_REQUEST", {
-              message: result.error ?? "Attestation verification failed",
-            });
-          }
-
-          const exit = await Effect.runPromiseExit(
-            nostr.saveAttestation({
-              accountId: input.accountId,
-              nostrPubkey: input.nostrPubkey,
-              publicKey: input.publicKey,
-              signature: input.signature,
-              nonce: input.nonce,
-              recipient: input.recipient,
-              message: input.message,
-            }),
-          );
-
-          if (Exit.isFailure(exit)) {
-            const squashed = Cause.squash(exit.cause);
-            if (squashed instanceof ORPCError) throw squashed;
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: squashed instanceof Error ? squashed.message : String(squashed),
-            });
-          }
-
-          const npub = bech32.encode(
-            "npub",
-            bech32.toWords(hexToBytes(input.nostrPubkey)),
-          );
-
-          return {
-            verified: true,
-            accountId: result.accountId,
-            nostrPubkey: result.nostrPubkey,
-            npub,
-            error: null,
-          };
-        }),
-
-      // ── getAttestation ────────────────────────────────────────────────
-      getAttestation: builder.getAttestation.handler(async ({ input }) => {
-        const exit = await Effect.runPromiseExit(
-          nostr.getAttestation(input.accountId),
-        );
-
-        if (Exit.isFailure(exit)) {
-          const squashed = Cause.squash(exit.cause);
-          if (squashed instanceof ORPCError) throw squashed;
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: squashed instanceof Error ? squashed.message : String(squashed),
-          });
-        }
-
-        const record = exit.value;
-        return {
-          attested: record?.verified ?? false,
-          accountId: input.accountId,
-          nostrPubkey: record?.nostrPubkey ?? null,
-          npub: record?.npub ?? null,
-          attestedAt: record ? Math.floor(new Date(record.createdAt).getTime() / 1000) : null,
+      createComment: builder.createComment.use(requireAuth).handler(async ({ input, context }) => {
+        let result: {
+          id: string;
+          projectId: string;
+          author: string;
+          authorNpub: string;
+          content: string;
+          createdAt: number;
+          replyTo: string | null;
+          reactions: number;
         };
+
+        if (input.event) {
+          result = await runEffect(
+            nostr.publishSignedComment(input.projectId, input.event as NostrEvent),
+          );
+        } else {
+          const accountId = context.walletAddress ?? context.near?.primaryAccountId;
+          if (!accountId) {
+            throw new ORPCError("UNAUTHORIZED", {
+              message: "No NEAR account linked. Connect a Nostr extension or sign in with NEAR.",
+            });
+          }
+          if (!input.content) {
+            throw new ORPCError("BAD_REQUEST", { message: "Content or event is required" });
+          }
+          result = await runEffect(
+            nostr.publishComment(input.projectId, accountId, input.content, input.replyTo),
+          );
+        }
+
+        await publisher.publish("new-comment", {
+          id: result.id,
+          projectId: input.projectId,
+          timestamp: Date.now(),
+        });
+
+        return result;
       }),
 
-      // ── ping ──────────────────────────────────────────────────────────
-      ping: builder.ping.handler(async () => {
-        const exit = await Effect.runPromiseExit(nostr.ping());
+      listNews: builder.listNews.handler(async ({ input }) => {
+        return runEffect(nostr.listNews(input.projectId, input.limit, input.type));
+      }),
 
-        if (Exit.isFailure(exit)) {
-          const squashed = Cause.squash(exit.cause);
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: squashed instanceof Error ? squashed.message : String(squashed),
+      publishNews: builder.publishNews.use(requireAuth).handler(async ({ input, context }) => {
+        if (context.user?.role && context.user.role !== "admin" && context.user.role !== "owner") {
+          throw new ORPCError("FORBIDDEN", {
+            message: "Only project owners or admins can publish news",
           });
         }
 
+        const accountId = context.walletAddress ?? context.near?.primaryAccountId;
+        if (!accountId) {
+          throw new ORPCError("UNAUTHORIZED", {
+            message: "No NEAR account linked to this session",
+          });
+        }
+
+        const result = await runEffect(
+          nostr.publishNews(input.projectId, accountId, input.content, input.title, input.newsType),
+        );
+
+        await publisher.publish("new-news", {
+          id: result.id,
+          projectId: input.projectId,
+          timestamp: Date.now(),
+        });
+
+        return result;
+      }),
+
+      ping: builder.ping.handler(async () => {
+        const result = await runEffect(nostr.ping());
         return {
           status: "ok" as const,
-          relay: exit.value.relay,
+          relay: result.relay,
           timestamp: new Date().toISOString(),
         };
       }),
