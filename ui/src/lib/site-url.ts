@@ -9,3 +9,11 @@ export function getSiteUrl(
   const base = `${runtimeConfig.hostUrl}${runtimeBasePath === "/" ? "" : runtimeBasePath}`;
   return `${base}${path}`;
 }
+
+export function getAssetUrl(
+  runtimeConfig: Partial<ClientRuntimeConfig> | undefined,
+  path: string,
+): string | undefined {
+  if (!runtimeConfig?.assetsUrl) return undefined;
+  return `${runtimeConfig.assetsUrl.replace(/\/$/, "")}${path}`;
+}

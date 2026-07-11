@@ -15,7 +15,7 @@ import { Toaster } from "sonner";
 import type { RouterContext } from "@/app";
 import { getBaseStyles } from "@/app";
 import { sessionQueryKey } from "@/lib/auth";
-import { getSiteUrl } from "@/lib/site-url";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -47,6 +47,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     const cspNonce = loaderData?.cspNonce;
     const assetsUrl = runtimeConfig?.assetsUrl?.replace(/\/$/, "");
     const siteUrl = getSiteUrl(runtimeConfig, "") ?? "";
+    const imageUrl = getAssetUrl(runtimeConfig, "/metadata.png") ?? "/metadata.png";
     const title = runtimeConfig?.runtime?.title ?? runtimeConfig?.account ?? "";
     const description = runtimeConfig?.runtime?.description ?? "";
 
@@ -78,7 +79,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         { name: "format-detection", content: "telephone=no" },
         { name: "robots", content: "index, follow" },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl,
           title,
           description,
           siteName: title,

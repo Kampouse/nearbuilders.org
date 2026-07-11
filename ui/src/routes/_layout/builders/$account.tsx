@@ -20,7 +20,7 @@ import {
   upvoteCountsOptions,
   userVotesOptions,
 } from "@/lib/queries/builders";
-import { getSiteUrl } from "@/lib/site-url";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import { linkLabel } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +64,7 @@ export const Route = createFileRoute("/_layout/builders/$account")({
       builder: builder?.data ?? null,
       siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
       siteUrl: getSiteUrl(context.runtimeConfig, `/builders/${params.account}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
     };
   },
   head: ({ params, loaderData }) => {
@@ -79,7 +80,7 @@ export const Route = createFileRoute("/_layout/builders/$account")({
         { title },
         { name: "description", content: description },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
           title: displayName,
           description,
           siteName,

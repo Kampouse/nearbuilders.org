@@ -28,7 +28,7 @@ import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/comp
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
-import { getSiteUrl } from "@/lib/site-url";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import { isProjectKind, parseProjectListSearch } from "./-search";
 
 export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
@@ -49,6 +49,7 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
       project,
       siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
       siteUrl: getSiteUrl(context.runtimeConfig, `/projects/${params.kind}/${params.slug}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
     };
   },
   head: ({ loaderData }) => {
@@ -64,7 +65,7 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
         { title },
         { name: "description", content: description },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
           title: project?.title ?? "Project",
           description,
           siteName,
