@@ -1,5 +1,29 @@
 import { z } from "every-plugin/zod";
 export declare const contract: {
+    fetchLumaEvent: import("@orpc/contract").ContractProcedure<z.ZodObject<{
+        url: z.ZodString;
+    }, z.core.$strip>, z.ZodObject<{
+        data: z.ZodObject<{
+            title: z.ZodOptional<z.ZodString>;
+            description: z.ZodOptional<z.ZodString>;
+            lumaUrl: z.ZodString;
+            startAt: z.ZodOptional<z.ZodISODateTime>;
+            endAt: z.ZodOptional<z.ZodISODateTime>;
+            location: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>;
+    }, z.core.$strip>, import("@orpc/contract").MergedErrorMap<Record<never, never>, import("@orpc/contract").MergedErrorMap<Record<never, never>, {
+        BAD_REQUEST: {
+            readonly status: 400;
+            readonly data: z.ZodObject<{
+                invalidFields: z.ZodOptional<z.ZodArray<z.ZodString>>;
+                validationErrors: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    field: z.ZodString;
+                    message: z.ZodString;
+                    code: z.ZodOptional<z.ZodString>;
+                }, z.core.$strip>>>;
+            }, z.core.$strip>;
+        };
+    }>>, Record<never, never>>;
     listEvents: import("@orpc/contract").ContractProcedure<z.ZodObject<{
         ownerId: z.ZodOptional<z.ZodString>;
         visibility: z.ZodOptional<z.ZodEnum<{
