@@ -15,6 +15,7 @@ import { Toaster } from "sonner";
 import type { RouterContext } from "@/app";
 import { getBaseStyles } from "@/app";
 import { sessionQueryKey } from "@/lib/auth";
+import { getSiteUrl } from "@/lib/site-url";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -44,11 +45,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   head: ({ loaderData }) => {
     const runtimeConfig = loaderData?.runtimeConfig;
     const cspNonce = loaderData?.cspNonce;
-    const runtimeBasePath = runtimeConfig?.runtime?.runtimeBasePath ?? "/";
     const assetsUrl = runtimeConfig?.assetsUrl?.replace(/\/$/, "");
-    const siteUrl = runtimeConfig?.hostUrl
-      ? `${runtimeConfig.hostUrl}${runtimeBasePath === "/" ? "" : runtimeBasePath}`
-      : "";
+    const siteUrl = getSiteUrl(runtimeConfig, "") ?? "";
     const title = runtimeConfig?.runtime?.title ?? runtimeConfig?.account ?? "";
     const description = runtimeConfig?.runtime?.description ?? "";
 
