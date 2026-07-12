@@ -31,7 +31,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
           "--success-bg": "var(--brand-mint-soft)",
-          "--success-text": "var(--foreground)",
+          "--success-text": "var(--brand-mint-foreground)",
           "--success-border": "var(--brand-mint-bright)",
           "--error-bg": "var(--brand-pink-light)",
           "--error-text": "var(--destructive)",
