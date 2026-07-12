@@ -28,6 +28,7 @@ import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/comp
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import { isProjectKind, parseProjectListSearch } from "./-search";
 
 export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
@@ -44,7 +45,12 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
       .then((r) => r?.data ?? null)
       .catch(() => null);
 
-    return { project, siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders" };
+    return {
+      project,
+      siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
+      siteUrl: getSiteUrl(context.runtimeConfig, `/projects/${params.kind}/${params.slug}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
+    };
   },
   head: ({ loaderData }) => {
     const project = loaderData?.project;
@@ -59,10 +65,11 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
         { title },
         { name: "description", content: description },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
           title: project?.title ?? "Project",
           description,
           siteName,
+          siteUrl: loaderData?.siteUrl,
           type: "article",
           alt: description,
         }),
@@ -164,7 +171,10 @@ function ProjectDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });
-      queryClient.setQueryData(["userVoteState", projectId], "up" as "up" | "down" | null);
+      queryClient.setQueryData(["userVoteState", projectId], {
+        entityId: projectId,
+        hasUpvote: true,
+      });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to upvote"),
   });
@@ -174,7 +184,10 @@ function ProjectDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });
-      queryClient.setQueryData(["userVoteState", projectId], "down" as "up" | "down" | null);
+      queryClient.setQueryData(["userVoteState", projectId], {
+        entityId: projectId,
+        hasUpvote: false,
+      });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to downvote"),
   });

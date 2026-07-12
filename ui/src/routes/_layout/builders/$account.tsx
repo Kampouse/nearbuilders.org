@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { Profile } from "better-near-auth";
+import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, MapPin, Pencil, ThumbsUp } from "lucide-react";
 import { useState } from "react";
@@ -19,6 +20,7 @@ import {
   upvoteCountsOptions,
   userVotesOptions,
 } from "@/lib/queries/builders";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import { linkLabel } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
 
@@ -53,16 +55,42 @@ export const Route = createFileRoute("/_layout/builders/$account")({
         ].filter(Boolean),
       );
     }
+
+    const builder = queryClient.getQueryData(["builder", params.account]) as
+      | { data?: { name: string | null; bio: string | null } }
+      | undefined;
+
+    return {
+      builder: builder?.data ?? null,
+      siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
+      siteUrl: getSiteUrl(context.runtimeConfig, `/builders/${params.account}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
+    };
   },
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.account} | NEAR Builders` },
-      {
-        name: "description",
-        content: `Builder profile for ${params.account} on NEAR Builders.`,
-      },
-    ],
-  }),
+  head: ({ params, loaderData }) => {
+    const builder = loaderData?.builder;
+    const siteName = loaderData?.siteName ?? "NEAR Builders";
+    const displayName = builder?.name || params.account;
+    const title = `${displayName} | ${siteName}`;
+    const description =
+      builder?.bio?.trim() || `Builder profile for ${displayName} on ${siteName}.`;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        ...getSocialImageMeta({
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
+          title: displayName,
+          description,
+          siteName,
+          siteUrl: loaderData?.siteUrl,
+          type: "profile",
+          alt: description,
+        }),
+      ],
+    };
+  },
   component: BuilderProfilePage,
 });
 
