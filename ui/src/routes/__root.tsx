@@ -22,8 +22,8 @@ import { ThemeProvider } from "next-themes";
 import type { RouterContext } from "@/app";
 import { getBaseStyles } from "@/app";
 import { Toaster } from "@/components/ui/sonner";
+import { useMediaQuery } from "@/hooks";
 import { sessionQueryKey } from "@/lib/auth";
-import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -53,9 +53,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   head: ({ loaderData }) => {
     const runtimeConfig = loaderData?.runtimeConfig;
     const cspNonce = loaderData?.cspNonce;
+    const runtimeBasePath = runtimeConfig?.runtime?.runtimeBasePath ?? "/";
     const assetsUrl = runtimeConfig?.assetsUrl?.replace(/\/$/, "");
-    const siteUrl = getSiteUrl(runtimeConfig, "") ?? "";
-    const imageUrl = getAssetUrl(runtimeConfig, "/metadata.png") ?? "/metadata.png";
+    const siteUrl = runtimeConfig?.hostUrl
+      ? `${runtimeConfig.hostUrl}${runtimeBasePath === "/" ? "" : runtimeBasePath}`
+      : "";
     const title = runtimeConfig?.runtime?.title ?? runtimeConfig?.account ?? "";
     const description = runtimeConfig?.runtime?.description ?? "";
 
@@ -87,7 +89,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         { name: "format-detection", content: "telephone=no" },
         { name: "robots", content: "index, follow" },
         ...getSocialImageMeta({
-          imageUrl,
+          imageUrl: "/metadata.png",
           title,
           description,
           siteName: title,
@@ -140,6 +142,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   const { cspNonce } = Route.useRouteContext();
+  const isDesktop = useMediaQuery("(min-width: 640px)");
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
@@ -151,7 +154,7 @@ function RootComponent() {
           <div id="root">
             <Outlet />
           </div>
-          <Toaster position="bottom-right" richColors closeButton />
+          <Toaster position={isDesktop ? "bottom-right" : "top-center"} closeButton />
         </ThemeProvider>
         <Scripts />
         {process.env.NODE_ENV === "development" && (

@@ -1,4 +1,4 @@
-name: work.efiz.near
+name: nearbuilders.near
 
 x-pg-common: &pg-common
   image: postgres:17-alpine
@@ -14,132 +14,132 @@ x-pg-common: &pg-common
 services:
   postgres-activity:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-activity
+    container_name: nearbuilders.near-postgres-activity
     environment:
       <<: *pg-env
       POSTGRES_DB: activity_db
     ports:
       - "5440:5432"
     volumes:
-      - work_efiz_near_postgres_activity_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_activity_data:/var/lib/postgresql/data
 
   postgres-api:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-api
+    container_name: nearbuilders.near-postgres-api
     environment:
       <<: *pg-env
       POSTGRES_DB: api_db
     ports:
       - "5432:5432"
     volumes:
-      - work_efiz_near_postgres_api_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_api_data:/var/lib/postgresql/data
 
   postgres-auth:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-auth
+    container_name: nearbuilders.near-postgres-auth
     environment:
       <<: *pg-env
       POSTGRES_DB: auth_db
     ports:
       - "5433:5432"
     volumes:
-      - work_efiz_near_postgres_auth_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_auth_data:/var/lib/postgresql/data
 
   postgres-builders:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-builders
+    container_name: nearbuilders.near-postgres-builders
     environment:
       <<: *pg-env
       POSTGRES_DB: builders_db
     ports:
-      - "5435:5432"
+      - "5442:5432"
     volumes:
-      - work_efiz_near_postgres_builders_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_builders_data:/var/lib/postgresql/data
 
   postgres-events:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-events
+    container_name: nearbuilders.near-postgres-events
     environment:
       <<: *pg-env
       POSTGRES_DB: events_db
     ports:
-      - "5436:5432"
+      - "5443:5432"
     volumes:
-      - work_efiz_near_postgres_events_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_events_data:/var/lib/postgresql/data
 
   postgres-nearcatalog:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-nearcatalog
+    container_name: nearbuilders.near-postgres-nearcatalog
     environment:
       <<: *pg-env
       POSTGRES_DB: nearcatalog_db
     ports:
       - "5441:5432"
     volumes:
-      - work_efiz_near_postgres_nearcatalog_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_nearcatalog_data:/var/lib/postgresql/data
 
   postgres-notifications:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-notifications
+    container_name: nearbuilders.near-postgres-notifications
     environment:
       <<: *pg-env
       POSTGRES_DB: notifications_db
     ports:
-      - "5439:5432"
+      - "5444:5432"
     volumes:
-      - work_efiz_near_postgres_notifications_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_notifications_data:/var/lib/postgresql/data
 
   postgres-projects:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-projects
+    container_name: nearbuilders.near-postgres-projects
     environment:
       <<: *pg-env
       POSTGRES_DB: projects_db
     ports:
-      - "5434:5432"
+      - "5445:5432"
     volumes:
-      - work_efiz_near_postgres_projects_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_projects_data:/var/lib/postgresql/data
 
   postgres-proposals:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-proposals
+    container_name: nearbuilders.near-postgres-proposals
     environment:
       <<: *pg-env
       POSTGRES_DB: proposals_db
     ports:
       - "5437:5432"
     volumes:
-      - work_efiz_near_postgres_proposals_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_proposals_data:/var/lib/postgresql/data
 
   postgres-votes:
     <<: *pg-common
-    container_name: work.efiz.near-postgres-votes
+    container_name: nearbuilders.near-postgres-votes
     environment:
       <<: *pg-env
       POSTGRES_DB: votes_db
     ports:
-      - "5438:5432"
+      - "5446:5432"
     volumes:
-      - work_efiz_near_postgres_votes_data:/var/lib/postgresql/data
+      - nearbuilders_near_postgres_votes_data:/var/lib/postgresql/data
 
 volumes:
-  work_efiz_near_postgres_activity_data:
-    name: work_efiz_near_postgres_activity_data
-  work_efiz_near_postgres_api_data:
-    name: work_efiz_near_postgres_api_data
-  work_efiz_near_postgres_auth_data:
-    name: work_efiz_near_postgres_auth_data
-  work_efiz_near_postgres_builders_data:
-    name: work_efiz_near_postgres_builders_data
-  work_efiz_near_postgres_events_data:
-    name: work_efiz_near_postgres_events_data
-  work_efiz_near_postgres_nearcatalog_data:
-    name: work_efiz_near_postgres_nearcatalog_data
-  work_efiz_near_postgres_notifications_data:
-    name: work_efiz_near_postgres_notifications_data
-  work_efiz_near_postgres_projects_data:
-    name: work_efiz_near_postgres_projects_data
-  work_efiz_near_postgres_proposals_data:
-    name: work_efiz_near_postgres_proposals_data
-  work_efiz_near_postgres_votes_data:
-    name: work_efiz_near_postgres_votes_data
+  nearbuilders_near_postgres_activity_data:
+    name: nearbuilders_near_postgres_activity_data
+  nearbuilders_near_postgres_api_data:
+    name: nearbuilders_near_postgres_api_data
+  nearbuilders_near_postgres_auth_data:
+    name: nearbuilders_near_postgres_auth_data
+  nearbuilders_near_postgres_builders_data:
+    name: nearbuilders_near_postgres_builders_data
+  nearbuilders_near_postgres_events_data:
+    name: nearbuilders_near_postgres_events_data
+  nearbuilders_near_postgres_nearcatalog_data:
+    name: nearbuilders_near_postgres_nearcatalog_data
+  nearbuilders_near_postgres_notifications_data:
+    name: nearbuilders_near_postgres_notifications_data
+  nearbuilders_near_postgres_projects_data:
+    name: nearbuilders_near_postgres_projects_data
+  nearbuilders_near_postgres_proposals_data:
+    name: nearbuilders_near_postgres_proposals_data
+  nearbuilders_near_postgres_votes_data:
+    name: nearbuilders_near_postgres_votes_data

@@ -66,7 +66,7 @@ tanstackIntent:
     for: "bos init, bos sync, and bos upgrade workflows — template download, snapshot-based conflict detection, package version bumps, and how init/sync select and own files. Use when scaffolding new projects, syncing upstream changes, or upgrading framework packages."
   - id: "everything-dev#plugin-development"
     run: "bunx @tanstack/intent@latest load everything-dev#plugin-development"
-    for: "Build, register, and deploy plugins within everything.dev. Covers the _template scaffold, contract/service/index pattern, database setup with Drizzle, bos.config.json registration, plugin UI/sidebar, and CLI workflow. Use when creating new plugins, adding database-backed routes, or deploying plugins to production."
+    for: "Build, register, and deploy plugins within everything.dev. Covers the _template scaffold, contract/service/index pattern, database setup with Drizzle, bos.config.json registration, plugin UI, and CLI workflow. Use when creating new plugins, adding database-backed routes, or deploying plugins to production."
   - id: "everything-dev#publish-sync"
     run: "bunx @tanstack/intent@latest load everything-dev#publish-sync"
     for: "Publish bos.config.json to the FastKV registry, sync from upstream, and upgrade workspace packages. Use when deploying, syncing, or managing runtime configuration across projects."
@@ -75,7 +75,7 @@ tanstackIntent:
     for: "Build shared-host, shared-API super apps with tenant-specific UI composition. Use when setting up a base runtime plus custom tenant apps, configuring fixed-core multi-tenancy, reasoning about extends-based runtime lineage, or deciding what tenants can override today."
   - id: "everything-dev#ui-integration"
     run: "bunx @tanstack/intent@latest load everything-dev#ui-integration"
-    for: "Route creation, API client usage, auth client, SSR hydration, sidebar system, and the @/app module surface. Use when adding new UI routes, fetching data from the API, implementing auth flows, or customizing sidebar navigation."
+    for: "Route creation, API client usage, auth client, SSR hydration, and the @/app module surface. Use when adding new UI routes, fetching data from the API, implementing auth flows, or customizing navigation."
 <!-- intent-skills:end -->
 
 # Agent Instructions
