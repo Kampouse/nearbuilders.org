@@ -142,7 +142,10 @@ export function buildRejectionNotification(
 }
 
 function notificationContext(context: Context) {
-  return { ...context, userId: context.near?.primaryAccountId ?? undefined };
+  return {
+    ...context,
+    userId: context.near?.primaryAccountId ?? context.userId ?? context.user?.id,
+  };
 }
 
 export function createProposalNotifications(plugins: Omit<PluginsClient, "auth">) {

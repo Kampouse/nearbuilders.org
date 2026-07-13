@@ -424,7 +424,7 @@ function ProjectDetailPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <KindChip kind={project.kind} />
                   {project.kind !== "result" && project.status !== "active" && (
-                    <StatusChip status={project.status as any} />
+                    <StatusChip status={project.status} />
                   )}
                   <NewBadge createdAt={project.createdAt} />
                 </div>
@@ -623,15 +623,15 @@ function MentionChip({
   );
 }
 
-function StatusChip({ status }: { status: "active" | "paused" | "archived" }) {
-  const variants = {
+function StatusChip({ status }: { status: string }) {
+  const variants: Record<string, string> = {
     active: "border-brand-accent-border bg-brand-accent-light text-foreground",
     paused: "border-border bg-secondary text-foreground",
     archived: "border-destructive/40 bg-destructive/10 text-destructive",
   };
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${variants[status]}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${variants[status] ?? "border-border bg-muted text-muted-foreground"}`}
     >
       {status}
     </span>

@@ -3,6 +3,7 @@ import type { z } from "every-plugin/zod";
 import { AccountIdSchema } from "near-kit/schemas";
 import type { ProposalSchema } from "../../../plugins/proposals/src/contract";
 import { applyCatalogClaimApplication } from "../lib/catalog-claim-application";
+import { normalizeCatalogClaimRoles } from "../lib/catalog-claims-utils";
 import type { Context } from "../lib/context";
 import type { PluginsClient } from "../lib/plugins-types.gen";
 import {
@@ -34,16 +35,6 @@ type RemoveCallback = (
 
 const IMPLICIT_ACCOUNT_ID_RE = /^[0-9a-f]{64}$/;
 const CATALOG_CLAIM_PLUGIN_ID = "nearcatalog";
-
-function normalizeCatalogClaimRoles(roles: string[]) {
-  const normalized = new Map<string, string>();
-  for (const role of roles) {
-    const value = role.trim();
-    const key = value.toLowerCase();
-    if (value && !normalized.has(key)) normalized.set(key, value);
-  }
-  return Array.from(normalized.values());
-}
 
 function applyCatalogClaimProposal(
   plugins: Omit<PluginsClient, "auth">,

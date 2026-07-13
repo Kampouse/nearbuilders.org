@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Profile } from "better-near-auth";
-import Markdown from "react-markdown";
 import { useAuthClient } from "@/app";
+import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
 import { nearProfileOptions } from "@/lib/queries/builders";
 
@@ -151,7 +151,7 @@ export function NearProfile({
 
           {profile?.description && (
             <div className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              <Markdown>{profile.description}</Markdown>
+              <Markdown content={profile.description} />
             </div>
           )}
 

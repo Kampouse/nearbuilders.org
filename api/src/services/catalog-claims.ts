@@ -1,6 +1,7 @@
 import { ORPCError } from "every-plugin/orpc";
 import type { z } from "every-plugin/zod";
 import type { ProposalSchema } from "../../../plugins/proposals/src/contract";
+import { normalizeCatalogClaimRoles } from "../lib/catalog-claims-utils";
 import type { Context } from "../lib/context";
 import type { PluginsClient } from "../lib/plugins-types.gen";
 import { readString, readStringArray, requireObjectPayload } from "../lib/utils";
@@ -8,16 +9,6 @@ import { readString, readStringArray, requireObjectPayload } from "../lib/utils"
 const CATALOG_CLAIM_PLUGIN_ID = "nearcatalog";
 
 type ProposalRecord = z.infer<typeof ProposalSchema>;
-
-function normalizeCatalogClaimRoles(roles: string[]) {
-  const normalized = new Map<string, string>();
-  for (const role of roles) {
-    const value = role.trim();
-    const key = value.toLowerCase();
-    if (value && !normalized.has(key)) normalized.set(key, value);
-  }
-  return Array.from(normalized.values());
-}
 
 function catalogClaimProposalStatus(
   proposal: Pick<ProposalRecord, "reviewStatus" | "removeStatus">,
