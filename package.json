@@ -57,15 +57,15 @@
       "@rspack/cli": "1.7.11",
       "@rsbuild/core": "1.7.5",
       "@rsbuild/plugin-react": "1.4.6",
-      "zephyr-rspack-plugin": "^1.1.1",
-      "zephyr-rsbuild-plugin": "^1.1.1",
+      "zephyr-rspack-plugin": "^1.1.2",
+      "zephyr-rsbuild-plugin": "^1.1.2",
       "@tanstack/intent": "^0.3.5",
       "@tanstack/store": "^0.11.0",
       "@opentelemetry/api": "^1.9.0"
     }
   },
   "scripts": {
-    "dev": "node_modules/.bin/bos dev --remote-plugins=apps,builders,projects,events,notifications,votes",
+    "dev": "node_modules/.bin/bos dev",
     "dev:ui": "node_modules/.bin/bos dev --ui local --api remote",
     "dev:api": "node_modules/.bin/bos dev --ui remote --api local",
     "dev:proxy": "node_modules/.bin/bos dev --proxy",
