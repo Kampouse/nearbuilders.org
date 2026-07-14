@@ -1,6 +1,6 @@
 {
   "extends": "bos://dev.everything.near/dev.everything.dev",
-  "account": "work.efiz.near",
+  "account": "nearbuilding.near",
   "domain": "nearbuilders.org",
   "title": "NEAR Builders",
   "description": "The open platform for builders on NEAR.",
