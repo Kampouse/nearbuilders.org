@@ -1,6 +1,6 @@
 import { createPlugin } from "every-plugin";
 import { Effect } from "every-plugin/effect";
-import { MemoryPublisher } from "every-plugin/orpc";
+import { MemoryPublisher, ORPCError } from "every-plugin/orpc";
 import { z } from "every-plugin/zod";
 import { contract } from "./contract";
 import { ContextSchema } from "./lib/context";
@@ -336,6 +336,16 @@ export default createPlugin({
   shutdown: () => Effect.log("[MCP] Shutdown"),
 
   createRouter: (services, builder) => {
+    const requireApiKey = builder.middleware(async ({ context, next }) => {
+      if (!context.apiKey) {
+        throw new ORPCError("UNAUTHORIZED", {
+          message: "API key required",
+          data: { authType: "apiKey", hint: "Provide a valid API key via x-api-key header" },
+        });
+      }
+      return next({ context: { apiKey: context.apiKey } });
+    });
+
     return {
       mcpTools: builder.mcpTools.handler(() => {
         return {
@@ -347,7 +357,7 @@ export default createPlugin({
         };
       }),
 
-      mcpCallTool: builder.mcpCallTool.handler(async ({ input }) => {
+      mcpCallTool: builder.mcpCallTool.use(requireApiKey).handler(async ({ input, context }) => {
         const tool = MCP_TOOLS.find((t) => t.name === input.name);
         if (!tool) {
           return {
@@ -364,9 +374,10 @@ export default createPlugin({
         const args = { ...(input.arguments || {}) };
         const { resolvedPath, remaining, method } = resolveRequest(tool, args);
         const baseUrl = services.registryUrl || "http://localhost:3000";
+        const apiKey = (context.apiKey as any)?.key;
 
         try {
-          const result = await proxyRequest(baseUrl, method, resolvedPath, remaining);
+          const result = await proxyRequest(baseUrl, method, resolvedPath, remaining, apiKey);
           return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
         } catch (err) {
           return {
