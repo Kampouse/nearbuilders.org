@@ -303,6 +303,7 @@ fabric.properties
 .turbo
 .bos
 !.bos/sync-snapshot.json
+!.bos/infra-state.json
 
 # AI tool config (local only, not committed)
 .opencode/
@@ -320,11 +321,13 @@ docker-compose.yml
 node_modules/.federation
 # CSS files (Tailwind - handled by build tools)
 *.css
+!ui/src/styles.css
 .tanstack
 
 # Markdown files (local notes, AI agent instructions, etc.)
 # Already-tracked .md files (README, docs) stay tracked; changesets are kept.
 *.md
+!**/skills/**/*.md
 !AGENTS.md
 !CONTRIBUTING.md
 !**/README.md

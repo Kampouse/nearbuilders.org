@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, KeyRound, Mail, Smartphone, Wallet } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
+import { type Passkey, type SessionData, sessionQueryOptions, useAuthClient } from "@/app";
 import { Badge, Button, ConfirmDialog } from "@/components";
 import { useUserPasskeys } from "@/components/settings-sections";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_layout/_authenticated/_dashboard/setting
       queryKey: ["passkeys"],
       queryFn: async () => {
         const { data } = await context.authClient.passkey.listUserPasskeys();
-        return (data || []) as any[];
+        return (data || []) as Passkey[];
       },
       staleTime: 60 * 1000,
     });

@@ -23,6 +23,7 @@ import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 
 export const Route = createFileRoute("/_layout/events/$slug")({
   loader: async ({ params, context }) => {
@@ -57,7 +58,12 @@ export const Route = createFileRoute("/_layout/events/$slug")({
       });
     }
 
-    return { event, siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders" };
+    return {
+      event,
+      siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
+      siteUrl: getSiteUrl(context.runtimeConfig, `/events/${params.slug}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
+    };
   },
   head: ({ loaderData }) => {
     const event = loaderData?.event;
@@ -73,10 +79,11 @@ export const Route = createFileRoute("/_layout/events/$slug")({
         { title },
         { name: "description", content: description },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
           title: event?.title ?? "Event",
           description,
           siteName,
+          siteUrl: loaderData?.siteUrl,
           type: "article",
           alt: description,
         }),

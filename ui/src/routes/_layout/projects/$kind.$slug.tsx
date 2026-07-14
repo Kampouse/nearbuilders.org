@@ -29,6 +29,7 @@ import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/comp
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { VoteButton } from "@/components/ui/vote-button";
 import { fetchRepositoryReadme } from "@/lib/repository-content";
+import { getAssetUrl, getSiteUrl } from "@/lib/site-url";
 import { isProjectKind, parseProjectListSearch } from "./-search";
 
 export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
@@ -45,7 +46,12 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
       .then((r) => r?.data ?? null)
       .catch(() => null);
 
-    return { project, siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders" };
+    return {
+      project,
+      siteName: context.runtimeConfig?.runtime?.title ?? "NEAR Builders",
+      siteUrl: getSiteUrl(context.runtimeConfig, `/projects/${params.kind}/${params.slug}`),
+      imageUrl: getAssetUrl(context.runtimeConfig, "/metadata.png"),
+    };
   },
   head: ({ loaderData }) => {
     const project = loaderData?.project;
@@ -60,10 +66,11 @@ export const Route = createFileRoute("/_layout/projects/$kind/$slug")({
         { title },
         { name: "description", content: description },
         ...getSocialImageMeta({
-          imageUrl: "/metadata.png",
+          imageUrl: loaderData?.imageUrl ?? "/metadata.png",
           title: project?.title ?? "Project",
           description,
           siteName,
+          siteUrl: loaderData?.siteUrl,
           type: "article",
           alt: description,
         }),
@@ -165,7 +172,10 @@ function ProjectDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });
-      queryClient.setQueryData(["userVoteState", projectId], "up" as "up" | "down" | null);
+      queryClient.setQueryData(["userVoteState", projectId], {
+        entityId: projectId,
+        hasUpvote: true,
+      });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to upvote"),
   });
@@ -175,7 +185,10 @@ function ProjectDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["upvoteCount", projectId] });
       queryClient.invalidateQueries({ queryKey: ["upvoteCounts"] });
-      queryClient.setQueryData(["userVoteState", projectId], "down" as "up" | "down" | null);
+      queryClient.setQueryData(["userVoteState", projectId], {
+        entityId: projectId,
+        hasUpvote: false,
+      });
     },
     onError: (err: Error) => toast.error(err.message || "Failed to downvote"),
   });
@@ -412,7 +425,7 @@ function ProjectDetailPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <KindChip kind={project.kind} />
                   {project.kind !== "result" && project.status !== "active" && (
-                    <StatusChip status={project.status as any} />
+                    <StatusChip status={project.status} />
                   )}
                   <NewBadge createdAt={project.createdAt} />
                 </div>
@@ -613,15 +626,15 @@ function MentionChip({
   );
 }
 
-function StatusChip({ status }: { status: "active" | "paused" | "archived" }) {
-  const variants = {
+function StatusChip({ status }: { status: string }) {
+  const variants: Record<string, string> = {
     active: "border-brand-accent-border bg-brand-accent-light text-foreground",
     paused: "border-border bg-secondary text-foreground",
     archived: "border-destructive/40 bg-destructive/10 text-destructive",
   };
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${variants[status]}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold border ${variants[status] ?? "border-border bg-muted text-muted-foreground"}`}
     >
       {status}
     </span>

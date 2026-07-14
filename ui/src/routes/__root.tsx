@@ -1,3 +1,11 @@
+/**
+ * HTML shell — head/scripts/styles, runtime config handoff.
+ * Root boundary between the host-rendered document and the UI application.
+ *
+ * BE CAREFUL MODIFYING THIS FILE — changes will be overwritten by `bos sync` / `bos upgrade`.
+ * Prefer upstream changes at https://github.com/nearbuilders/everything-dev
+ */
+
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
   ClientOnly,
@@ -11,9 +19,10 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { getRemoteScripts } from "everything-dev/ui/head";
 import { getSocialImageMeta } from "everything-dev/ui/metadata";
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
 import type { RouterContext } from "@/app";
 import { getBaseStyles } from "@/app";
+import { Toaster } from "@/components/ui/sonner";
+import { useMediaQuery } from "@/hooks";
 import { sessionQueryKey } from "@/lib/auth";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
@@ -133,6 +142,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   const { cspNonce } = Route.useRouteContext();
+  const isDesktop = useMediaQuery("(min-width: 640px)");
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
@@ -144,7 +154,7 @@ function RootComponent() {
           <div id="root">
             <Outlet />
           </div>
-          <Toaster position="bottom-right" richColors closeButton />
+          <Toaster position={isDesktop ? "bottom-right" : "top-center"} closeButton />
         </ThemeProvider>
         <Scripts />
         {process.env.NODE_ENV === "development" && (

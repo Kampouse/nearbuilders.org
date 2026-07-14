@@ -1,3 +1,10 @@
+/**
+ * Better-Auth client with NEAR SIWN, passkey, API key, and organization plugins.
+ *
+ * BE CAREFUL MODIFYING THIS FILE — changes will be overwritten by `bos sync` / `bos upgrade`.
+ * Prefer upstream changes at https://github.com/nearbuilders/everything-dev
+ */
+
 import { apiKeyClient } from "@better-auth/api-key/client";
 import { passkeyClient } from "@better-auth/passkey/client";
 import { useQuery } from "@tanstack/react-query";
@@ -127,9 +134,17 @@ function getSiwnClientConfig(options: CreateAuthClientOptions): SiwnClientConfig
   const networkId =
     runtimeConfig?.networkId ?? (mainnetRecipient.endsWith(".testnet") ? "testnet" : "mainnet");
   const testnetRecipient = siwn.recipients?.testnet;
+
+  if (testnetRecipient) {
+    return {
+      recipients: { mainnet: mainnetRecipient, testnet: testnetRecipient },
+      networkId,
+      cspNonce: options.cspNonce,
+    };
+  }
+
   const recipient =
     networkId === "testnet" && testnetRecipient ? testnetRecipient : mainnetRecipient;
-
   return { recipient, networkId, cspNonce: options.cspNonce };
 }
 

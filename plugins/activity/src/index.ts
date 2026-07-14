@@ -4,6 +4,7 @@ import { MemoryPublisher, ORPCError } from "every-plugin/orpc";
 import { z } from "every-plugin/zod";
 import { type ActivityEventSchema, contract } from "./contract";
 import { DatabaseLive } from "./db/layer";
+import { ContextSchema } from "./lib/context";
 import { ActivityService, ActivityServiceLive } from "./services/activity";
 
 type ActivityEvent = z.infer<typeof ActivityEventSchema>;
@@ -31,28 +32,7 @@ export default createPlugin({
     ACTIVITY_DATABASE_URL: z.string().default("pglite:.bos/activity/:memory:"),
   }),
 
-  context: z.object({
-    userId: z.string().optional(),
-    walletAddress: z.string().optional(),
-    user: z
-      .object({
-        id: z.string(),
-        role: z.string().optional(),
-        email: z.string().optional(),
-        name: z.string().optional(),
-      })
-      .optional(),
-    organizationId: z.string().optional(),
-    apiKey: z
-      .object({
-        id: z.string(),
-        name: z.string().nullable(),
-        permissions: z.record(z.string(), z.array(z.string())).nullable(),
-      })
-      .optional(),
-    reqHeaders: z.custom<Headers>().optional(),
-    getRawBody: z.custom<() => Promise<string>>().optional(),
-  }),
+  context: ContextSchema,
 
   contract,
 
@@ -71,15 +51,51 @@ export default createPlugin({
 
   createRouter: (services, builder) => {
     const requireAuth = builder.middleware(async ({ context, next }) => {
-      if (!context.user || !context.userId) {
+      if (!context.user || !context.userId || !context.near?.primaryAccountId) {
         throw new ORPCError("UNAUTHORIZED", { message: "Authentication required" });
       }
       return next({ context });
     });
 
+    const requireAdmin = builder.middleware(async ({ context, next }) => {
+      if (!context.user || !context.userId) {
+        throw new ORPCError("UNAUTHORIZED", { message: "Authentication required" });
+      }
+      if (context.user.role !== "admin") {
+        throw new ORPCError("FORBIDDEN", { message: "Admin access required" });
+      }
+      return next({ context });
+    });
+
     return {
-      emitActivity: builder.emitActivity.use(requireAuth).handler(async ({ input }) => {
-        const event = await runEffect(services.activity.emitActivity(input));
+      emitActivity: builder.emitActivity.use(requireAuth).handler(async ({ input, context }) => {
+        const actor = context.near?.primaryAccountId;
+        if (!actor) {
+          throw new ORPCError("UNAUTHORIZED", { message: "Authentication required" });
+        }
+        const event = await runEffect(
+          services.activity.emitActivity({
+            ...input,
+            actor,
+            verified: false,
+          }),
+        );
+        await services.publisher.publish("activity", event);
+        return event;
+      }),
+
+      emitTrustedActivity: builder.emitTrustedActivity
+        .use(requireAdmin)
+        .handler(async ({ input }) => {
+          const event = await runEffect(
+            services.activity.emitActivity({ ...input, verified: true }),
+          );
+          await services.publisher.publish("activity", event);
+          return event;
+        }),
+
+      hideActivity: builder.hideActivity.use(requireAdmin).handler(async ({ input }) => {
+        const event = await runEffect(services.activity.hideActivity(input.id));
         await services.publisher.publish("activity", event);
         return event;
       }),
