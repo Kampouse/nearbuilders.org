@@ -33,15 +33,22 @@ export const Route = createFileRoute("/_layout/skill")({
       intentRegistryUrl: INTENT_REGISTRY_URL,
     };
   },
-  head: () => ({
-    meta: [
-      { title: "Skill | app" },
-      {
-        name: "description",
-        content: "Agent-oriented instructions for running, editing, and publishing this runtime.",
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const runtimeConfig = loaderData?.runtimeConfig;
+    const title = runtimeConfig?.runtime?.title ?? runtimeConfig?.account ?? "app";
+    const description = runtimeConfig?.runtime?.description ?? "";
+    return {
+      meta: [
+        { title: `Skill | ${title}` },
+        {
+          name: "description",
+          content:
+            description ||
+            "Agent-oriented instructions for running, editing, and publishing this runtime.",
+        },
+      ],
+    };
+  },
   component: SkillPage,
 });
 
