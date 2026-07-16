@@ -448,7 +448,7 @@ export class LumaService {
   }
 
   async getEvent(calendarId: string, eventId: string, options?: { isAdmin?: boolean }) {
-    const cacheKey = `${calendarId}:${eventId}`;
+    const cacheKey = `${calendarId}:${eventId}:${options?.isAdmin ?? false}`;
     const cached = getCachedValue(this.detailCache, cacheKey);
     if (cached) return { data: cached };
     const pending = this.detailRequests.get(cacheKey);
