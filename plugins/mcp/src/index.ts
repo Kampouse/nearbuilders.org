@@ -336,16 +336,6 @@ export default createPlugin({
   shutdown: () => Effect.log("[MCP] Shutdown"),
 
   createRouter: (services, builder) => {
-    const requireApiKey = builder.middleware(async ({ context, next }) => {
-      if (!context.apiKey) {
-        throw new ORPCError("UNAUTHORIZED", {
-          message: "API key required",
-          data: { authType: "apiKey", hint: "Provide a valid API key via x-api-key header" },
-        });
-      }
-      return next({ context: { apiKey: context.apiKey } });
-    });
-
     return {
       mcpTools: builder.mcpTools.handler(() => {
         return {
@@ -357,8 +347,16 @@ export default createPlugin({
         };
       }),
 
-      mcpCallTool: builder.mcpCallTool.use(requireApiKey).handler(async ({ input, context }) => {
+      mcpCallTool: builder.mcpCallTool.handler(async ({ input, context }) => {
+        // Require API key only for mutations (POST/PATCH/DELETE)
         const tool = MCP_TOOLS.find((t) => t.name === input.name);
+        if (tool && tool.rest.method !== "GET" && !context.apiKey) {
+          throw new ORPCError("UNAUTHORIZED", {
+            message: "API key required for mutations",
+            data: { authType: "apiKey", hint: "Provide a valid API key via x-api-key header" },
+          });
+        }
+
         if (!tool) {
           return {
             content: [
