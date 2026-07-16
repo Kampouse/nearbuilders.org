@@ -13,7 +13,7 @@ export default createPlugin({
 
   secrets: z.object({
     EVENTS_DATABASE_URL: z.string().default("pglite:.bos/events/:memory:"),
-    LUMA_CALENDAR_API_KEYS: z.string().default("[]"),
+    LUMA_CALENDAR_API_KEYS: z.string().default(""),
   }),
 
   context: ContextSchema,
@@ -68,9 +68,12 @@ export default createPlugin({
         return await services.luma.listCalendars();
       }),
 
-      listLumaEvents: builder.listLumaEvents.handler(async ({ input, errors }) => {
+      listLumaEvents: builder.listLumaEvents.handler(async ({ input, errors, context }) => {
         try {
-          return await services.luma.listEvents(input);
+          return await services.luma.listEvents({
+            ...input,
+            isAdmin: context.user?.role === "admin",
+          });
         } catch (error) {
           throw errors.BAD_REQUEST({
             message: error instanceof Error ? error.message : "Could not list Luma events",
@@ -79,9 +82,11 @@ export default createPlugin({
         }
       }),
 
-      getLumaEvent: builder.getLumaEvent.handler(async ({ input, errors }) => {
+      getLumaEvent: builder.getLumaEvent.handler(async ({ input, errors, context }) => {
         try {
-          return await services.luma.getEvent(input.calendarId, input.eventId);
+          return await services.luma.getEvent(input.calendarId, input.eventId, {
+            isAdmin: context.user?.role === "admin",
+          });
         } catch {
           throw errors.NOT_FOUND({
             message: "Luma event not found",

@@ -164,6 +164,7 @@ export type ListLumaEventsInput = {
   before?: string;
   cursor?: string;
   limitPerCalendar?: number;
+  isAdmin?: boolean;
 };
 
 function readString(value: unknown): string | undefined {
@@ -352,16 +353,15 @@ function decodeCursor(cursor?: string): CursorState {
 }
 
 export function parseLumaApiKeys(value: string): string[] {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(value || "[]");
-  } catch {
-    throw new Error("LUMA_CALENDAR_API_KEYS must be a JSON array of strings");
-  }
-  if (!Array.isArray(parsed) || parsed.some((key) => typeof key !== "string")) {
-    throw new Error("LUMA_CALENDAR_API_KEYS must be a JSON array of strings");
-  }
-  return [...new Set(parsed.map((key) => key.trim()).filter(Boolean))];
+  if (!value.trim()) return [];
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((key) => key.trim())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 export class LumaService {
@@ -415,6 +415,7 @@ export class LumaService {
           before: input.before,
           cursor: currentCursor ?? undefined,
           limit,
+          isAdmin: input.isAdmin,
         });
         events.push(...page.events);
         nextState[calendar.id] = page.nextCursor;
@@ -446,14 +447,14 @@ export class LumaService {
     };
   }
 
-  async getEvent(calendarId: string, eventId: string) {
+  async getEvent(calendarId: string, eventId: string, options?: { isAdmin?: boolean }) {
     const cacheKey = `${calendarId}:${eventId}`;
     const cached = getCachedValue(this.detailCache, cacheKey);
     if (cached) return { data: cached };
     const pending = this.detailRequests.get(cacheKey);
     if (pending) return { data: await pending };
 
-    const request = this.loadEvent(calendarId, eventId);
+    const request = this.loadEvent(calendarId, eventId, options);
     this.detailRequests.set(cacheKey, request);
     try {
       const details = await request;
@@ -511,7 +512,7 @@ export class LumaService {
   private async getCalendarEventPage(
     calendarId: string,
     apiKey: string,
-    input: { after?: string; before?: string; cursor?: string; limit: number },
+    input: { after?: string; before?: string; cursor?: string; limit: number; isAdmin?: boolean },
   ): Promise<CalendarEventPage> {
     const cacheKey = JSON.stringify([
       calendarId,
@@ -537,14 +538,17 @@ export class LumaService {
     }
   }
 
-  private async loadEvent(calendarId: string, eventId: string) {
+  private async loadEvent(calendarId: string, eventId: string, options?: { isAdmin?: boolean }) {
     const registry = await this.getCalendarRegistry();
     const apiKey = registry.keyByCalendarId.get(calendarId);
     if (!apiKey) throw new Error("Luma calendar not found");
     const search = new URLSearchParams({ event_id: eventId });
     const event = await this.request(`/v1/events/get?${search.toString()}`, apiKey);
     const record = readObject(event) as LumaEventResponse | undefined;
-    if (readString(record?.calendar_id) !== calendarId || record?.visibility !== "public") {
+    if (readString(record?.calendar_id) !== calendarId) {
+      throw new Error("Luma event not found");
+    }
+    if (!options?.isAdmin && record?.visibility !== "public") {
       throw new Error("Luma event not found");
     }
     return normalizeEventDetails(event, calendarId);
@@ -553,7 +557,7 @@ export class LumaService {
   private async loadCalendarEventPage(
     calendarId: string,
     apiKey: string,
-    input: { after?: string; before?: string; cursor?: string; limit: number },
+    input: { after?: string; before?: string; cursor?: string; limit: number; isAdmin?: boolean },
   ) {
     const search = new URLSearchParams({
       pagination_limit: String(input.limit),
@@ -577,7 +581,9 @@ export class LumaService {
     const page = {
       events: entries
         .map((entry) => normalizeEvent(entry, calendarId))
-        .filter((event): event is LumaEventRecord => event?.visibility === "public"),
+        .filter((event): event is LumaEventRecord =>
+          input.isAdmin ? true : event?.visibility === "public",
+        ),
       nextCursor: response.has_more === true ? (readString(response.next_cursor) ?? null) : null,
     };
     return page;

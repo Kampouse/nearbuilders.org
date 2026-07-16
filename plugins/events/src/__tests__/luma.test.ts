@@ -39,25 +39,44 @@ function createFetch() {
     if (url.pathname === "/v1/calendars/events/list" && calendar) {
       const cursor = url.searchParams.get("pagination_cursor");
       const suffix = cursor ? "next" : "first";
+      const entries = [
+        {
+          platform: "luma",
+          id: `evt-${calendar.id}-${suffix}`,
+          calendar_id: calendar.id,
+          name: `${calendar.name} ${suffix}`,
+          url: `https://lu.ma/${calendar.id}-${suffix}`,
+          cover_url: null,
+          start_at: cursor ? "2026-08-02T12:00:00.000Z" : "2026-08-01T12:00:00.000Z",
+          end_at: cursor ? "2026-08-02T13:00:00.000Z" : "2026-08-01T13:00:00.000Z",
+          timezone: "UTC",
+          geo_address_json: { full_address: "1 Main Street" },
+          location_type: "offline",
+          location_visibility: "public",
+          visibility: "public",
+          access: "manage",
+        },
+      ];
+      if (!cursor && apiKey === "key-a") {
+        entries.push({
+          platform: "luma",
+          id: "evt-cal-a-private",
+          calendar_id: calendar.id,
+          name: "Private Alpha Event",
+          url: `https://lu.ma/${calendar.id}-private`,
+          cover_url: null,
+          start_at: "2026-08-01T14:00:00.000Z",
+          end_at: "2026-08-01T15:00:00.000Z",
+          timezone: "UTC",
+          geo_address_json: { full_address: "1 Main Street" },
+          location_type: "offline",
+          location_visibility: "public",
+          visibility: "private",
+          access: "manage",
+        });
+      }
       return Response.json({
-        entries: [
-          {
-            platform: "luma",
-            id: `evt-${calendar.id}-${suffix}`,
-            calendar_id: calendar.id,
-            name: `${calendar.name} ${suffix}`,
-            url: `https://lu.ma/${calendar.id}-${suffix}`,
-            cover_url: null,
-            start_at: cursor ? "2026-08-02T12:00:00.000Z" : "2026-08-01T12:00:00.000Z",
-            end_at: cursor ? "2026-08-02T13:00:00.000Z" : "2026-08-01T13:00:00.000Z",
-            timezone: "UTC",
-            geo_address_json: { full_address: "1 Main Street" },
-            location_type: "offline",
-            location_visibility: "public",
-            visibility: "public",
-            access: "manage",
-          },
-        ],
+        entries,
         has_more: apiKey === "key-a" && !cursor,
         next_cursor: apiKey === "key-a" && !cursor ? "alpha-next" : undefined,
       });
@@ -108,10 +127,9 @@ function createFetch() {
 
 describe("LumaService", () => {
   it("parses, trims, and deduplicates configured API keys", () => {
-    expect(parseLumaApiKeys('[" key-a ", "key-b", "key-a", ""]')).toEqual(["key-a", "key-b"]);
-    expect(() => parseLumaApiKeys("key-a,key-b")).toThrow(
-      "LUMA_CALENDAR_API_KEYS must be a JSON array of strings",
-    );
+    expect(parseLumaApiKeys(" key-a , key-b, key-a, ,")).toEqual(["key-a", "key-b"]);
+    expect(parseLumaApiKeys("")).toEqual([]);
+    expect(parseLumaApiKeys("   ")).toEqual([]);
   });
 
   it("loads calendar metadata independently and caches the registry", async () => {
@@ -225,9 +243,41 @@ describe("LumaService", () => {
     expect(JSON.stringify(result)).not.toContain("meet.example.com");
   });
 
-  it("does not return private event details", async () => {
+  it("does not return private event details for non-admin", async () => {
     const service = new LumaService(["key-a"], createFetch() as unknown as typeof fetch);
 
     await expect(service.getEvent("cal-a", "evt-private")).rejects.toThrow("Luma event not found");
+  });
+
+  it("allows admin to see private event details", async () => {
+    const service = new LumaService(["key-a"], createFetch() as unknown as typeof fetch);
+
+    const result = await service.getEvent("cal-a", "evt-private", { isAdmin: true });
+
+    expect(result.data).toMatchObject({
+      id: "evt-private",
+      visibility: "private",
+    });
+  });
+
+  it("filters private events from list for non-admin", async () => {
+    const fetchImplementation = createFetch();
+    const service = new LumaService(["key-a"], fetchImplementation as unknown as typeof fetch);
+
+    const result = await service.listEvents({ after: "2026-08-01T00:00:00.000Z" });
+
+    expect(result.data.map((e) => e.id)).not.toContain("evt-cal-a-private");
+  });
+
+  it("includes private events in list for admin", async () => {
+    const fetchImplementation = createFetch();
+    const service = new LumaService(["key-a"], fetchImplementation as unknown as typeof fetch);
+
+    const result = await service.listEvents({
+      after: "2026-08-01T00:00:00.000Z",
+      isAdmin: true,
+    });
+
+    expect(result.data.map((e) => e.id)).toContain("evt-cal-a-private");
   });
 });

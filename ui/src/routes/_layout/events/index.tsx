@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, Clock, Lock, MapPin, Plus, Share2, Users, Video } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { sessionQueryOptions, useApiClient, useAuthClient } from "@/app";
 import { Button } from "@/components/ui/button";
@@ -89,7 +89,12 @@ function isCurrentUserOwner(
 }
 
 function EventsPage() {
-  const { timeBoundary } = Route.useLoaderData();
+  const { timeBoundary: initialTimeBoundary } = Route.useLoaderData();
+  const [timeBoundary, setTimeBoundary] = useState(initialTimeBoundary);
+  useEffect(() => {
+    const id = setInterval(() => setTimeBoundary(new Date().toISOString()), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const apiClient = useApiClient();
   const auth = useAuthClient();
   const { data: session } = useQuery(sessionQueryOptions(auth, undefined));

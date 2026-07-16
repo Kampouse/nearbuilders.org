@@ -408,12 +408,12 @@ export default createPlugin.withPlugins<PluginsClient>()({
         return await services.plugins.events().listLumaCalendars();
       }),
 
-      listLumaEvents: builder.listLumaEvents.handler(async ({ input }) => {
-        return await services.plugins.events().listLumaEvents(input);
+      listLumaEvents: builder.listLumaEvents.handler(async ({ input, context }) => {
+        return await services.plugins.events(context).listLumaEvents(input);
       }),
 
-      getLumaEvent: builder.getLumaEvent.handler(async ({ input }) => {
-        return await services.plugins.events().getLumaEvent(input);
+      getLumaEvent: builder.getLumaEvent.handler(async ({ input, context }) => {
+        return await services.plugins.events(context).getLumaEvent(input);
       }),
 
       createEvent: builder.createEvent.use(requireAuth).handler(async ({ input, context }) => {
